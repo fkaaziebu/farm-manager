@@ -35,7 +35,15 @@ __decorate([
     __metadata("design:type", String)
 ], Admin.prototype, "password", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'uuid', default: null }),
+    (0, typeorm_1.Column)({ default: null }),
+    __metadata("design:type", String)
+], Admin.prototype, "token", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: "ADMIN" }),
+    __metadata("design:type", String)
+], Admin.prototype, "role", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "uuid", default: null }),
     (0, class_transformer_1.Exclude)({ toPlainOnly: true }),
     __metadata("design:type", String)
 ], Admin.prototype, "password_reset_code", void 0);
@@ -56,6 +64,6 @@ __decorate([
     __metadata("design:type", Array)
 ], Admin.prototype, "workers", void 0);
 exports.Admin = Admin = __decorate([
-    (0, typeorm_1.Entity)('admins')
+    (0, typeorm_1.Entity)("admins")
 ], Admin);
 //# sourceMappingURL=admin.entity.js.map

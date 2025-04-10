@@ -23,9 +23,21 @@ __decorate([
     __metadata("design:type", Number)
 ], Farm.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
 ], Farm.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: null }),
+    __metadata("design:type", String)
+], Farm.prototype, "location", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: null }),
+    __metadata("design:type", String)
+], Farm.prototype, "area", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 100 }),
+    __metadata("design:type", Number)
+], Farm.prototype, "performance", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => admin_entity_1.Admin, (admin) => admin.farms),
     __metadata("design:type", admin_entity_1.Admin)
@@ -44,6 +56,6 @@ __decorate([
     __metadata("design:type", Array)
 ], Farm.prototype, "animals", void 0);
 exports.Farm = Farm = __decorate([
-    (0, typeorm_1.Entity)('farms')
+    (0, typeorm_1.Entity)("farms")
 ], Farm);
 //# sourceMappingURL=farm.entity.js.map

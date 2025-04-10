@@ -1,9 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Exclude } from 'class-transformer';
-import { Farm } from './farm.entity';
-import { Worker } from './worker.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Exclude } from "class-transformer";
+import { Farm } from "./farm.entity";
+import { Worker } from "./worker.entity";
 
-@Entity('admins')
+@Entity("admins")
 export class Admin {
   @PrimaryGeneratedColumn()
   id: number;
@@ -18,7 +18,13 @@ export class Admin {
   @Exclude({ toPlainOnly: true })
   password: string;
 
-  @Column({ type: 'uuid', default: null })
+  @Column({ default: null })
+  token: string;
+
+  @Column({ default: "ADMIN" })
+  role: string;
+
+  @Column({ type: "uuid", default: null })
   @Exclude({ toPlainOnly: true })
   password_reset_code: string;
 

@@ -26,10 +26,10 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(8, { message: 'Password must be at least 8 characters long' }),
-    (0, class_validator_1.MaxLength)(32, { message: 'Password must not exceed 32 characters' }),
+    (0, class_validator_1.MinLength)(8, { message: "Password must be at least 8 characters long" }),
+    (0, class_validator_1.MaxLength)(32, { message: "Password must not exceed 32 characters" }),
     (0, class_validator_1.Matches)(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
-        message: 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character',
+        message: "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
     }),
     __metadata("design:type", String)
 ], CreateAdminBodyDto.prototype, "password", void 0);

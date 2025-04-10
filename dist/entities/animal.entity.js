@@ -9,21 +9,35 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Animal = void 0;
+exports.Animal = exports.HealthStatus = exports.FarmAnimalType = void 0;
 const typeorm_1 = require("typeorm");
 const farm_entity_1 = require("./farm.entity");
-const breeding_record_entity_1 = require("./breeding-record.entity");
-const growth_record_entity_1 = require("./growth-record.entity");
-const expense_record_entity_1 = require("./expense-record.entity");
-const health_record_entity_1 = require("./health-record.entity");
-const sales_record_entity_1 = require("./sales-record.entity");
+const breeding_record_entity_1 = require("./breeding_record.entity");
+const growth_record_entity_1 = require("./growth_record.entity");
+const expense_record_entity_1 = require("./expense_record.entity");
+const health_record_entity_1 = require("./health_record.entity");
+const sales_record_entity_1 = require("./sales_record.entity");
 const room_entity_1 = require("./room.entity");
+var FarmAnimalType;
+(function (FarmAnimalType) {
+    FarmAnimalType["GRASSCUTTER"] = "GRASSCUTTER";
+    FarmAnimalType["CATTLE"] = "CATTLE";
+    FarmAnimalType["GOAT"] = "GOAT";
+})(FarmAnimalType || (exports.FarmAnimalType = FarmAnimalType = {}));
+var HealthStatus;
+(function (HealthStatus) {
+    HealthStatus["HEALTHY"] = "HEALTHY";
+    HealthStatus["SICK"] = "SICK";
+    HealthStatus["TREATED"] = "TREATED";
+    HealthStatus["RECOVERING"] = "RECOVERING";
+    HealthStatus["CRITICAL"] = "CRITICAL";
+})(HealthStatus || (exports.HealthStatus = HealthStatus = {}));
 let Animal = class Animal {
 };
 exports.Animal = Animal;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], Animal.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)({ unique: true }),
@@ -38,6 +52,14 @@ __decorate([
     __metadata("design:type", Date)
 ], Animal.prototype, "birth_date", void 0);
 __decorate([
+    (0, typeorm_1.Column)({
+        type: "enum",
+        enum: FarmAnimalType,
+        default: FarmAnimalType.GRASSCUTTER,
+    }),
+    __metadata("design:type", String)
+], Animal.prototype, "type", void 0);
+__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Animal.prototype, "breed", void 0);
@@ -46,7 +68,11 @@ __decorate([
     __metadata("design:type", Number)
 ], Animal.prototype, "weight", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 'HEALTHY' }),
+    (0, typeorm_1.Column)({
+        type: "enum",
+        enum: HealthStatus,
+        default: HealthStatus.HEALTHY,
+    }),
     __metadata("design:type", String)
 ], Animal.prototype, "health_status", void 0);
 __decorate([
@@ -88,9 +114,18 @@ __decorate([
 ], Animal.prototype, "health_records", void 0);
 __decorate([
     (0, typeorm_1.OneToOne)(() => sales_record_entity_1.SalesRecord, (sales_record) => sales_record.animal),
+    (0, typeorm_1.JoinColumn)(),
     __metadata("design:type", sales_record_entity_1.SalesRecord)
 ], Animal.prototype, "sales_record", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", Date)
+], Animal.prototype, "inserted_at", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", Date)
+], Animal.prototype, "updated_at", void 0);
 exports.Animal = Animal = __decorate([
-    (0, typeorm_1.Entity)('animals')
+    (0, typeorm_1.Entity)("animals")
 ], Animal);
 //# sourceMappingURL=animal.entity.js.map

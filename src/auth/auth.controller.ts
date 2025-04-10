@@ -6,13 +6,24 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  UseGuards,
 } from "@nestjs/common";
-import type { CreateAdminBodyDto } from "./dto/create-admin-body.dto";
-import type { LoginBodyDto } from "./dto/login-body.dto";
-import type { PasswordRequestResetBodyDto } from "./dto/password-request-reset-body.dto";
-import type { PasswordResetQueryDto } from "./dto/password-reset-query.dto";
-import type { PasswordResetBodyDto } from "./dto/password-reset-body.dto";
+
+// Services
 import { AuthService } from "./auth.service";
+
+// Guards
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { Roles } from "./guards/roles.decorator";
+
+// Dto's
+import { CreateAdminBodyDto } from "./dto/create-admin-body.dto";
+import { LoginBodyDto } from "./dto/login-body.dto";
+import { PasswordRequestResetBodyDto } from "./dto/password-request-reset-body.dto";
+import { PasswordResetQueryDto } from "./dto/password-reset-query.dto";
+import { PasswordResetBodyDto } from "./dto/password-reset-body.dto";
+import { CreateWorkersBodyDto } from "./dto/create-workers-body.dto";
 
 @Controller("v1")
 export class AuthController {
@@ -28,17 +39,13 @@ export class AuthController {
   @Post("/auth/admins/login")
   @HttpCode(HttpStatus.OK)
   loginAdmin(@Body() loginBodyDto: LoginBodyDto) {
-    return {
-      ...loginBodyDto,
-    };
+    return this.authService.loginAdmin(loginBodyDto);
   }
 
   @Post("/auth/workers/login")
   @HttpCode(HttpStatus.OK)
   loginWorker(@Body() loginBodyDto: LoginBodyDto) {
-    return {
-      ...loginBodyDto,
-    };
+    return this.authService.loginWorker(loginBodyDto);
   }
 
   @Post("/auth/admins/request-password-reset")
@@ -46,9 +53,7 @@ export class AuthController {
   requestAdminPasswordReset(
     @Body() passwordResetBodyDto: PasswordRequestResetBodyDto,
   ) {
-    return {
-      ...passwordResetBodyDto,
-    };
+    return this.authService.requestWorkerPasswordReset(passwordResetBodyDto);
   }
 
   @Post("/auth/workers/request-password-reset")
@@ -56,9 +61,7 @@ export class AuthController {
   requestWorkerPasswordReset(
     @Body() passwordResetBodyDto: PasswordRequestResetBodyDto,
   ) {
-    return {
-      ...passwordResetBodyDto,
-    };
+    return this.authService.requestWorkerPasswordReset(passwordResetBodyDto);
   }
 
   @Patch("/auth/admins/reset-password")
@@ -66,10 +69,10 @@ export class AuthController {
     @Query() resetQueryDto: PasswordResetQueryDto,
     @Body() passwordResetBodyDto: PasswordResetBodyDto,
   ) {
-    return {
+    return this.authService.resetAdminPassword({
       ...resetQueryDto,
       ...passwordResetBodyDto,
-    };
+    });
   }
 
   @Patch("/auth/workers/reset-password")
@@ -77,9 +80,21 @@ export class AuthController {
     @Query() resetQueryDto: PasswordResetQueryDto,
     @Body() passwordResetBodyDto: PasswordResetBodyDto,
   ) {
-    return {
+    return this.authService.resetWorkerPassword({
       ...resetQueryDto,
       ...passwordResetBodyDto,
-    };
+    });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles("admin")
+  @Post("/auth/workers:add")
+  createWorkers(
+    @Req() req,
+    @Body() createWorkersBodyDto: CreateWorkersBodyDto,
+  ) {
+    const { email } = req.user;
+
+    return this.authService.createWorkers(email, createWorkersBodyDto.workers);
   }
 }

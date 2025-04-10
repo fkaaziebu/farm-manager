@@ -7,19 +7,36 @@ import {
   ManyToMany,
   JoinTable,
   OneToOne,
-} from 'typeorm';
-import { Farm } from './farm.entity';
-import { BreedingRecord } from './breeding-record.entity';
-import { GrowthRecord } from './growth-record.entity';
-import { ExpenseRecord } from './expense-record.entity';
-import { HealthRecord } from './health-record.entity';
-import { SalesRecord } from './sales-record.entity';
-import { Room } from './room.entity';
+  CreateDateColumn,
+  UpdateDateColumn,
+  JoinColumn,
+} from "typeorm";
+import { Farm } from "./farm.entity";
+import { BreedingRecord } from "./breeding_record.entity";
+import { GrowthRecord } from "./growth_record.entity";
+import { ExpenseRecord } from "./expense_record.entity";
+import { HealthRecord } from "./health_record.entity";
+import { SalesRecord } from "./sales_record.entity";
+import { Room } from "./room.entity";
 
-@Entity('animals')
+export enum FarmAnimalType {
+  GRASSCUTTER = "GRASSCUTTER",
+  CATTLE = "CATTLE",
+  GOAT = "GOAT",
+}
+
+export enum HealthStatus {
+  HEALTHY = "HEALTHY",
+  SICK = "SICK",
+  TREATED = "TREATED",
+  RECOVERING = "RECOVERING",
+  CRITICAL = "CRITICAL",
+}
+
+@Entity("animals")
 export class Animal {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Column({ unique: true })
   tag_number: string;
@@ -30,23 +47,34 @@ export class Animal {
   @Column()
   birth_date: Date;
 
+  @Column({
+    type: "enum",
+    enum: FarmAnimalType,
+    default: FarmAnimalType.GRASSCUTTER,
+  })
+  type: FarmAnimalType;
+
   @Column()
   breed: string;
 
   @Column({ default: 0 })
-  weight?: number;
+  weight: number;
 
-  @Column({ default: 'HEALTHY' })
-  health_status?: string;
+  @Column({
+    type: "enum",
+    enum: HealthStatus,
+    default: HealthStatus.HEALTHY,
+  })
+  health_status: HealthStatus;
 
   @Column({ default: true })
   available: boolean;
 
   @OneToMany(() => Animal, (animal) => animal.direct_children)
-  direct_parents?: Animal[];
+  direct_parents: Animal[];
 
   @OneToMany(() => Animal, (animal) => animal.direct_parents)
-  direct_children?: Animal[];
+  direct_children: Animal[];
 
   @ManyToOne(() => Farm, (farm) => farm.animals)
   farm: Farm;
@@ -71,5 +99,12 @@ export class Animal {
   health_records: HealthRecord[];
 
   @OneToOne(() => SalesRecord, (sales_record) => sales_record.animal)
+  @JoinColumn()
   sales_record: SalesRecord;
+
+  @CreateDateColumn()
+  inserted_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

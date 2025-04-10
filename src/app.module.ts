@@ -1,25 +1,23 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { GraphQLModule } from "@nestjs/graphql";
+import { ApolloDriver, type ApolloDriverConfig } from "@nestjs/apollo";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { configValidationSchema } from "./config.schema";
 import { AuthModule } from "./auth/auth.module";
-
-// Entities
-import { Admin } from "./entities/admin.entity";
-import { Animal } from "./entities/animal.entity";
-import { BreedingRecord } from "./entities/breeding-record.entity";
-import { ExpenseRecord } from "./entities/expense-record.entity";
-import { Farm } from "./entities/farm.entity";
-import { GrowthRecord } from "./entities/growth-record.entity";
-import { HealthRecord } from "./entities/health-record.entity";
-import { House } from "./entities/house.entity";
-import { Room } from "./entities/room.entity";
-import { SalesRecord } from "./entities/sales-record.entity";
-import { Worker } from "./entities/worker.entity";
+import { BullModule } from "@nestjs/bullmq";
+import { ScheduleModule } from "@nestjs/schedule";
+import { FarmModule } from "./farm/farm.module";
 
 @Module({
   imports: [
     AuthModule,
+    FarmModule,
+    ScheduleModule.forRoot(),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      autoSchemaFile: true,
+      driver: ApolloDriver,
+    }),
     ConfigModule.forRoot({
       envFilePath: [
         process.env.STAGE === "development"
@@ -41,19 +39,18 @@ import { Worker } from "./entities/worker.entity";
         username: configService.get("DB_USERNAME"),
         password: configService.get("DB_PASSWORD"),
         database: configService.get("DB_DATABASE"),
-        entities: [
-          Admin,
-          Animal,
-          BreedingRecord,
-          ExpenseRecord,
-          Farm,
-          GrowthRecord,
-          HealthRecord,
-          House,
-          Room,
-          SalesRecord,
-          Worker,
-        ],
+      }),
+    }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        connection: {
+          host: configService.get("REDIS_HOST", "localhost"),
+          port: configService.get("REDIS_PORT", 6379),
+          password: configService.get("REDIS_PASSWORD", undefined),
+          db: configService.get("REDIS_DB", 0),
+        },
       }),
     }),
   ],

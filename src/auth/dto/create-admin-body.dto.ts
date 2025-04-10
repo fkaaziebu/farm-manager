@@ -5,7 +5,7 @@ import {
   Matches,
   MaxLength,
   MinLength,
-} from 'class-validator';
+} from "class-validator";
 
 export class CreateAdminBodyDto {
   @IsNotEmpty()
@@ -17,13 +17,13 @@ export class CreateAdminBodyDto {
 
   @IsNotEmpty()
   @IsString()
-  @MinLength(8, { message: 'Password must be at least 8 characters long' })
-  @MaxLength(32, { message: 'Password must not exceed 32 characters' })
+  @MinLength(8, { message: "Password must be at least 8 characters long" })
+  @MaxLength(32, { message: "Password must not exceed 32 characters" })
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
     {
       message:
-        'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character',
+        "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
     },
   )
   password: string;

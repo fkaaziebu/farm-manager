@@ -18,7 +18,7 @@ let Room = class Room {
 exports.Room = Room;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], Room.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)({ unique: true }),
@@ -33,6 +33,6 @@ __decorate([
     __metadata("design:type", Array)
 ], Room.prototype, "animals", void 0);
 exports.Room = Room = __decorate([
-    (0, typeorm_1.Entity)('rooms')
+    (0, typeorm_1.Entity)("rooms")
 ], Room);
 //# sourceMappingURL=room.entity.js.map

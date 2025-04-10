@@ -4,14 +4,14 @@ import {
   Column,
   ManyToOne,
   OneToMany,
-} from 'typeorm';
-import { House } from './house.entity';
-import { Animal } from './animal.entity';
+} from "typeorm";
+import { House } from "./house.entity";
+import { Animal } from "./animal.entity";
 
-@Entity('rooms')
+@Entity("rooms")
 export class Room {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Column({ unique: true })
   room_number: string;
