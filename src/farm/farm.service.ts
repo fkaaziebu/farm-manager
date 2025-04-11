@@ -891,6 +891,7 @@ export class FarmService {
 
         return {
           ...savedFarm,
+          admin: admin,
           message: "Farm created successfully",
         };
       },
