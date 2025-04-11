@@ -16,6 +16,8 @@ import { FarmModule } from "./farm/farm.module";
     ScheduleModule.forRoot(),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       autoSchemaFile: true,
+      introspection: true,
+      playground: true,
       driver: ApolloDriver,
     }),
     ConfigModule.forRoot({
