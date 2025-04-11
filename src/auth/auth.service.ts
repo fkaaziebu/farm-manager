@@ -148,9 +148,10 @@ export class AuthService {
         user.email = email;
         user.password = await this.hashPassword(password);
 
-        await transactionalEntityManager.save(Entity, user);
+        const savedUser = await transactionalEntityManager.save(Entity, user);
 
         return {
+          ...savedUser,
           message: "Successfully signed up",
         };
       },
