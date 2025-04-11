@@ -857,7 +857,12 @@ export class FarmService {
           where: {
             email,
           },
-          relations: ["farms"],
+          relations: [
+            "farms.admin",
+            "farms.houses",
+            "farms.animals",
+            "farms.workers",
+          ],
         });
 
         if (!admin) {
