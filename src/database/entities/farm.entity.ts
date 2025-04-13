@@ -1,0 +1,91 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  ManyToMany,
+  OneToMany,
+  JoinTable,
+  Generated,
+} from "typeorm";
+import { Admin } from "./admin.entity";
+import { Worker } from "./worker.entity";
+import { Livestock } from "./livestock.entity";
+import { PoultryBatch } from "./poultry-batch.entity";
+import { AquacultureBatch } from "./aquaculture-batch.entity";
+import { CropBatch } from "./crop-batch.entity";
+import { Hive } from "./hive.entity";
+import { HousingUnit } from "./housing-unit.entity";
+import { Task } from "./task.entity";
+
+export enum FarmType {
+  LIVESTOCK = "LIVESTOCK",
+  POULTRY = "POULTRY",
+  AQUACULTURE = "AQUACULTURE",
+  CROP = "CROP",
+  APIARY = "APIARY",
+  MIXED = "MIXED",
+}
+
+@Entity("farms")
+export class Farm {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "uuid", unique: true })
+  @Generated("uuid")
+  farm_tag: string;
+
+  @Column()
+  name: string;
+
+  @Column({
+    type: "enum",
+    enum: FarmType,
+    default: FarmType.MIXED,
+  })
+  farm_type: FarmType;
+
+  @Column({ default: null })
+  location: string;
+
+  @Column({ default: null })
+  area: string;
+
+  @Column({ default: 100 })
+  performance: number;
+
+  @ManyToOne(() => Admin, (admin) => admin.farms)
+  admin: Admin;
+
+  @ManyToMany(() => Worker, (worker) => worker.farms)
+  @JoinTable()
+  workers: Worker[];
+
+  @OneToMany(() => HousingUnit, (housingUnit) => housingUnit.farm)
+  housing_units: HousingUnit[];
+
+  // Animal entities by type
+  @OneToMany(() => Livestock, (livestock) => livestock.farm)
+  livestock: Livestock[];
+
+  @OneToMany(() => PoultryBatch, (poultryBatch) => poultryBatch.farm)
+  poultry_batches: PoultryBatch[];
+
+  @OneToMany(
+    () => AquacultureBatch,
+    (aquacultureBatch) => aquacultureBatch.farm,
+  )
+  aquaculture_batches: AquacultureBatch[];
+
+  // Plant entities
+  @OneToMany(() => CropBatch, (cropBatch) => cropBatch.farm)
+  crop_batches: CropBatch[];
+
+  // Apiary entities
+  @OneToMany(() => Hive, (hive) => hive.farm)
+  hives: Hive[];
+
+  @OneToMany(() => Task, (task) => task.admin)
+  tasks: Task[];
+}

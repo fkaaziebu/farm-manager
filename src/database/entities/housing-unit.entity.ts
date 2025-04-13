@@ -1,0 +1,49 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  TableInheritance,
+} from "typeorm";
+import { Farm } from "./farm.entity";
+import { ExpenseRecord } from "./expense-record.entity";
+
+export enum HousingStatus {
+  OPERATIONAL = "OPERATIONAL",
+  MAINTENANCE = "MAINTENANCE",
+  EMPTY = "EMPTY",
+  FULL = "FULL",
+}
+
+@Entity("housing_units")
+@TableInheritance({ column: { type: "varchar", name: "type" } })
+export abstract class HousingUnit {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ unique: true })
+  unit_id: string;
+
+  @Column()
+  name: string;
+
+  @Column({ default: 0 })
+  capacity: number;
+
+  @Column({
+    type: "enum",
+    enum: HousingStatus,
+    default: HousingStatus.OPERATIONAL,
+  })
+  status: HousingStatus;
+
+  @ManyToOne(() => Farm, (farm) => farm.housing_units)
+  farm: Farm;
+
+  @OneToMany(
+    () => ExpenseRecord,
+    (expense_record) => expense_record.housing_unit,
+  )
+  expense_records: ExpenseRecord[];
+}

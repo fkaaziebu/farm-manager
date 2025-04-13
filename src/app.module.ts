@@ -1,25 +1,17 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import { GraphQLModule } from "@nestjs/graphql";
-import { ApolloDriver, type ApolloDriverConfig } from "@nestjs/apollo";
-import { TypeOrmModule } from "@nestjs/typeorm";
+import { ConfigModule } from "@nestjs/config";
+import { DatabaseModule } from "./database/database.module";
 import { configValidationSchema } from "./config.schema";
-import { AuthModule } from "./auth/auth.module";
-import { BullModule } from "@nestjs/bullmq";
 import { ScheduleModule } from "@nestjs/schedule";
-import { FarmModule } from "./farm/farm.module";
+import { ApolloDriver, type ApolloDriverConfig } from "@nestjs/apollo";
+import { GraphQLModule } from "@nestjs/graphql";
+import { GraphQLJSON } from "graphql-type-json";
+import { AuthModule } from "./modules/auth/auth.module";
+import { FarmModule } from "./modules/farm/farm.module";
 
 @Module({
   imports: [
-    AuthModule,
-    FarmModule,
     ScheduleModule.forRoot(),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      autoSchemaFile: true,
-      introspection: true,
-      playground: true,
-      driver: ApolloDriver,
-    }),
     ConfigModule.forRoot({
       envFilePath: [
         process.env.STAGE === "development"
@@ -28,30 +20,16 @@ import { FarmModule } from "./farm/farm.module";
       ],
       validationSchema: configValidationSchema,
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        type: "postgres",
-        autoLoadEntities: true,
-        synchronize: configService.get("NODE_ENV") !== "production",
-        host: configService.get("DB_HOST"),
-        url: configService.get("DATABASE_URL"),
-        port: configService.get("DB_PORT"),
-        username: configService.get("DB_USERNAME"),
-        password: configService.get("DB_PASSWORD"),
-        database: configService.get("DB_DATABASE"),
-      }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      autoSchemaFile: true,
+      introspection: true,
+      playground: true,
+      driver: ApolloDriver,
+      resolvers: { JSON: GraphQLJSON },
     }),
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        connection: {
-          url: configService.get<string>("REDIS_URL"),
-        },
-      }),
-    }),
+    DatabaseModule,
+    AuthModule,
+    FarmModule,
   ],
   controllers: [],
   providers: [],
