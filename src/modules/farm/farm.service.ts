@@ -75,7 +75,7 @@ export class FarmService {
           email,
         },
       },
-      relations: ["barns.pens.livestock"],
+      relations: ["barns.pens.livestock", "workers"],
     });
   }
 
@@ -185,7 +185,16 @@ export class FarmService {
           },
         },
       },
-      relations: ["pen"],
+      relations: [
+        "pen",
+        "breeding_records",
+        "health_records",
+        "expense_records",
+        "growth_records",
+        "farm.admin",
+        "father",
+        "mother",
+      ],
     });
   }
 

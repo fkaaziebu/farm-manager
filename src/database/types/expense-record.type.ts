@@ -4,7 +4,15 @@ import { PoultryBatchType } from "./poultry-batch.type";
 import { AquacultureBatchType } from "./aquaculture-batch.type";
 import { CropBatchType } from "./crop-batch.type";
 import { HiveType } from "./hive.type";
-import { HousingUnitType } from "./housing-unit.type";
+import { BarnType } from "./barn.type";
+import { AquacultureSystemTypeClass } from "./aquaculture-system.type";
+import { PondType } from "./pond.type";
+import { FieldType } from "./field.type";
+import { GreenhouseType } from "./greenhouse.type";
+import { ApiaryType } from "./apiary.type";
+import { PoultryHouseType } from "./poultry-house.type";
+import { CoopType } from "./coop.type";
+import { PenType } from "./pen.type";
 
 export enum ExpenseCategory {
   // General categories
@@ -78,6 +86,30 @@ export class ExpenseRecordType {
   @Field(() => HiveType, { nullable: true })
   hive?: HiveType;
 
-  @Field(() => HousingUnitType, { nullable: true })
-  housing_unit?: HousingUnitType;
+  @Field(() => BarnType, { nullable: true })
+  barn?: BarnType;
+
+  @Field(() => AquacultureSystemTypeClass, { nullable: true })
+  aquaculture_system?: AquacultureSystemTypeClass;
+
+  @Field(() => PondType, { nullable: true })
+  pond?: PondType;
+
+  @Field(() => FieldType, { nullable: true })
+  field?: FieldType;
+
+  @Field(() => GreenhouseType, { nullable: true })
+  greenhouse?: GreenhouseType;
+
+  @Field(() => ApiaryType, { nullable: true })
+  apiary?: ApiaryType;
+
+  @Field(() => PoultryHouseType, { nullable: true })
+  poultry_house?: PoultryHouseType;
+
+  @Field(() => CoopType, { nullable: true })
+  coop?: CoopType;
+
+  @Field(() => PenType, { nullable: true })
+  pen?: PenType;
 }

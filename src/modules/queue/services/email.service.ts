@@ -19,10 +19,6 @@ export class EmailService {
           user: this.configService.get<string>("GMAIL_USER"),
           pass: this.configService.get<string>("GMAIL_APP_PASSWORD"),
         },
-        // secure: false,
-        // tls: {
-        //   rejectUnauthorized: false,
-        // },
       });
 
       // Verify the connection configuration
@@ -45,6 +41,9 @@ export class EmailService {
       host: this.configService.get<string>("EMAIL_HOST"),
       port: 587,
       secure: false,
+      tls: {
+        rejectUnauthorized: false,
+      },
       auth: {
         user: testAccount.user,
         pass: testAccount.pass,
