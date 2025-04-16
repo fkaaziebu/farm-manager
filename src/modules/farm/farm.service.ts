@@ -829,8 +829,13 @@ export class FarmService {
           livestockToUpdate,
         );
 
-        if (father) await transactionalEntityManager.save(father);
-        if (mother) await transactionalEntityManager.save(mother);
+        if (father && mother) {
+          await transactionalEntityManager.save([father, mother]);
+        } else if (father) {
+          await transactionalEntityManager.save(Livestock, father);
+        } else if (mother) {
+          await transactionalEntityManager.save(Livestock, mother);
+        }
 
         return savedLivestock;
       },
