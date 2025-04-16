@@ -739,6 +739,7 @@ export class FarmService {
                 },
               },
             },
+            relations: ["offspring"],
           });
 
           if (!mother) {
@@ -776,6 +777,7 @@ export class FarmService {
                 },
               },
             },
+            relations: ["offspring"],
           });
 
           if (!father) {
@@ -817,10 +819,17 @@ export class FarmService {
           ? offsprings
           : livestockToUpdate.offspring;
 
+        // update offspring's father and mother
+        if (father) father.offspring.push(livestockToUpdate);
+        if (mother) mother.offspring.push(livestockToUpdate);
+
         const savedLivestock = await transactionalEntityManager.save(
           Livestock,
           livestockToUpdate,
         );
+
+        if (father) await transactionalEntityManager.save(father);
+        if (mother) await transactionalEntityManager.save(mother);
 
         return savedLivestock;
       },
