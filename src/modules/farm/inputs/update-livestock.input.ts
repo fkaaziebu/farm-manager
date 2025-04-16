@@ -3,18 +3,33 @@ import { LivestockGender, LivestockType } from "../../../database/types";
 
 @InputType()
 export class UpdateLivestockInput {
-  @Field()
-  birth_date: Date;
+  @Field({ nullable: true })
+  birthDate?: Date;
 
-  @Field()
-  breed: string;
+  @Field({ nullable: true })
+  milkProduction?: number;
 
-  @Field()
-  weight: number;
+  @Field({ nullable: true })
+  meatGrade?: string;
 
-  @Field(() => LivestockType, { nullable: false })
-  livestockType: LivestockType;
+  @Field({ nullable: true })
+  breed?: string;
 
-  @Field(() => LivestockGender, { nullable: false })
-  gender: LivestockGender;
+  @Field({ nullable: true })
+  weight?: number;
+
+  @Field({ nullable: true })
+  motherTag?: string;
+
+  @Field({ nullable: true })
+  fatherTag?: string;
+
+  @Field(() => LivestockType, { nullable: true })
+  livestockType?: LivestockType;
+
+  @Field(() => LivestockGender, { nullable: true })
+  gender?: LivestockGender;
+
+  @Field(() => [String], { nullable: true })
+  offspringTags?: string[];
 }

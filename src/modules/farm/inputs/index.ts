@@ -12,6 +12,10 @@ import { UpdateBreedingRecordInput } from "./update-breeding-record.input";
 import { UpdateHealthRecordInput } from "./update-health-record.input";
 import { UpdateGrowthRecordInput } from "./update-growth-record.input";
 import { UpdateExpenseRecordInput } from "./update-expense-record.input";
+import { SalesRecordInput } from "./sales-record.input";
+import { UpdateSalesRecordInput } from "./update-sales-record.input";
+import { UpdateBarnInput } from "./update-barn.input";
+import { UpdatePenInput } from "./update-pen.input";
 
 export {
   WorkerInput,
@@ -28,4 +32,8 @@ export {
   UpdateHealthRecordInput,
   UpdateGrowthRecordInput,
   UpdateExpenseRecordInput,
+  SalesRecordInput,
+  UpdateSalesRecordInput,
+  UpdateBarnInput,
+  UpdatePenInput,
 };

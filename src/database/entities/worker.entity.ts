@@ -65,6 +65,6 @@ export class Worker {
   @ManyToOne(() => Admin, (admin) => admin.workers)
   admin: Admin;
 
-  @OneToMany(() => Task, (task) => task.workers)
+  @OneToMany(() => Task, (task) => task.worker)
   assigned_tasks: Task[];
 }

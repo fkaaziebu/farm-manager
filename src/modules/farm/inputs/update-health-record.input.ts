@@ -3,36 +3,33 @@ import { GrowthRecordType } from "../../../database/types/growth-record.type";
 
 @InputType()
 export class UpdateHealthRecordInput {
-  @Field()
-  cost: number;
-
-  @Field()
-  diagnosis: string;
+  @Field({ nullable: true })
+  cost?: number;
 
   @Field({ nullable: true })
-  dosage: string;
-
-  @Field()
-  issue: string;
+  diagnosis?: string;
 
   @Field({ nullable: true })
-  medication: string;
-
-  @Field()
-  notes: string;
-
-  @Field()
-  symptoms: string;
-
-  @Field()
-  treatment: string;
+  dosage?: string;
 
   @Field({ nullable: true })
-  vetName: string;
+  issue?: string;
 
-  @Field()
-  recordDate: Date;
+  @Field({ nullable: true })
+  medication?: string;
 
-  @Field(() => GrowthRecordType, { nullable: false })
-  recordType: GrowthRecordType;
+  @Field({ nullable: true })
+  notes?: string;
+
+  @Field({ nullable: true })
+  symptoms?: string;
+
+  @Field({ nullable: true })
+  treatment?: string;
+
+  @Field({ nullable: true })
+  vetName?: string;
+
+  @Field({ nullable: true })
+  recordDate?: Date;
 }

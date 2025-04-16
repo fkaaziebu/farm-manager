@@ -9,20 +9,20 @@ export class BarnInput {
   name: string;
 
   @Field({ nullable: true })
-  buildingMaterial: string;
+  buildingMaterial?: string;
 
   @Field()
   climateControlled: boolean;
 
   @Field({ nullable: true })
-  constructionDate: Date;
+  constructionDate?: Date;
 
   @Field()
   areaSqm: number;
 
   @Field({ nullable: true })
-  ventilationType: string;
+  ventilationType?: string;
 
   @Field()
-  capacity: string;
+  capacity: number;
 }

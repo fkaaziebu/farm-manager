@@ -9,6 +9,8 @@ import {
 import { Farm } from "./farm.entity";
 import { Admin } from "./admin.entity";
 import { Worker } from "./worker.entity";
+import { Barn } from "./barn.entity";
+import { Pen } from "./pen.entity";
 
 enum TaskStatus {
   "PENDING" = "PENDING",
@@ -40,9 +42,15 @@ export class Task {
   @OneToOne(() => Admin, (admin) => admin.assigned_tasks)
   admin: Admin;
 
-  @OneToMany(() => Worker, (worker) => worker.assigned_tasks)
-  workers: Worker;
+  @ManyToOne(() => Worker, (worker) => worker.assigned_tasks)
+  worker: Worker;
 
   @ManyToOne(() => Farm, (farm) => farm.tasks)
   farm: Farm;
+
+  @ManyToOne(() => Barn, (barn) => barn.tasks)
+  barn: Barn;
+
+  @ManyToOne(() => Pen, (pen) => pen.tasks)
+  pen: Pen;
 }

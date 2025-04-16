@@ -17,6 +17,7 @@ import { HealthRecord } from "./health-record.entity";
 import { Pen } from "./pen.entity";
 
 export enum LivestockType {
+  GRASSCUTTER = "GRASSCUTTER",
   CATTLE = "CATTLE",
   GOAT = "GOAT",
   SHEEP = "SHEEP",
@@ -35,6 +36,17 @@ export enum HealthStatus {
 enum LivestockGender {
   MALE = "MALE",
   FEMALE = "FEMALE",
+}
+
+enum LivestockAvailabilityStatus {
+  UNAVAILABLE = "UNAVAILABLE",
+  AVAILABLE = "AVAILABLE",
+}
+
+enum LivestockUnavailabilityReason {
+  "NOT_APPLICABLE" = "NOT_APPLICABLE",
+  DEAD = "DEAD",
+  SOLD = "SOLD",
 }
 
 @Entity("livestock")
@@ -80,8 +92,19 @@ export class Livestock {
   })
   health_status: HealthStatus;
 
-  @Column({ default: true })
-  available: boolean;
+  @Column({
+    type: "enum",
+    enum: LivestockAvailabilityStatus,
+    default: LivestockAvailabilityStatus.AVAILABLE,
+  })
+  availability_status: LivestockAvailabilityStatus;
+
+  @Column({
+    type: "enum",
+    enum: LivestockUnavailabilityReason,
+    default: LivestockUnavailabilityReason.NOT_APPLICABLE,
+  })
+  unavailability_reason: LivestockUnavailabilityReason;
 
   @ManyToOne(() => Livestock, (livestock) => livestock.offspring)
   mother: Livestock;

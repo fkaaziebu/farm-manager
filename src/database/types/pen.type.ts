@@ -4,6 +4,7 @@ import { LivestockTypeClass } from "./livestock.type";
 import { FarmTypeClass } from "./farm.type";
 import { ExpenseRecordType } from "./expense-record.type";
 import { HousingStatus } from "./housing-status.enum";
+import { TaskType } from "./task.type";
 
 @ObjectType("Pen")
 export class PenType {
@@ -46,4 +47,7 @@ export class PenType {
 
   @Field(() => [ExpenseRecordType], { nullable: true })
   expense_records?: ExpenseRecordType[];
+
+  @Field(() => [TaskType], { nullable: true })
+  tasks?: TaskType[];
 }

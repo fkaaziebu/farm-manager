@@ -4,18 +4,27 @@ import { BreedingStatus } from "../../../database/types/breeding-record.type";
 
 @InputType()
 export class UpdateBreedingRecordInput {
-  @Field()
-  matingDate: Date;
-
-  @Field()
-  expectedDelivery: Date;
-
-  @Field(() => GraphQLJSON, { nullable: true })
-  breedingMethod: any;
+  @Field({ nullable: true })
+  matingDate?: Date;
 
   @Field({ nullable: true })
-  notes: string;
+  expectedDelivery?: Date;
 
-  @Field(() => BreedingStatus, { nullable: false })
-  status: BreedingStatus;
+  @Field({ nullable: true })
+  actualDelivery?: Date;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  breedingMethod?: any;
+
+  @Field({ nullable: true })
+  notes?: string;
+
+  @Field({ nullable: true })
+  offspringCountMale?: number;
+
+  @Field({ nullable: true })
+  offspringCountFemale?: number;
+
+  @Field(() => BreedingStatus, { nullable: true })
+  status?: BreedingStatus;
 }

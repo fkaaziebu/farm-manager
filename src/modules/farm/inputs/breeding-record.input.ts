@@ -11,10 +11,10 @@ export class BreedingRecordInput {
   expectedDelivery: Date;
 
   @Field(() => GraphQLJSON, { nullable: true })
-  breedingMethod: any;
+  breedingMethod?: any;
 
   @Field({ nullable: true })
-  notes: string;
+  notes?: string;
 
   @Field(() => BreedingStatus, { nullable: false })
   status: BreedingStatus;

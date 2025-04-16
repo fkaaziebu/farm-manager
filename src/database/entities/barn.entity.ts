@@ -1,9 +1,49 @@
-import { Entity, Column, OneToMany } from "typeorm";
-import { HousingUnit } from "./housing-unit.entity";
+import {
+  Entity,
+  Column,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+} from "typeorm";
 import { Pen } from "./pen.entity";
+import { Task } from "./task.entity";
+import { Farm } from "./farm.entity";
+import { ExpenseRecord } from "./expense-record.entity";
+
+enum HousingStatus {
+  OPERATIONAL = "OPERATIONAL",
+  MAINTENANCE = "MAINTENANCE",
+  EMPTY = "EMPTY",
+  FULL = "FULL",
+}
 
 @Entity()
-export class Barn extends HousingUnit {
+export class Barn {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ unique: true })
+  unit_id: string;
+
+  @Column()
+  name: string;
+
+  @Column({ default: 0 })
+  capacity: number;
+
+  @Column({
+    type: "enum",
+    enum: HousingStatus,
+    default: HousingStatus.OPERATIONAL,
+  })
+  status: HousingStatus;
+
+  @ManyToOne(() => Farm, (farm) => farm.barns)
+  farm: Farm;
+
+  @OneToMany(() => ExpenseRecord, (expense_record) => expense_record.barn)
+  expense_records: ExpenseRecord[];
+
   @Column({ default: 0 })
   area_sqm: number;
 
@@ -21,4 +61,7 @@ export class Barn extends HousingUnit {
 
   @OneToMany(() => Pen, (pen) => pen.barn)
   pens: Pen[];
+
+  @OneToMany(() => Task, (task) => task.barn)
+  tasks: Task[];
 }

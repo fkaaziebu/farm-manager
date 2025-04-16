@@ -1,13 +1,21 @@
 import { Field, ID, ObjectType, registerEnumType } from "@nestjs/graphql";
 import { WorkerType } from "./worker.type";
 import { AdminType } from "./admin.type";
-import { HousingUnitType } from "./housing-unit.type";
-import { LivestockType, LivestockTypeClass } from "./livestock.type";
+import { LivestockTypeClass } from "./livestock.type";
 import { PoultryBatchType } from "./poultry-batch.type";
 import { AquacultureBatchType } from "./aquaculture-batch.type";
 import { CropBatchType } from "./crop-batch.type";
 import { HiveType } from "./hive.type";
 import { TaskType } from "./task.type";
+import { BarnType } from "./barn.type";
+import { AquacultureSystemTypeClass } from "./aquaculture-system.type";
+import { PondType } from "./pond.type";
+import { FieldType } from "./field.type";
+import { GreenhouseType } from "./greenhouse.type";
+import { ApiaryType } from "./apiary.type";
+import { PoultryHouseType } from "./poultry-house.type";
+import { CoopType } from "./coop.type";
+import { PenType } from "./pen.type";
 
 export enum FarmType {
   LIVESTOCK = "LIVESTOCK",
@@ -53,20 +61,44 @@ export class FarmTypeClass {
   @Field(() => [WorkerType], { nullable: true })
   workers?: WorkerType[];
 
-  @Field(() => [HousingUnitType], { nullable: true })
-  housingUnits?: HousingUnitType[];
+  @Field(() => [BarnType], { nullable: true })
+  barns?: BarnType[];
+
+  @Field(() => [AquacultureSystemTypeClass], { nullable: true })
+  aquaculture_systems?: AquacultureSystemTypeClass[];
+
+  @Field(() => [PondType], { nullable: true })
+  ponds: PondType[];
+
+  @Field(() => [FieldType], { nullable: true })
+  fields: FieldType[];
+
+  @Field(() => [GreenhouseType], { nullable: true })
+  greenhouses: GreenhouseType[];
+
+  @Field(() => [ApiaryType], { nullable: true })
+  apiaries: ApiaryType[];
+
+  @Field(() => [PoultryHouseType], { nullable: true })
+  poultry_houses: PoultryHouseType[];
+
+  @Field(() => [CoopType], { nullable: true })
+  coops: CoopType[];
+
+  @Field(() => [PenType], { nullable: true })
+  pens: PenType[];
 
   @Field(() => [LivestockTypeClass], { nullable: true })
   livestock?: LivestockTypeClass[];
 
   @Field(() => [PoultryBatchType], { nullable: true })
-  poultryBatches?: PoultryBatchType[];
+  poultry_batches?: PoultryBatchType[];
 
   @Field(() => [AquacultureBatchType], { nullable: true })
-  aquacultureBatches?: AquacultureBatchType[];
+  aquaculture_batches?: AquacultureBatchType[];
 
   @Field(() => [CropBatchType], { nullable: true })
-  cropBatches?: CropBatchType[];
+  crop_batches?: CropBatchType[];
 
   @Field(() => [HiveType], { nullable: true })
   hives?: HiveType[];

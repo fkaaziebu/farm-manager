@@ -1,5 +1,5 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { GrowthRecordType } from "../../../database/types/growth-record.type";
+import { HealthRecordType } from "../../../database/types/health-record.type";
 
 @InputType()
 export class HealthRecordInput {
@@ -10,13 +10,13 @@ export class HealthRecordInput {
   diagnosis: string;
 
   @Field({ nullable: true })
-  dosage: string;
+  dosage?: string;
 
   @Field()
   issue: string;
 
   @Field({ nullable: true })
-  medication: string;
+  medication?: string;
 
   @Field()
   notes: string;
@@ -28,11 +28,8 @@ export class HealthRecordInput {
   treatment: string;
 
   @Field({ nullable: true })
-  vetName: string;
+  vetName?: string;
 
   @Field()
   recordDate: Date;
-
-  @Field(() => GrowthRecordType, { nullable: false })
-  recordType: GrowthRecordType;
 }

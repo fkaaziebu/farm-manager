@@ -7,7 +7,7 @@ export class LivestockInput {
   livestockTag: string;
 
   @Field()
-  birth_date: Date;
+  birthDate: Date;
 
   @Field()
   breed: string;

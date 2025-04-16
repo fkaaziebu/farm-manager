@@ -7,6 +7,7 @@ import { HealthRecordType, HealthRecordTypeClass } from "./health-record.type";
 import { PenType } from "./pen.type";
 
 export enum LivestockType {
+  GRASSCUTTER = "GRASSCUTTER",
   CATTLE = "CATTLE",
   GOAT = "GOAT",
   SHEEP = "SHEEP",
@@ -27,6 +28,17 @@ export enum LivestockGender {
   FEMALE = "FEMALE",
 }
 
+export enum LivestockAvailabilityStatus {
+  UNAVAILABLE = "UNAVAILABLE",
+  AVAILABLE = "AVAILABLE",
+}
+
+export enum LivestockUnavailabilityReason {
+  "NOT_APPLICABLE" = "NOT_APPLICABLE",
+  DEAD = "DEAD",
+  SOLD = "SOLD",
+}
+
 registerEnumType(LivestockType, {
   name: "LivestockType",
   description: "Type of livestock animal",
@@ -40,6 +52,16 @@ registerEnumType(HealthStatus, {
 registerEnumType(LivestockGender, {
   name: "LivestockGender",
   description: "Gender of an animal",
+});
+
+registerEnumType(LivestockAvailabilityStatus, {
+  name: "LivestockAvailabilityStatus",
+  description: "Shows animal availability",
+});
+
+registerEnumType(LivestockUnavailabilityReason, {
+  name: "LivestockUnavailabilityReason",
+  description: "Shows animal unavailability reason",
 });
 
 @ObjectType("Livestock")
@@ -74,8 +96,11 @@ export class LivestockTypeClass {
   @Field(() => HealthStatus)
   health_status: HealthStatus;
 
-  @Field()
-  available: boolean;
+  @Field(() => LivestockAvailabilityStatus, { nullable: true })
+  availability_status: LivestockAvailabilityStatus;
+
+  @Field(() => LivestockUnavailabilityReason, { nullable: true })
+  unavailability_reason: LivestockUnavailabilityReason;
 
   @Field(() => LivestockTypeClass, { nullable: true })
   mother?: LivestockTypeClass;

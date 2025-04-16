@@ -13,7 +13,6 @@ import { Greenhouse } from "./greenhouse.entity";
 import { GrowthRecord } from "./growth-record.entity";
 import { HealthRecord } from "./health-record.entity";
 import { Hive } from "./hive.entity";
-import { HousingUnit } from "./housing-unit.entity";
 import { Livestock } from "./livestock.entity";
 import { Pen } from "./pen.entity";
 import { Pond } from "./pond.entity";
@@ -39,7 +38,6 @@ export {
   GrowthRecord,
   HealthRecord,
   Hive,
-  HousingUnit,
   Livestock,
   Pen,
   Pond,

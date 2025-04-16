@@ -7,29 +7,26 @@ import {
 @InputType()
 export class UpdateGrowthRecordInput {
   @Field({ nullable: true })
-  feedConversion: number;
+  feedConversion?: number;
 
   @Field({ nullable: true })
-  growthRate: number;
+  growthRate?: number;
 
   @Field({ nullable: true })
-  height: number;
+  height?: number;
 
   @Field({ nullable: true })
-  length: number;
+  length?: number;
 
-  @Field()
-  notes: string;
+  @Field({ nullable: true })
+  notes?: string;
 
-  @Field()
-  recordDate: Date;
+  @Field({ nullable: true })
+  recordDate?: Date;
 
-  @Field()
-  weight: number;
+  @Field({ nullable: true })
+  weight?: number;
 
-  @Field(() => GrowthPeriod, { nullable: false })
-  period: GrowthPeriod;
-
-  @Field(() => GrowthRecordType, { nullable: false })
-  recordType: GrowthRecordType;
+  @Field(() => GrowthPeriod, { nullable: true })
+  period?: GrowthPeriod;
 }

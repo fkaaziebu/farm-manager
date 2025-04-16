@@ -8,6 +8,7 @@ import {
 } from "typeorm";
 import { Farm } from "./farm.entity";
 import { ExpenseRecord } from "./expense-record.entity";
+import { Task } from "./task.entity";
 
 export enum HousingStatus {
   OPERATIONAL = "OPERATIONAL",

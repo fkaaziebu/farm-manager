@@ -12,14 +12,14 @@ export class PenInput {
   areaSqm: number;
 
   @Field({ nullable: true })
-  beddingType: string;
+  beddingType?: string;
 
   @Field()
-  capacity: string;
+  capacity: number;
 
   @Field({ nullable: true })
-  feederType: string;
+  feederType?: string;
 
   @Field({ nullable: true })
-  watererType: string;
+  watererType?: string;
 }

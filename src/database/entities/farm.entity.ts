@@ -15,8 +15,16 @@ import { PoultryBatch } from "./poultry-batch.entity";
 import { AquacultureBatch } from "./aquaculture-batch.entity";
 import { CropBatch } from "./crop-batch.entity";
 import { Hive } from "./hive.entity";
-import { HousingUnit } from "./housing-unit.entity";
 import { Task } from "./task.entity";
+import { Barn } from "./barn.entity";
+import { AquacultureSystem } from "./aquaculture-system.entity";
+import { Pond } from "./pond.entity";
+import { Field } from "./field.entity";
+import { Greenhouse } from "./greenhouse.entity";
+import { Apiary } from "./apiary.entity";
+import { PoultryHouse } from "./poultry-house.entity";
+import { Coop } from "./coop.entity";
+import { Pen } from "./pen.entity";
 
 export enum FarmType {
   LIVESTOCK = "LIVESTOCK",
@@ -62,8 +70,35 @@ export class Farm {
   @JoinTable()
   workers: Worker[];
 
-  @OneToMany(() => HousingUnit, (housingUnit) => housingUnit.farm)
-  housing_units: HousingUnit[];
+  @OneToMany(() => Barn, (barn) => barn.farm)
+  barns: Barn[];
+
+  @OneToMany(
+    () => AquacultureSystem,
+    (aquaculture_system) => aquaculture_system.farm,
+  )
+  aquaculture_systems: AquacultureSystem[];
+
+  @OneToMany(() => Pond, (pond) => pond.farm)
+  ponds: Pond[];
+
+  @OneToMany(() => Field, (field) => field.farm)
+  fields: Field[];
+
+  @OneToMany(() => Greenhouse, (greenhouse) => greenhouse.farm)
+  greenhouses: Greenhouse[];
+
+  @OneToMany(() => Apiary, (apiary) => apiary.farm)
+  apiaries: Apiary[];
+
+  @OneToMany(() => PoultryHouse, (poultry_house) => poultry_house.farm)
+  poultry_houses: PoultryHouse[];
+
+  @OneToMany(() => Coop, (coops) => coops.farm)
+  coops: Coop[];
+
+  @OneToMany(() => Pen, (pen) => pen.farm)
+  pens: Pen[];
 
   // Animal entities by type
   @OneToMany(() => Livestock, (livestock) => livestock.farm)
