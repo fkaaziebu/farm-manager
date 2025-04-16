@@ -194,6 +194,7 @@ export class FarmService {
         "farm.admin",
         "father",
         "mother",
+        "offspring",
       ],
     });
   }
