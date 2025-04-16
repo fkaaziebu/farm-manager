@@ -834,10 +834,11 @@ export class FarmService {
         const currentMother = livestockToUpdate.mother;
         const currentFather = livestockToUpdate.father;
 
+        console.log(currentMother, currentFather);
         // If the current mother is different from the new mother, remove from old mother's offspring
         if (currentMother && (!mother || currentMother.id !== mother.id)) {
           currentMother.maternalOffspring =
-            currentMother.maternalOffspring.filter(
+            currentMother?.maternalOffspring?.filter(
               (child) => child.id !== livestockToUpdate.id,
             );
           await transactionalEntityManager.save(Livestock, currentMother);
@@ -846,7 +847,7 @@ export class FarmService {
         // If the current father is different from the new father, remove from old father's offspring
         if (currentFather && (!father || currentFather.id !== father.id)) {
           currentFather.paternalOffspring =
-            currentFather.paternalOffspring.filter(
+            currentFather?.paternalOffspring?.filter(
               (child) => child.id !== livestockToUpdate.id,
             );
           await transactionalEntityManager.save(Livestock, currentFather);
