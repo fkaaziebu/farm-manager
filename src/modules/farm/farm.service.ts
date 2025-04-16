@@ -68,12 +68,19 @@ export class FarmService {
     private salesRecordRepository: Repository<SalesRecord>,
   ) {}
 
-  async listFarms({ email }: { email: string }) {
+  async listFarms({
+    email,
+    searchTerm,
+  }: {
+    email: string;
+    searchTerm: string;
+  }) {
     return this.farmRepository.find({
       where: {
         admin: {
           email,
         },
+        name: ILike(`%${searchTerm}%`),
       },
       relations: ["barns.pens.livestock", "workers"],
     });
@@ -834,7 +841,6 @@ export class FarmService {
         const currentMother = livestockToUpdate.mother;
         const currentFather = livestockToUpdate.father;
 
-        console.log(currentMother, currentFather);
         // If the current mother is different from the new mother, remove from old mother's offspring
         if (currentMother && (!mother || currentMother.id !== mother.id)) {
           currentMother.maternalOffspring =

@@ -1650,8 +1650,22 @@ describe("FarmService", () => {
     it("should return a list of farms", async () => {
       await setupForQueries();
 
-      const farms = await farmService.listFarms({
+      await farmService.createFarm({
+        ...farmInfo,
+        name: "Fred Farms 2",
         email: adminInfo.email,
+      });
+
+      let farms = await farmService.listFarms({
+        email: adminInfo.email,
+        searchTerm: "",
+      });
+
+      expect(farms).toHaveLength(2);
+
+      farms = await farmService.listFarms({
+        email: adminInfo.email,
+        searchTerm: "Fred Farms 1",
       });
 
       expect(farms).toHaveLength(1);

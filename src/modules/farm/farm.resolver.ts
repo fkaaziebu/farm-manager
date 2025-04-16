@@ -46,10 +46,11 @@ export class FarmResolver {
   // Queries
   @UseGuards(GqlJwtAuthGuard)
   @Query(() => [FarmTypeClass])
-  listFarms(@Context() context) {
+  listFarms(@Context() context, @Args("searchTerm") searchTerm: string) {
     const { email } = context.req.user;
     return this.farmService.listFarms({
       email,
+      searchTerm,
     });
   }
 
