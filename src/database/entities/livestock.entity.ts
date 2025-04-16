@@ -106,17 +106,17 @@ export class Livestock {
   })
   unavailability_reason: LivestockUnavailabilityReason;
 
-  @ManyToOne(() => Livestock, (livestock) => livestock.offspring)
+  @ManyToOne(() => Livestock, (livestock) => livestock.maternalOffspring)
   mother: Livestock;
 
-  @ManyToOne(() => Livestock, (livestock) => livestock.offspring)
+  @ManyToOne(() => Livestock, (livestock) => livestock.paternalOffspring)
   father: Livestock;
 
-  @OneToMany(
-    () => Livestock,
-    (livestock) => livestock.mother || livestock.father,
-  )
-  offspring: Livestock[];
+  @OneToMany(() => Livestock, (livestock) => livestock.mother)
+  maternalOffspring: Livestock[];
+
+  @OneToMany(() => Livestock, (livestock) => livestock.father)
+  paternalOffspring: Livestock[];
 
   @ManyToOne(() => Farm, (farm) => farm.livestock)
   farm: Farm;

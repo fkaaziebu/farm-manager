@@ -599,21 +599,59 @@ describe("FarmService", () => {
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
-        livestock: adminInfo.livestock,
+        livestock: [
+          ...adminInfo.livestock,
+          {
+            livestockTag: "LST3",
+            livestockType: LivestockType.GRASSCUTTER,
+            birthDate: new Date(),
+            breed: "WHITE",
+            gender: LivestockGender.MALE,
+            weight: 20,
+          },
+        ],
       });
 
       const response = await farmService.updateLivestock({
         email: adminInfo.email,
-        livestockTag: adminInfo.livestock[0].livestockTag,
+        livestockTag: "LST3",
         livestock: {
-          ...adminInfo.livestock[0],
+          ...{
+            livestockTag: "LST3",
+            livestockType: LivestockType.GRASSCUTTER,
+            birthDate: new Date(),
+            breed: "WHITE",
+            gender: LivestockGender.MALE,
+            weight: 20,
+          },
           motherTag: adminInfo.livestock[1].livestockTag,
+          fatherTag: adminInfo.livestock[0].livestockTag,
         },
       });
 
       expect(response.mother.livestock_tag).toBe(
         adminInfo.livestock[1].livestockTag,
       );
+
+      expect(response.father.livestock_tag).toBe(
+        adminInfo.livestock[0].livestockTag,
+      );
+
+      const motherLivestock = await farmService.getLivestock({
+        email: adminInfo.email,
+        livestockTag: response.mother.livestock_tag,
+      });
+
+      expect(motherLivestock.maternalOffspring.length).toBe(1);
+      expect(motherLivestock.maternalOffspring[0].livestock_tag).toBe("LST3");
+
+      const fatherLivestock = await farmService.getLivestock({
+        email: adminInfo.email,
+        livestockTag: response.father.livestock_tag,
+      });
+
+      expect(fatherLivestock.paternalOffspring.length).toBe(1);
+      expect(fatherLivestock.paternalOffspring[0].livestock_tag).toBe("LST3");
     });
 
     it("throws an error when livestock is not found", async () => {

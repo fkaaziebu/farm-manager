@@ -194,7 +194,8 @@ export class FarmService {
         "farm.admin",
         "father",
         "mother",
-        "offspring",
+        "maternalOffspring",
+        "paternalOffspring",
       ],
     });
   }
@@ -704,7 +705,12 @@ export class FarmService {
                 },
               },
             },
-            relations: ["mother", "father", "offspring"],
+            relations: [
+              "mother",
+              "father",
+              "maternalOffspring",
+              "paternalOffspring",
+            ],
           },
         );
 
@@ -740,7 +746,7 @@ export class FarmService {
                 },
               },
             },
-            relations: ["offspring"],
+            relations: ["maternalOffspring", "paternalOffspring"],
           });
 
           if (!mother) {
@@ -778,7 +784,7 @@ export class FarmService {
                 },
               },
             },
-            relations: ["offspring"],
+            relations: ["maternalOffspring", "paternalOffspring"],
           });
 
           if (!father) {
@@ -814,28 +820,68 @@ export class FarmService {
           livestock.milkProduction || livestockToUpdate.milk_production;
         livestockToUpdate.meat_grade =
           livestock.meatGrade || livestockToUpdate.meat_grade;
+
+        if (livestockToUpdate.gender === LivestockGender.MALE) {
+          livestockToUpdate.paternalOffspring = offsprings.length
+            ? offsprings
+            : livestockToUpdate.paternalOffspring;
+        } else {
+          livestockToUpdate.maternalOffspring = offsprings.length
+            ? offsprings
+            : livestockToUpdate.maternalOffspring;
+        }
+
+        const currentMother = livestockToUpdate.mother;
+        const currentFather = livestockToUpdate.father;
+
+        // If the current mother is different from the new mother, remove from old mother's offspring
+        if (currentMother && (!mother || currentMother.id !== mother.id)) {
+          currentMother.maternalOffspring =
+            currentMother.maternalOffspring.filter(
+              (child) => child.id !== livestockToUpdate.id,
+            );
+          await transactionalEntityManager.save(Livestock, currentMother);
+        }
+
+        // If the current father is different from the new father, remove from old father's offspring
+        if (currentFather && (!father || currentFather.id !== father.id)) {
+          currentFather.paternalOffspring =
+            currentFather.paternalOffspring.filter(
+              (child) => child.id !== livestockToUpdate.id,
+            );
+          await transactionalEntityManager.save(Livestock, currentFather);
+        }
+
+        // Now assign the new parents
         livestockToUpdate.mother = mother || livestockToUpdate.mother;
         livestockToUpdate.father = father || livestockToUpdate.father;
-        livestockToUpdate.offspring = offsprings.length
-          ? offsprings
-          : livestockToUpdate.offspring;
 
-        // update offspring's father and mother
-        if (father) father.offspring.push(livestockToUpdate);
-        if (mother) mother.offspring.push(livestockToUpdate);
+        // Initialize arrays if they don't exist
+        if (mother && !mother.maternalOffspring) mother.maternalOffspring = [];
+        if (father && !father.paternalOffspring) father.paternalOffspring = [];
+
+        // Add to new parents' offspring arrays if not already there
+        const isInMotherOffspring = mother?.maternalOffspring?.some(
+          (child) => child.id === livestockToUpdate.id,
+        );
+        const isInFatherOffspring = father?.paternalOffspring?.some(
+          (child) => child.id === livestockToUpdate.id,
+        );
+
+        if (mother && !isInMotherOffspring) {
+          mother.maternalOffspring.push(livestockToUpdate);
+          await transactionalEntityManager.save(Livestock, mother);
+        }
+
+        if (father && !isInFatherOffspring) {
+          father.paternalOffspring.push(livestockToUpdate);
+          await transactionalEntityManager.save(Livestock, father);
+        }
 
         const savedLivestock = await transactionalEntityManager.save(
           Livestock,
           livestockToUpdate,
         );
-
-        if (father && mother) {
-          await transactionalEntityManager.save([father, mother]);
-        } else if (father) {
-          await transactionalEntityManager.save(Livestock, father);
-        } else if (mother) {
-          await transactionalEntityManager.save(Livestock, mother);
-        }
 
         return savedLivestock;
       },

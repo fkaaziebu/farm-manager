@@ -109,7 +109,10 @@ export class LivestockTypeClass {
   father?: LivestockTypeClass;
 
   @Field(() => [LivestockTypeClass], { nullable: true })
-  offspring?: LivestockTypeClass[];
+  maternalOffspring?: LivestockTypeClass[];
+
+  @Field(() => [LivestockTypeClass], { nullable: true })
+  paternalOffspring?: LivestockTypeClass[];
 
   @Field(() => FarmTypeClass, { nullable: true })
   farm?: FarmTypeClass;
