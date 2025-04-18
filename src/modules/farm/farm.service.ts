@@ -24,9 +24,11 @@ import {
   BarnInput,
   BreedingRecordInput,
   ExpenseRecordInput,
+  FarmSortInput,
   GrowthRecordInput,
   HealthRecordInput,
   LivestockInput,
+  PaginationInput,
   PenInput,
   SalesRecordInput,
   UpdateBarnInput,
@@ -67,6 +69,66 @@ export class FarmService {
     @InjectRepository(SalesRecord)
     private salesRecordRepository: Repository<SalesRecord>,
   ) {}
+
+  async listFarmsPaginated({
+    email,
+    searchTerm,
+    pagination,
+    sort,
+  }: {
+    email: string;
+    searchTerm?: string;
+    pagination: PaginationInput;
+    sort?: FarmSortInput[];
+  }) {
+    // First get all farms that match the filter
+    const farms = await this.listFarms({ email, searchTerm });
+
+    // Sort the farms if sort options are provided
+    if (sort && sort.length > 0) {
+      this.sortFarms(farms, sort);
+    }
+
+    // Apply pagination and return in the connection format
+
+    return this.paginate<Farm>(farms, pagination, (farm) => farm.id.toString());
+  }
+
+  private sortFarms(farms: Farm[], sortOptions: FarmSortInput[]) {
+    farms.sort((a, b) => {
+      for (const sort of sortOptions) {
+        const { field, direction } = sort;
+        const multiplier = direction === "ASC" ? 1 : -1;
+
+        // Handle different field types
+        switch (field) {
+          case "id":
+            if (a.id !== b.id) {
+              return (a.id - b.id) * multiplier;
+            }
+            break;
+          case "name":
+            const nameCompare = a.name.localeCompare(b.name);
+            if (nameCompare !== 0) {
+              return nameCompare * multiplier;
+            }
+            break;
+          case "insertedAt":
+            if (a["inserted_at"] && b["inserted_at"]) {
+              const dateA = new Date(a["inserted_at"]).getTime();
+              const dateB = new Date(b["inserted_at"]).getTime();
+              if (dateA !== dateB) {
+                return (dateA - dateB) * multiplier;
+              }
+            }
+            break;
+        }
+      }
+
+      // Default sort by ID if all other comparisons are equal
+      return a.id - b.id;
+    });
+  }
 
   async listFarms({
     email,
@@ -1474,5 +1536,91 @@ export class FarmService {
         return savedSalesRecord;
       },
     );
+  }
+
+  private paginate<T>(
+    items: T[],
+    paginationInput: PaginationInput = {},
+    cursorExtractor: (item: T) => string | number,
+  ) {
+    const { first, after, last, before } = paginationInput;
+
+    // Default values
+    const defaultFirst = 10;
+    let limit = first || defaultFirst;
+    let afterIndex = -1;
+    let beforeIndex = items.length;
+
+    // Determine indices based on cursors
+    if (after) {
+      const decodedCursor = this.decodeCursor(after);
+      afterIndex = items.findIndex(
+        (item) => String(cursorExtractor(item)) === decodedCursor,
+      );
+      if (afterIndex === -1)
+        afterIndex = -1; // Not found
+      else afterIndex = afterIndex; // Include items after this index
+    }
+
+    if (before) {
+      const decodedCursor = this.decodeCursor(before);
+      beforeIndex = items.findIndex(
+        (item) => String(cursorExtractor(item)) === decodedCursor,
+      );
+      if (beforeIndex === -1)
+        beforeIndex = items.length; // Not found
+      else beforeIndex = beforeIndex; // Include items before this index
+    }
+
+    // Handle the 'last' parameter by adjusting the starting point
+    if (last) {
+      const potentialCount = beforeIndex - afterIndex - 1;
+      if (potentialCount > last) {
+        afterIndex = beforeIndex - last - 1;
+      }
+      limit = last;
+    }
+
+    // Get the paginated items
+    const slicedItems = items.slice(afterIndex + 1, beforeIndex);
+    const paginatedItems = slicedItems.slice(0, limit);
+
+    // Create edges with cursors
+    const edges = paginatedItems.map((item) => ({
+      cursor: this.encodeCursor(String(cursorExtractor(item))),
+      node: item,
+    }));
+
+    // Determine if there are more pages
+    const hasNextPage = beforeIndex > afterIndex + 1 + paginatedItems.length;
+    const hasPreviousPage = afterIndex >= 0;
+
+    // Create the pageInfo object
+    const pageInfo = {
+      hasNextPage,
+      hasPreviousPage,
+      startCursor: edges.length > 0 ? edges[0].cursor : null,
+      endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
+    };
+
+    return {
+      edges,
+      pageInfo,
+      count: items.length,
+    };
+  }
+
+  /**
+   * Encode a cursor to Base64
+   */
+  private encodeCursor(cursor: string): string {
+    return Buffer.from(cursor).toString("base64");
+  }
+
+  /**
+   * Decode a cursor from Base64
+   */
+  private decodeCursor(cursor: string): string {
+    return Buffer.from(cursor, "base64").toString("utf-8");
   }
 }

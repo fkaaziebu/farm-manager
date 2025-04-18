@@ -16,6 +16,7 @@ import { SalesRecordInput } from "./sales-record.input";
 import { UpdateSalesRecordInput } from "./update-sales-record.input";
 import { UpdateBarnInput } from "./update-barn.input";
 import { UpdatePenInput } from "./update-pen.input";
+import e from "express";
 
 export {
   WorkerInput,
@@ -37,3 +38,5 @@ export {
   UpdateBarnInput,
   UpdatePenInput,
 };
+export { FarmSortInput } from "./farm-sort.input";
+export { PaginationInput } from "./pagination.input";

@@ -9,9 +9,11 @@ import {
   BarnInput,
   BreedingRecordInput,
   ExpenseRecordInput,
+  FarmSortInput,
   GrowthRecordInput,
   HealthRecordInput,
   LivestockInput,
+  PaginationInput,
   PenInput,
   SalesRecordInput,
   TaskInput,
@@ -38,6 +40,7 @@ import {
 } from "src/database/types";
 import { LivestockUnavailabilityReason } from "src/database/types/livestock.type";
 import { Barn } from "src/database/entities";
+import { FarmConnection } from "./types";
 
 @Resolver()
 export class FarmResolver {
@@ -45,12 +48,20 @@ export class FarmResolver {
 
   // Queries
   @UseGuards(GqlJwtAuthGuard)
-  @Query(() => [FarmTypeClass])
-  listFarms(@Context() context, @Args("searchTerm") searchTerm: string) {
+  @Query(() => FarmConnection)
+  listFarms(
+    @Context() context,
+    @Args("searchTerm") searchTerm: string,
+    @Args("pagination", { nullable: true }) pagination?: PaginationInput,
+    @Args("sort", { type: () => [FarmSortInput], nullable: true })
+    sort?: FarmSortInput[],
+  ) {
     const { email } = context.req.user;
-    return this.farmService.listFarms({
+    return this.farmService.listFarmsPaginated({
       email,
       searchTerm,
+      pagination,
+      sort,
     });
   }
 
