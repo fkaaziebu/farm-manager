@@ -1,6 +1,6 @@
 import { Field, InputType, registerEnumType } from "@nestjs/graphql";
 
-enum SortDirection {
+export enum SortDirection {
   ASC = "ASC",
   DESC = "DESC",
 }

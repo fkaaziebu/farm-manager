@@ -7,14 +7,17 @@ import { RolesGuard } from "./guards/roles.guard";
 import { Roles } from "./decorators/roles.decorator";
 import {
   BarnInput,
+  BarnSortInput,
   BreedingRecordInput,
   ExpenseRecordInput,
   FarmSortInput,
   GrowthRecordInput,
   HealthRecordInput,
   LivestockInput,
+  LivestockSortInput,
   PaginationInput,
   PenInput,
+  PenSortInput,
   SalesRecordInput,
   TaskInput,
   UpdateBarnInput,
@@ -40,7 +43,12 @@ import {
 } from "src/database/types";
 import { LivestockUnavailabilityReason } from "src/database/types/livestock.type";
 import { Barn } from "src/database/entities";
-import { FarmConnection } from "./types";
+import {
+  BarnConnection,
+  FarmConnection,
+  LivestockConnection,
+  PenConnection,
+} from "./types";
 
 @Resolver()
 export class FarmResolver {
@@ -66,12 +74,20 @@ export class FarmResolver {
   }
 
   @UseGuards(GqlJwtAuthGuard)
-  @Query(() => [BarnType])
-  listBarns(@Context() context, @Args("searchTerm") searchTerm: string) {
+  @Query(() => BarnConnection)
+  listBarns(
+    @Context() context,
+    @Args("searchTerm") searchTerm: string,
+    @Args("pagination", { nullable: true }) pagination?: PaginationInput,
+    @Args("sort", { type: () => [BarnSortInput], nullable: true })
+    sort?: BarnSortInput[],
+  ) {
     const { email } = context.req.user;
-    return this.farmService.listBarns({
+    return this.farmService.listBarnsPaginated({
       email,
       searchTerm,
+      pagination,
+      sort,
     });
   }
 
@@ -86,12 +102,20 @@ export class FarmResolver {
   }
 
   @UseGuards(GqlJwtAuthGuard)
-  @Query(() => [PenType])
-  listPens(@Context() context, @Args("searchTerm") searchTerm: string) {
+  @Query(() => PenConnection)
+  listPens(
+    @Context() context,
+    @Args("searchTerm") searchTerm: string,
+    @Args("pagination", { nullable: true }) pagination?: PaginationInput,
+    @Args("sort", { type: () => [PenSortInput], nullable: true })
+    sort?: PenSortInput[],
+  ) {
     const { email } = context.req.user;
-    return this.farmService.listPens({
+    return this.farmService.listPensPaginated({
       email,
       searchTerm,
+      pagination,
+      sort,
     });
   }
 
@@ -106,12 +130,20 @@ export class FarmResolver {
   }
 
   @UseGuards(GqlJwtAuthGuard)
-  @Query(() => [LivestockTypeClass])
-  listLivestock(@Context() context, @Args("searchTerm") searchTerm: string) {
+  @Query(() => LivestockConnection)
+  listLivestock(
+    @Context() context,
+    @Args("searchTerm") searchTerm: string,
+    @Args("pagination", { nullable: true }) pagination?: PaginationInput,
+    @Args("sort", { type: () => [LivestockSortInput], nullable: true })
+    sort?: LivestockSortInput[],
+  ) {
     const { email } = context.req.user;
-    return this.farmService.listLivestock({
+    return this.farmService.listLivestockPaginated({
       email,
       searchTerm,
+      pagination,
+      sort,
     });
   }
 
