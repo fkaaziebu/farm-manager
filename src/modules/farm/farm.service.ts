@@ -84,16 +84,9 @@ export class FarmService {
     pagination: PaginationInput;
     sort?: FarmSortInput[];
   }) {
-    // First get all farms that match the filter
-    const farms = await this.listFarms({ email, searchTerm });
-
-    // Sort the farms if sort options are provided
-    if (sort && sort.length > 0) {
-      this.sortFarms(farms, sort);
-    }
+    const farms = await this.listFarms({ email, searchTerm, sort });
 
     // Apply pagination and return in the connection format
-
     return this.paginate<Farm>(farms, pagination, (farm) => farm.id.toString());
   }
 
@@ -108,15 +101,9 @@ export class FarmService {
     pagination: PaginationInput;
     sort?: BarnSortInput[];
   }) {
-    const barns = await this.listBarns({ email, searchTerm });
-
-    // Sort the barns if sort options are provided
-    if (sort && sort.length > 0) {
-      this.sortBarns(barns, sort);
-    }
+    const barns = await this.listBarns({ email, searchTerm, sort });
 
     // Apply pagination and return in the connection format
-
     return this.paginate<Barn>(barns, pagination, (barn) => barn.id.toString());
   }
 
@@ -131,15 +118,9 @@ export class FarmService {
     pagination: PaginationInput;
     sort?: PenSortInput[];
   }) {
-    const pens = await this.listPens({ email, searchTerm });
-
-    // Sort the pens if sort options are provided
-    if (sort && sort.length > 0) {
-      this.sortPens(pens, sort);
-    }
+    const pens = await this.listPens({ email, searchTerm, sort });
 
     // Apply pagination and return in the connection format
-
     return this.paginate<Pen>(pens, pagination, (pen) => pen.id.toString());
   }
 
@@ -154,161 +135,28 @@ export class FarmService {
     pagination: PaginationInput;
     sort?: LivestockSortInput[];
   }) {
-    const livestock = await this.listLivestock({ email, searchTerm });
-
-    // Sort the livestock if sort options are provided
-    if (sort && sort.length > 0) {
-      this.sortLivestock(livestock, sort);
-    }
+    const livestock = await this.listLivestock({ email, searchTerm, sort });
 
     // Apply pagination and return in the connection format
-
     return this.paginate<Livestock>(livestock, pagination, (livestock) =>
       livestock.id.toString(),
     );
   }
 
-  private sortFarms(farms: Farm[], sortOptions: FarmSortInput[]) {
-    farms.sort((a, b) => {
-      for (const sort of sortOptions) {
-        const { field, direction } = sort;
-        const multiplier = direction === "ASC" ? 1 : -1;
-
-        // Handle different field types
-        switch (field) {
-          case "id":
-            if (a.id !== b.id) {
-              return (a.id - b.id) * multiplier;
-            }
-            break;
-          case "name":
-            const nameCompare = a.name.localeCompare(b.name);
-            if (nameCompare !== 0) {
-              return nameCompare * multiplier;
-            }
-            break;
-          case "insertedAt":
-            if (a["inserted_at"] && b["inserted_at"]) {
-              const dateA = new Date(a["inserted_at"]).getTime();
-              const dateB = new Date(b["inserted_at"]).getTime();
-              if (dateA !== dateB) {
-                return (dateA - dateB) * multiplier;
-              }
-            }
-            break;
-        }
-      }
-
-      // Default sort by ID if all other comparisons are equal
-      return a.id - b.id;
-    });
-  }
-
-  private sortBarns(barns: Barn[], sortOptions: BarnSortInput[]) {
-    barns.sort((a, b) => {
-      for (const sort of sortOptions) {
-        const { field, direction } = sort;
-        const multiplier = direction === "ASC" ? 1 : -1;
-
-        // Handle different field types
-        switch (field) {
-          case "id":
-            if (a.id !== b.id) {
-              return (a.id - b.id) * multiplier;
-            }
-            break;
-          case "name":
-            const nameCompare = a.name.localeCompare(b.name);
-            if (nameCompare !== 0) {
-              return nameCompare * multiplier;
-            }
-            break;
-          case "status":
-            const statusCompare = a.status.localeCompare(b.status);
-            if (statusCompare !== 0) {
-              return statusCompare * multiplier;
-            }
-            break;
-        }
-      }
-
-      // Default sort by ID if all other comparisons are equal
-      return a.id - b.id;
-    });
-  }
-
-  private sortPens(pens: Pen[], sortOptions: PenSortInput[]) {
-    pens.sort((a, b) => {
-      for (const sort of sortOptions) {
-        const { field, direction } = sort;
-        const multiplier = direction === "ASC" ? 1 : -1;
-
-        // Handle different field types
-        switch (field) {
-          case "id":
-            if (a.id !== b.id) {
-              return (a.id - b.id) * multiplier;
-            }
-            break;
-          case "name":
-            const nameCompare = a.name.localeCompare(b.name);
-            if (nameCompare !== 0) {
-              return nameCompare * multiplier;
-            }
-            break;
-          case "status":
-            const statusCompare = a.status.localeCompare(b.status);
-            if (statusCompare !== 0) {
-              return statusCompare * multiplier;
-            }
-            break;
-        }
-      }
-
-      // Default sort by ID if all other comparisons are equal
-      return a.id - b.id;
-    });
-  }
-
-  private sortLivestock(
-    livestock: Livestock[],
-    sortOptions: LivestockSortInput[],
-  ) {
-    livestock.sort((a, b) => {
-      for (const sort of sortOptions) {
-        const { field, direction } = sort;
-        const multiplier = direction === "ASC" ? 1 : -1;
-
-        // Handle different field types
-        switch (field) {
-          case "id":
-            if (a.id !== b.id) {
-              return (a.id - b.id) * multiplier;
-            }
-            break;
-          case "livestock_type":
-            const livestockTypeCompare = a.livestock_type.localeCompare(
-              b.livestock_type,
-            );
-            if (livestockTypeCompare !== 0) {
-              return livestockTypeCompare * multiplier;
-            }
-            break;
-        }
-      }
-
-      // Default sort by ID if all other comparisons are equal
-      return a.id - b.id;
-    });
-  }
-
   async listFarms({
     email,
     searchTerm,
+    sort,
   }: {
     email: string;
     searchTerm: string;
+    sort?: FarmSortInput[];
   }) {
+    const sortOrder = {};
+    sort?.map((item) => {
+      sortOrder[item.field] = item.direction;
+    });
+
     return this.farmRepository.find({
       where: {
         admin: {
@@ -317,16 +165,24 @@ export class FarmService {
         name: ILike(`%${searchTerm}%`),
       },
       relations: ["barns.pens.livestock", "workers"],
+      order: sortOrder,
     });
   }
 
   async listBarns({
     email,
     searchTerm,
+    sort,
   }: {
     email: string;
     searchTerm: string;
+    sort?: BarnSortInput[];
   }) {
+    const sortOrder = {};
+    sort?.map((item) => {
+      sortOrder[item.field] = item.direction;
+    });
+
     return this.barnRepository.find({
       where: {
         farm: {
@@ -337,6 +193,7 @@ export class FarmService {
         name: ILike(`%${searchTerm}%`),
       },
       relations: ["pens.livestock"],
+      order: sortOrder,
     });
   }
 
@@ -354,7 +211,20 @@ export class FarmService {
     });
   }
 
-  async listPens({ email, searchTerm }: { email: string; searchTerm: string }) {
+  async listPens({
+    email,
+    searchTerm,
+    sort,
+  }: {
+    email: string;
+    searchTerm: string;
+    sort?: PenSortInput[];
+  }) {
+    const sortOrder = {};
+    sort?.map((item) => {
+      sortOrder[item.field] = item.direction;
+    });
+
     return this.penRepository.find({
       where: {
         barn: {
@@ -367,6 +237,7 @@ export class FarmService {
         name: ILike(`%${searchTerm}%`),
       },
       relations: ["livestock"],
+      order: sortOrder,
     });
   }
 
@@ -387,10 +258,17 @@ export class FarmService {
   async listLivestock({
     email,
     searchTerm,
+    sort,
   }: {
     email: string;
     searchTerm: string;
+    sort?: LivestockSortInput[];
   }) {
+    const sortOrder = {};
+    sort?.map((item) => {
+      sortOrder[item.field] = item.direction;
+    });
+
     return this.livestockRepository.find({
       where: {
         pen: {
@@ -405,6 +283,7 @@ export class FarmService {
         livestock_tag: ILike(`%${searchTerm}%`),
       },
       relations: ["pen"],
+      order: sortOrder,
     });
   }
 
