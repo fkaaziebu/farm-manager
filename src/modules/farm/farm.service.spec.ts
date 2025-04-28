@@ -1670,6 +1670,15 @@ describe("FarmService", () => {
 
       expect(farms).toHaveLength(1);
       expect(farms[0].name).toBe("Fred Farms 1");
+
+      farms = await farmService.listFarms({
+        email: adminInfo.email,
+        searchTerm: "Fred Farms 1",
+        filter: { id: farms[0].id },
+      });
+
+      expect(farms).toHaveLength(1);
+      expect(farms[0].name).toBe("Fred Farms 1");
     });
   });
 

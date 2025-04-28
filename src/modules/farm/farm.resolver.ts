@@ -10,6 +10,7 @@ import {
   BarnSortInput,
   BreedingRecordInput,
   ExpenseRecordInput,
+  FarmFilterInput,
   FarmSortInput,
   GrowthRecordInput,
   HealthRecordInput,
@@ -60,6 +61,7 @@ export class FarmResolver {
   listFarms(
     @Context() context,
     @Args("searchTerm") searchTerm: string,
+    @Args("filter", { nullable: true }) filter?: FarmFilterInput,
     @Args("pagination", { nullable: true }) pagination?: PaginationInput,
     @Args("sort", { type: () => [FarmSortInput], nullable: true })
     sort?: FarmSortInput[],
@@ -68,6 +70,7 @@ export class FarmResolver {
     return this.farmService.listFarmsPaginated({
       email,
       searchTerm,
+      filter,
       pagination,
       sort,
     });

@@ -25,6 +25,7 @@ import {
   BarnSortInput,
   BreedingRecordInput,
   ExpenseRecordInput,
+  FarmFilterInput,
   FarmSortInput,
   GrowthRecordInput,
   HealthRecordInput,
@@ -76,15 +77,17 @@ export class FarmService {
   async listFarmsPaginated({
     email,
     searchTerm,
+    filter,
     pagination,
     sort,
   }: {
     email: string;
     searchTerm?: string;
+    filter?: FarmFilterInput;
     pagination: PaginationInput;
     sort?: FarmSortInput[];
   }) {
-    const farms = await this.listFarms({ email, searchTerm, sort });
+    const farms = await this.listFarms({ email, searchTerm, sort, filter });
 
     // Apply pagination and return in the connection format
     return this.paginate<Farm>(farms, pagination, (farm) => farm.id.toString());
@@ -147,10 +150,12 @@ export class FarmService {
     email,
     searchTerm,
     sort,
+    filter,
   }: {
     email: string;
     searchTerm: string;
     sort?: FarmSortInput[];
+    filter?: FarmFilterInput;
   }) {
     const sortOrder = {};
     sort?.map((item) => {
@@ -163,8 +168,9 @@ export class FarmService {
           email,
         },
         name: ILike(`%${searchTerm}%`),
+        id: filter?.id,
       },
-      relations: ["barns.pens.livestock", "workers"],
+      relations: ["barns.pens.livestock", "workers", "livestock"],
       order: sortOrder,
     });
   }
