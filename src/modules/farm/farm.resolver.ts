@@ -41,7 +41,7 @@ import {
   LivestockTypeClass,
   PenType,
   SalesRecordType,
-  TaskType,
+  TaskTypeClass,
   WorkerType,
 } from "src/database/types";
 import { LivestockUnavailabilityReason } from "src/database/types/livestock.type";
@@ -388,7 +388,7 @@ export class FarmResolver {
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @Roles("admin")
-  @Mutation(() => TaskType)
+  @Mutation(() => TaskTypeClass)
   createTask(
     @Context() context,
     @Args("farmTag") farmTag: string,
@@ -406,7 +406,7 @@ export class FarmResolver {
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @Roles("admin")
-  @Mutation(() => TaskType)
+  @Mutation(() => TaskTypeClass)
   assignTaskToWorkers(
     @Context() context,
     @Args("taskId") taskId: string,
