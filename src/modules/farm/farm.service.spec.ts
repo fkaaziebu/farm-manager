@@ -1765,6 +1765,8 @@ describe("FarmService", () => {
       expect(response).toBeDefined();
       expect(response.type).toBe(TaskType.REGULAR_INSPECTION);
       expect(response.status).toBe(TaskStatus.PENDING);
+      expect(response.farm).toBeDefined();
+      expect(response.farm.farm_tag).toEqual(farm.farm_tag);
 
       const admin = await getAdmin();
       expect(admin.assigned_tasks).toHaveLength(1);

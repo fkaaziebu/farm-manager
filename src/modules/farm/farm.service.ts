@@ -1730,6 +1730,7 @@ export class FarmService {
         newTask.type = task.type;
         newTask.description = task.description;
         newTask.notes = task.notes;
+        newTask.farm = admin.farms[0];
 
         const savedTask = await transactionalEntityManager.save(Task, newTask);
 
