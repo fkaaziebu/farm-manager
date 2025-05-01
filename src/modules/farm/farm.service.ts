@@ -29,6 +29,7 @@ import {
   FarmSortInput,
   GrowthRecordInput,
   HealthRecordInput,
+  LivestockFilterInput,
   LivestockInput,
   LivestockSortInput,
   PaginationInput,
@@ -50,14 +51,21 @@ import { v4 as uuidv4 } from "uuid";
 import { LivestockGender } from "../../database/types";
 import { BreedingStatus } from "../../database/types/breeding-record.type";
 import { ProductType } from "../../database/types/sales-record.type";
+import {
+  LivestockAvailabilityStatus,
+  LivestockUnavailabilityReason,
+} from "../../database/types/livestock.type";
 
 @Injectable()
 export class FarmService {
   constructor(
     @InjectRepository(Admin)
     private adminRepository: Repository<Admin>,
+    @InjectRepository(Worker)
+    private workerRepository: Repository<Worker>,
     @InjectRepository(Farm)
     private farmRepository: Repository<Farm>,
+
     @InjectRepository(Barn)
     private barnRepository: Repository<Barn>,
     @InjectRepository(Pen)
@@ -91,6 +99,23 @@ export class FarmService {
 
     // Apply pagination and return in the connection format
     return this.paginate<Farm>(farms, pagination, (farm) => farm.id.toString());
+  }
+
+  async listWorkersPaginated({
+    email,
+    searchTerm,
+    pagination,
+  }: {
+    email: string;
+    searchTerm?: string;
+    pagination: PaginationInput;
+  }) {
+    const workers = await this.listWorkers({ email, searchTerm });
+
+    // Apply pagination and return in the connection format
+    return this.paginate<Worker>(workers, pagination, (worker) =>
+      worker.id.toString(),
+    );
   }
 
   async listBarnsPaginated({
@@ -130,15 +155,22 @@ export class FarmService {
   async listLivestockPaginated({
     email,
     searchTerm,
+    filter,
     pagination,
     sort,
   }: {
     email: string;
     searchTerm?: string;
+    filter?: LivestockFilterInput;
     pagination: PaginationInput;
     sort?: LivestockSortInput[];
   }) {
-    const livestock = await this.listLivestock({ email, searchTerm, sort });
+    const livestock = await this.listLivestock({
+      email,
+      searchTerm,
+      sort,
+      filter,
+    });
 
     // Apply pagination and return in the connection format
     return this.paginate<Livestock>(livestock, pagination, (livestock) =>
@@ -172,6 +204,36 @@ export class FarmService {
       },
       relations: ["barns.pens.livestock", "workers", "livestock"],
       order: sortOrder,
+    });
+  }
+
+  async listWorkers({
+    email,
+    searchTerm,
+  }: {
+    email: string;
+    searchTerm: string;
+  }) {
+    return this.workerRepository.find({
+      where: {
+        admin: {
+          email,
+        },
+        name: ILike(`%${searchTerm}%`),
+      },
+      relations: ["farms", "admin", "assigned_tasks"],
+    });
+  }
+
+  async getWorker({ email, workerTag }: { email: string; workerTag: string }) {
+    return this.workerRepository.findOne({
+      where: {
+        admin: {
+          email,
+        },
+        worker_tag: workerTag,
+      },
+      relations: ["farms", "admin", "assigned_tasks"],
     });
   }
 
@@ -263,11 +325,13 @@ export class FarmService {
 
   async listLivestock({
     email,
+    filter,
     searchTerm,
     sort,
   }: {
     email: string;
     searchTerm: string;
+    filter?: LivestockFilterInput;
     sort?: LivestockSortInput[];
   }) {
     const sortOrder = {};
@@ -287,6 +351,8 @@ export class FarmService {
           },
         },
         livestock_tag: ILike(`%${searchTerm}%`),
+        livestock_type: filter?.livestock_type,
+        availability_status: LivestockAvailabilityStatus.AVAILABLE,
       },
       relations: ["pen"],
       order: sortOrder,
@@ -1003,6 +1069,49 @@ export class FarmService {
           father.paternalOffspring.push(livestockToUpdate);
           await transactionalEntityManager.save(Livestock, father);
         }
+
+        const savedLivestock = await transactionalEntityManager.save(
+          Livestock,
+          livestockToUpdate,
+        );
+
+        return savedLivestock;
+      },
+    );
+  }
+
+  async markLivestockAsUnavailable({
+    email,
+    livestockTag,
+    unavailabilityReason,
+  }: {
+    email: string;
+    livestockTag: string;
+    unavailabilityReason: LivestockUnavailabilityReason;
+  }) {
+    return this.livestockRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        const livestockToUpdate = await transactionalEntityManager.findOne(
+          Livestock,
+          {
+            where: {
+              livestock_tag: livestockTag,
+              farm: {
+                admin: {
+                  email,
+                },
+              },
+            },
+          },
+        );
+
+        if (!livestockToUpdate) {
+          throw new NotFoundException("Livestock not found");
+        }
+
+        livestockToUpdate.availability_status =
+          LivestockAvailabilityStatus.UNAVAILABLE;
+        livestockToUpdate.unavailability_reason = unavailabilityReason;
 
         const savedLivestock = await transactionalEntityManager.save(
           Livestock,

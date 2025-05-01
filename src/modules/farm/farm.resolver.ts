@@ -14,6 +14,7 @@ import {
   FarmSortInput,
   GrowthRecordInput,
   HealthRecordInput,
+  LivestockFilterInput,
   LivestockInput,
   LivestockSortInput,
   PaginationInput,
@@ -43,12 +44,12 @@ import {
   TaskType,
 } from "src/database/types";
 import { LivestockUnavailabilityReason } from "src/database/types/livestock.type";
-import { Barn } from "src/database/entities";
 import {
   BarnConnection,
   FarmConnection,
   LivestockConnection,
   PenConnection,
+  WorkerConnection,
 } from "./types";
 
 @Resolver()
@@ -73,6 +74,31 @@ export class FarmResolver {
       filter,
       pagination,
       sort,
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard)
+  @Query(() => WorkerConnection)
+  listWorkers(
+    @Context() context,
+    @Args("searchTerm") searchTerm: string,
+    @Args("pagination", { nullable: true }) pagination?: PaginationInput,
+  ) {
+    const { email } = context.req.user;
+    return this.farmService.listWorkersPaginated({
+      email,
+      searchTerm,
+      pagination,
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard)
+  @Query(() => BarnType)
+  getWorker(@Context() context, @Args("workerTag") workerTag: string) {
+    const { email } = context.req.user;
+    return this.farmService.getWorker({
+      email,
+      workerTag,
     });
   }
 
@@ -137,6 +163,7 @@ export class FarmResolver {
   listLivestock(
     @Context() context,
     @Args("searchTerm") searchTerm: string,
+    @Args("filter", { nullable: true }) filter?: LivestockFilterInput,
     @Args("pagination", { nullable: true }) pagination?: PaginationInput,
     @Args("sort", { type: () => [LivestockSortInput], nullable: true })
     sort?: LivestockSortInput[],
@@ -145,6 +172,7 @@ export class FarmResolver {
     return this.farmService.listLivestockPaginated({
       email,
       searchTerm,
+      filter,
       pagination,
       sort,
     });
@@ -347,7 +375,15 @@ export class FarmResolver {
       nullable: false,
     })
     unavailabilityReason: LivestockUnavailabilityReason,
-  ) {}
+  ) {
+    const { email } = context.req.user;
+
+    return this.farmService.markLivestockAsUnavailable({
+      email,
+      livestockTag,
+      unavailabilityReason,
+    });
+  }
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @Roles("admin")

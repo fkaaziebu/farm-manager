@@ -44,6 +44,10 @@ import { LivestockType } from "../../database/entities/livestock.entity";
 import { BreedingStatus } from "../../database/types/breeding-record.type";
 import { GrowthPeriod } from "../../database/types/growth-record.type";
 import { ExpenseCategory } from "../../database/types/expense-record.type";
+import {
+  LivestockAvailabilityStatus,
+  LivestockUnavailabilityReason,
+} from "../../database/types/livestock.type";
 
 describe("FarmService", () => {
   let module: TestingModule;
@@ -1645,6 +1649,77 @@ describe("FarmService", () => {
     });
   });
 
+  describe("markLivestockAsUnavailable", () => {
+    it("returns update livestock with status set to unavailable", async () => {
+      await registerAdmin(adminInfo);
+
+      const farm = await farmService.createFarm({
+        ...farmInfo,
+        email: adminInfo.email,
+      });
+
+      const farmWithBarns = await farmService.addBarnsToFarm({
+        email: adminInfo.email,
+        farmTag: farm.farm_tag,
+        barns: adminInfo.barns,
+      });
+
+      await farmService.addPensToBarn({
+        email: adminInfo.email,
+        barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
+          .unit_id,
+        pens: adminInfo.pens,
+      });
+
+      await farmService.addLivestockToPen({
+        email: adminInfo.email,
+        penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
+        livestock: adminInfo.livestock,
+      });
+
+      const response = await farmService.markLivestockAsUnavailable({
+        email: adminInfo.email,
+        livestockTag: adminInfo.livestock[0].livestockTag,
+        unavailabilityReason: LivestockUnavailabilityReason.DEAD,
+      });
+
+      expect(response.availability_status).toEqual(
+        LivestockAvailabilityStatus.UNAVAILABLE,
+      );
+      expect(response.unavailability_reason).toEqual(
+        LivestockUnavailabilityReason.DEAD,
+      );
+
+      // only list available livestock
+      const response2 = await farmService.listLivestock({
+        email: adminInfo.email,
+        searchTerm: "",
+      });
+
+      expect(response2).toHaveLength(1);
+      expect(response2[0].availability_status).toEqual(
+        LivestockAvailabilityStatus.AVAILABLE,
+      );
+    });
+    it("throws an error if livestock not found", async () => {
+      await expect(
+        farmService.markLivestockAsUnavailable({
+          email: adminInfo.email,
+          livestockTag: "invalid-tag",
+          unavailabilityReason: LivestockUnavailabilityReason.SOLD,
+        }),
+      ).rejects.toThrow(NotFoundException);
+
+      await expect(
+        farmService.markLivestockAsUnavailable({
+          email: adminInfo.email,
+          livestockTag: "invalid-tag",
+          unavailabilityReason: LivestockUnavailabilityReason.SOLD,
+        }),
+      ).rejects.toThrow("Livestock not found");
+    });
+  });
+
   // Queries
   describe("listFarms", () => {
     it("should return a list of farms", async () => {
@@ -1775,6 +1850,27 @@ describe("FarmService", () => {
 
       expect(livestock).toHaveLength(1);
       expect(livestock[0].livestock_tag).toContain("LST1");
+
+      // filter by type
+      livestock = await farmService.listLivestock({
+        email: adminInfo.email,
+        searchTerm: "",
+        filter: {
+          livestock_type: LivestockType.GRASSCUTTER,
+        },
+      });
+
+      expect(livestock).toHaveLength(2);
+
+      livestock = await farmService.listLivestock({
+        email: adminInfo.email,
+        searchTerm: "",
+        filter: {
+          livestock_type: LivestockType.CATTLE,
+        },
+      });
+
+      expect(livestock).toHaveLength(0);
     });
   });
 
@@ -1791,6 +1887,38 @@ describe("FarmService", () => {
       expect(livestock.livestock_tag).toContain(
         adminInfo.livestock[0].livestockTag,
       );
+    });
+  });
+
+  describe("listWorkers", () => {
+    it("should return a list of workers for the admin", async () => {
+      await setupForQueries();
+      const workers = await farmService.listWorkers({
+        email: adminInfo.email,
+        searchTerm: "",
+      });
+
+      expect(workers).toHaveLength(2);
+      expect(workers[0].admin.email).toEqual(adminInfo.email);
+    });
+  });
+
+  describe("getWorker", () => {
+    it("should return a worker for the admin", async () => {
+      await setupForQueries();
+
+      const workers = await farmService.listWorkers({
+        email: adminInfo.email,
+        searchTerm: "",
+      });
+
+      const worker = await farmService.getWorker({
+        email: adminInfo.email,
+        workerTag: workers[0].worker_tag,
+      });
+
+      expect(worker).toBeDefined();
+      expect(worker.email).toEqual(workers[0].email);
     });
   });
 
