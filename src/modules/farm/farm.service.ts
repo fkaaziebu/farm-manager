@@ -16,6 +16,7 @@ import {
   Livestock,
   Pen,
   SalesRecord,
+  Task,
   Worker,
 } from "../../database/entities";
 import { FarmType } from "../../database/types/farm.type";
@@ -36,6 +37,7 @@ import {
   PenInput,
   PenSortInput,
   SalesRecordInput,
+  TaskInput,
   UpdateBarnInput,
   UpdateBreedingRecordInput,
   UpdateExpenseRecordInput,
@@ -65,7 +67,6 @@ export class FarmService {
     private workerRepository: Repository<Worker>,
     @InjectRepository(Farm)
     private farmRepository: Repository<Farm>,
-
     @InjectRepository(Barn)
     private barnRepository: Repository<Barn>,
     @InjectRepository(Pen)
@@ -80,6 +81,8 @@ export class FarmService {
     private expenseRecordRepository: Repository<ExpenseRecord>,
     @InjectRepository(SalesRecord)
     private salesRecordRepository: Repository<SalesRecord>,
+    @InjectRepository(Task)
+    private taskRepository: Repository<Task>,
   ) {}
 
   async listFarmsPaginated({
@@ -1700,6 +1703,40 @@ export class FarmService {
         );
 
         return savedSalesRecord;
+      },
+    );
+  }
+
+  async createTask({
+    email,
+    farmTag,
+    task,
+  }: {
+    email: string;
+    farmTag: string;
+    task: TaskInput;
+  }) {
+    return this.taskRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        const admin = await transactionalEntityManager.findOne(Admin, {
+          where: { email, farms: { farm_tag: farmTag } },
+          relations: ["farms", "assigned_tasks"],
+        });
+
+        const newTask = new Task();
+        newTask.starting_date = task.startingDate;
+        newTask.completion_date = task.completionDate;
+        newTask.status = task.status;
+        newTask.type = task.type;
+        newTask.description = task.description;
+        newTask.notes = task.notes;
+
+        const savedTask = await transactionalEntityManager.save(Task, newTask);
+
+        admin.assigned_tasks.push(savedTask);
+        await transactionalEntityManager.save(Admin, admin);
+
+        return savedTask;
       },
     );
   }

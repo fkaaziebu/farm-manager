@@ -24,7 +24,7 @@ import { PondType } from "./pond.type";
 import { PoultryBatchType } from "./poultry-batch.type";
 import { PoultryHouseType } from "./poultry-house.type";
 import { SalesRecordType } from "./sales-record.type";
-import { TaskType } from "./task.type";
+import { TaskTypeClass, TaskType } from "./task.type";
 import { WorkerType } from "./worker.type";
 
 export {
@@ -53,5 +53,6 @@ export {
   PoultryHouseType,
   SalesRecordType,
   TaskType,
+  TaskTypeClass,
   WorkerType,
 };

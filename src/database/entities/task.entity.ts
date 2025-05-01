@@ -5,6 +5,7 @@ import {
   OneToOne,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from "typeorm";
 import { Farm } from "./farm.entity";
 import { Admin } from "./admin.entity";
@@ -18,13 +19,31 @@ enum TaskStatus {
   "COMPLETED" = "COMPLETED",
 }
 
+enum TaskType {
+  "REGULAR_INSPECTION" = "REGULAR_INSPECTION",
+  "TRAINING_SESSION" = "TRAINING_SESSION",
+  "ELECTRIC_CHECK" = "ELECTRIC_CHECK",
+  "MAINTENANCE" = "MAINTENANCE",
+  "CLEANING" = "CLEANING",
+}
+
 @Entity("tasks")
 export class Task {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({
+    type: "enum",
+    enum: TaskType,
+    default: TaskType.REGULAR_INSPECTION,
+  })
+  type: TaskType;
+
   @Column()
   description: string;
+
+  @Column({ nullable: true })
+  notes: string;
 
   @Column()
   starting_date: Date;
@@ -40,6 +59,7 @@ export class Task {
   status: TaskStatus;
 
   @OneToOne(() => Admin, (admin) => admin.assigned_tasks)
+  @JoinColumn()
   admin: Admin;
 
   @ManyToOne(() => Worker, (worker) => worker.assigned_tasks)

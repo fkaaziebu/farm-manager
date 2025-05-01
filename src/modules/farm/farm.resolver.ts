@@ -391,9 +391,18 @@ export class FarmResolver {
   @Mutation(() => TaskType)
   createTask(
     @Context() context,
+    @Args("farmTag") farmTag: string,
     @Args("task", { type: () => TaskInput!, nullable: false })
     task: TaskInput,
-  ) {}
+  ) {
+    const { email } = context.req.user;
+
+    return this.farmService.createTask({
+      email,
+      farmTag,
+      task,
+    });
+  }
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @Roles("admin")

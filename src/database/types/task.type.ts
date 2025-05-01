@@ -11,18 +11,37 @@ export enum TaskStatus {
   COMPLETED = "COMPLETED",
 }
 
+export enum TaskType {
+  REGULAR_INSPECTION = "REGULAR_INSPECTION",
+  TRAINING_SESSION = "TRAINING_SESSION",
+  ELECTRIC_CHECK = "ELECTRIC_CHECK",
+  MAINTENANCE = "MAINTENANCE",
+  CLEANING = "CLEANING",
+}
+
 registerEnumType(TaskStatus, {
   name: "TaskStatus",
   description: "Status of a task",
 });
 
+registerEnumType(TaskType, {
+  name: "TaskType",
+  description: "Type of a task",
+});
+
 @ObjectType("Task")
-export class TaskType {
+export class TaskTypeClass {
   @Field(() => ID)
   id: number;
 
+  @Field(() => TaskType)
+  type: TaskType;
+
   @Field()
   description: string;
+
+  @Field({ nullable: true })
+  notes?: string;
 
   @Field()
   starting_date: Date;

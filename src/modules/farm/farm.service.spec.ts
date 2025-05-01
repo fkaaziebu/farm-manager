@@ -39,7 +39,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { WorkerRole } from "../../database/types/worker.type";
-import { LivestockGender } from "../../database/types";
+import { LivestockGender, TaskType } from "../../database/types";
 import { LivestockType } from "../../database/entities/livestock.entity";
 import { BreedingStatus } from "../../database/types/breeding-record.type";
 import { GrowthPeriod } from "../../database/types/growth-record.type";
@@ -48,6 +48,7 @@ import {
   LivestockAvailabilityStatus,
   LivestockUnavailabilityReason,
 } from "../../database/types/livestock.type";
+import { TaskStatus } from "../../database/types/task.type";
 
 describe("FarmService", () => {
   let module: TestingModule;
@@ -1720,6 +1721,56 @@ describe("FarmService", () => {
     });
   });
 
+  describe("createTask", () => {
+    it("returns a task after creation", async () => {
+      await registerAdmin(adminInfo);
+
+      const farm = await farmService.createFarm({
+        ...farmInfo,
+        email: adminInfo.email,
+      });
+
+      const farmWithBarns = await farmService.addBarnsToFarm({
+        email: adminInfo.email,
+        farmTag: farm.farm_tag,
+        barns: adminInfo.barns,
+      });
+
+      await farmService.addPensToBarn({
+        email: adminInfo.email,
+        barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
+          .unit_id,
+        pens: adminInfo.pens,
+      });
+
+      await farmService.addLivestockToPen({
+        email: adminInfo.email,
+        penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
+        livestock: adminInfo.livestock,
+      });
+
+      const response = await farmService.createTask({
+        email: adminInfo.email,
+        farmTag: farm.farm_tag,
+        task: {
+          description: "Test Task Description",
+          startingDate: new Date(),
+          completionDate: new Date(),
+          type: TaskType.REGULAR_INSPECTION,
+          notes: "Test Task Notes",
+          status: TaskStatus.PENDING,
+        },
+      });
+
+      expect(response).toBeDefined();
+      expect(response.type).toBe(TaskType.REGULAR_INSPECTION);
+      expect(response.status).toBe(TaskStatus.PENDING);
+
+      const admin = await getAdmin();
+      expect(admin.assigned_tasks).toHaveLength(1);
+    });
+  });
+
   // Queries
   describe("listFarms", () => {
     it("should return a list of farms", async () => {
@@ -1994,6 +2045,15 @@ describe("FarmService", () => {
     location: "Kpong",
     area: "20 acres",
     farmType: FarmType.LIVESTOCK,
+  };
+
+  const getAdmin = async () => {
+    const admin = await adminRepository.findOne({
+      where: { email: adminInfo.email },
+      relations: ["assigned_tasks"],
+    });
+
+    return admin;
   };
 
   const registerAdmin = async ({ name, email, password }) => {
