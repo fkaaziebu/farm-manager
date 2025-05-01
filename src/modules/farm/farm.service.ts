@@ -54,6 +54,7 @@ import { LivestockGender } from "../../database/types";
 import { BreedingStatus } from "../../database/types/breeding-record.type";
 import { ProductType } from "../../database/types/sales-record.type";
 import {
+  HealthStatus,
   LivestockAvailabilityStatus,
   LivestockUnavailabilityReason,
 } from "../../database/types/livestock.type";
@@ -1346,6 +1347,7 @@ export class FarmService {
         );
 
         livestock.health_records.push(savedHealthRecord);
+        livestock.health_status = HealthStatus[`${healthRecord.recordStatus}`];
 
         await transactionalEntityManager.save(Livestock, livestock);
 
@@ -1372,6 +1374,7 @@ export class FarmService {
               id: healthRecordId,
               livestock: { farm: { admin: { email } } },
             },
+            relations: ["livestock"],
           },
         );
 
@@ -1402,9 +1405,19 @@ export class FarmService {
         healthRecordToUpdate.record_status =
           healthRecord.recordStatus || healthRecordToUpdate.record_status;
 
+        healthRecordToUpdate.livestock.health_status =
+          HealthStatus[
+            healthRecord.recordStatus || healthRecordToUpdate.record_status
+          ];
+
         const savedHealthRecord = await transactionalEntityManager.save(
           HealthRecord,
           healthRecordToUpdate,
+        );
+
+        await transactionalEntityManager.save(
+          Livestock,
+          healthRecordToUpdate.livestock,
         );
 
         return savedHealthRecord;
