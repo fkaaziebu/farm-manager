@@ -42,6 +42,7 @@ import {
   PenType,
   SalesRecordType,
   TaskType,
+  WorkerType,
 } from "src/database/types";
 import { LivestockUnavailabilityReason } from "src/database/types/livestock.type";
 import {
@@ -93,7 +94,7 @@ export class FarmResolver {
   }
 
   @UseGuards(GqlJwtAuthGuard)
-  @Query(() => BarnType)
+  @Query(() => WorkerType)
   getWorker(@Context() context, @Args("workerTag") workerTag: string) {
     const { email } = context.req.user;
     return this.farmService.getWorker({
