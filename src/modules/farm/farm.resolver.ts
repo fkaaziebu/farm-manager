@@ -407,12 +407,19 @@ export class FarmResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @Roles("admin")
   @Mutation(() => TaskTypeClass)
-  assignTaskToWorkers(
+  assignTaskToWorker(
     @Context() context,
-    @Args("taskId") taskId: string,
-    @Args("workerTags", { type: () => [String!]!, nullable: false })
-    workerTags: string[],
-  ) {}
+    @Args("taskId") taskId: number,
+    @Args("workerTag") workerTag: string,
+  ) {
+    const { email } = context.req.user;
+
+    return this.farmService.assignTaskToWorker({
+      email,
+      taskId,
+      workerTag,
+    });
+  }
 
   @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => BreedingRecordType)

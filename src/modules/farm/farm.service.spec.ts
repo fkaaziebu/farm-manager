@@ -1773,6 +1773,42 @@ describe("FarmService", () => {
     });
   });
 
+  describe("assignTaskToWorkers", () => {
+    it("returns task with assigned workers after assigning task", async () => {
+      await setupForQueries();
+      let admin = await getAdmin();
+
+      const task = await farmService.createTask({
+        email: adminInfo.email,
+        farmTag: admin.farms[0].farm_tag,
+        task: {
+          description: "Test Task Description",
+          startingDate: new Date(),
+          completionDate: new Date(),
+          type: TaskType.REGULAR_INSPECTION,
+          notes: "Test Task Notes",
+          status: TaskStatus.PENDING,
+        },
+      });
+
+      const response = await farmService.assignTaskToWorker({
+        email: adminInfo.email,
+        taskId: task.id,
+        workerTag: admin.workers[0].worker_tag,
+      });
+
+      expect(response).toBeDefined();
+      expect(response.worker.worker_tag).toEqual(admin.workers[0].worker_tag);
+
+      admin = await getAdmin();
+      expect(
+        admin.workers.find(
+          (worker) => worker.worker_tag === response.worker.worker_tag,
+        ).assigned_tasks,
+      ).toHaveLength(1);
+    });
+  });
+
   // Queries
   describe("listFarms", () => {
     it("should return a list of farms", async () => {
@@ -2052,7 +2088,7 @@ describe("FarmService", () => {
   const getAdmin = async () => {
     const admin = await adminRepository.findOne({
       where: { email: adminInfo.email },
-      relations: ["assigned_tasks"],
+      relations: ["farms", "assigned_tasks", "workers.assigned_tasks"],
     });
 
     return admin;

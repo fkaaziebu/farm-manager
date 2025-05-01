@@ -1742,6 +1742,50 @@ export class FarmService {
     );
   }
 
+  async assignTaskToWorker({
+    email,
+    taskId,
+    workerTag,
+  }: {
+    email: string;
+    taskId: number;
+    workerTag: string;
+  }) {
+    return this.taskRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        const taskToUpdate = await transactionalEntityManager.findOne(Task, {
+          where: { admin: { email }, id: taskId },
+          relations: ["farm"],
+        });
+
+        if (!taskToUpdate) {
+          throw new NotFoundException("Task not found");
+        }
+
+        const workerToAssign = await transactionalEntityManager.findOne(
+          Worker,
+          {
+            where: {
+              farms: {
+                farm_tag: taskToUpdate.farm.farm_tag,
+              },
+              worker_tag: workerTag,
+            },
+          },
+        );
+
+        if (!workerToAssign) {
+          throw new NotFoundException("Worker not found");
+        }
+
+        taskToUpdate.worker = workerToAssign;
+        await transactionalEntityManager.save(Task, taskToUpdate);
+
+        return taskToUpdate;
+      },
+    );
+  }
+
   private paginate<T>(
     items: T[],
     paginationInput: PaginationInput = {},
