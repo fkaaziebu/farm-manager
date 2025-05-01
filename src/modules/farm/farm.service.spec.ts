@@ -49,6 +49,7 @@ import {
   LivestockUnavailabilityReason,
 } from "../../database/types/livestock.type";
 import { TaskStatus } from "../../database/types/task.type";
+import { HealthRecordStatus } from "../../database/types/health-record.type";
 
 describe("FarmService", () => {
   let module: TestingModule;
@@ -1011,6 +1012,7 @@ describe("FarmService", () => {
           symptoms: "None",
           treatment: "None",
           recordDate: new Date(),
+          recordStatus: HealthRecordStatus.HEALTHY,
         },
       });
 
@@ -1032,6 +1034,7 @@ describe("FarmService", () => {
             symptoms: "None",
             treatment: "None",
             recordDate: new Date(),
+            recordStatus: HealthRecordStatus.HEALTHY,
           },
         }),
       ).rejects.toThrow(NotFoundException);
@@ -1048,6 +1051,7 @@ describe("FarmService", () => {
             symptoms: "None",
             treatment: "None",
             recordDate: new Date(),
+            recordStatus: HealthRecordStatus.HEALTHY,
           },
         }),
       ).rejects.toThrow("Livestock not found");
@@ -1093,6 +1097,7 @@ describe("FarmService", () => {
           symptoms: "None",
           treatment: "None",
           recordDate: new Date(),
+          recordStatus: HealthRecordStatus.HEALTHY,
         },
       });
 
@@ -1128,6 +1133,7 @@ describe("FarmService", () => {
             symptoms: "None",
             treatment: "None",
             recordDate: new Date(),
+            recordStatus: HealthRecordStatus.HEALTHY,
           },
         }),
       ).rejects.toThrow(NotFoundException);
@@ -1144,6 +1150,7 @@ describe("FarmService", () => {
             symptoms: "None",
             treatment: "None",
             recordDate: new Date(),
+            recordStatus: HealthRecordStatus.HEALTHY,
           },
         }),
       ).rejects.toThrow("Livestock not found");
@@ -2166,6 +2173,7 @@ describe("FarmService", () => {
         symptoms: "None",
         treatment: "None",
         recordDate: new Date(),
+        recordStatus: HealthRecordStatus.HEALTHY,
       },
     });
 

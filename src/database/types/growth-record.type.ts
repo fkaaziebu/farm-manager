@@ -58,6 +58,9 @@ export class GrowthRecordTypeClass {
   @Field({ nullable: true })
   feed_conversion?: number;
 
+  @Field({ nullable: true })
+  feed_consumption?: number;
+
   @Field()
   notes: string;
 

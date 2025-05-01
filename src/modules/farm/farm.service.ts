@@ -1338,6 +1338,7 @@ export class FarmService {
           healthRecord.vetName || newHealthRecord.vet_name;
         newHealthRecord.record_date = healthRecord.recordDate;
         newHealthRecord.livestock = livestock;
+        newHealthRecord.record_status = healthRecord.recordStatus;
 
         const savedHealthRecord = await transactionalEntityManager.save(
           HealthRecord,
@@ -1398,6 +1399,8 @@ export class FarmService {
           healthRecord.vetName || healthRecordToUpdate.vet_name;
         healthRecordToUpdate.record_date =
           healthRecord.recordDate || healthRecordToUpdate.record_date;
+        healthRecordToUpdate.record_status =
+          healthRecord.recordStatus || healthRecordToUpdate.record_status;
 
         const savedHealthRecord = await transactionalEntityManager.save(
           HealthRecord,
@@ -1440,13 +1443,13 @@ export class FarmService {
         newGrowthRecord.record_date = growthRecord.recordDate;
         newGrowthRecord.weight = growthRecord.weight;
         newGrowthRecord.period = growthRecord.period;
-        newGrowthRecord.feed_conversion =
-          growthRecord.feedConversion || newGrowthRecord.feed_conversion;
         newGrowthRecord.growth_rate =
           growthRecord.growthRate || newGrowthRecord.growth_rate;
         newGrowthRecord.height = growthRecord.height || newGrowthRecord.height;
         newGrowthRecord.length = growthRecord.length || newGrowthRecord.length;
         newGrowthRecord.notes = growthRecord.notes;
+        newGrowthRecord.feed_consumption =
+          growthRecord.feedConsumption || newGrowthRecord.feed_consumption;
         newGrowthRecord.livestock = livestock;
 
         const savedGrowthRecord = await transactionalEntityManager.save(
@@ -1494,8 +1497,8 @@ export class FarmService {
           growthRecord.weight || growthRecordToUpdate.weight;
         growthRecordToUpdate.period =
           growthRecord.period || growthRecordToUpdate.period;
-        growthRecordToUpdate.feed_conversion =
-          growthRecord.feedConversion || growthRecordToUpdate.feed_conversion;
+        growthRecordToUpdate.feed_consumption =
+          growthRecord.feedConsumption || growthRecordToUpdate.feed_consumption;
         growthRecordToUpdate.growth_rate =
           growthRecord.growthRate || growthRecordToUpdate.growth_rate;
         growthRecordToUpdate.height =

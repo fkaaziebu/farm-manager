@@ -7,9 +7,6 @@ import {
 @InputType()
 export class GrowthRecordInput {
   @Field({ nullable: true })
-  feedConversion?: number;
-
-  @Field({ nullable: true })
   growthRate?: number;
 
   @Field({ nullable: true })
@@ -26,6 +23,9 @@ export class GrowthRecordInput {
 
   @Field()
   weight: number;
+
+  @Field({ nullable: true })
+  feedConsumption?: number;
 
   @Field(() => GrowthPeriod, { nullable: false })
   period: GrowthPeriod;

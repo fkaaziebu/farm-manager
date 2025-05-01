@@ -8,9 +8,22 @@ export enum HealthRecordType {
   BATCH = "BATCH",
 }
 
+export enum HealthRecordStatus {
+  HEALTHY = "HEALTHY",
+  SICK = "SICK",
+  TREATED = "TREATED",
+  RECOVERING = "RECOVERING",
+  CRITICAL = "CRITICAL",
+}
+
 registerEnumType(HealthRecordType, {
   name: "HealthRecordType",
   description: "Type of health record (individual or batch)",
+});
+
+registerEnumType(HealthRecordStatus, {
+  name: "HealthRecordStatus",
+  description: "Status of health record (individual or batch)",
 });
 
 @ObjectType("HealthRecord")
@@ -20,6 +33,9 @@ export class HealthRecordTypeClass {
 
   @Field(() => HealthRecordType)
   record_type: HealthRecordType;
+
+  @Field(() => HealthRecordStatus)
+  record_status: HealthRecordStatus;
 
   @Field()
   record_date: Date;

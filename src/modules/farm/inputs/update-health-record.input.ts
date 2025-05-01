@@ -1,5 +1,5 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { GrowthRecordType } from "../../../database/types/growth-record.type";
+import { HealthRecordStatus } from "src/database/types/health-record.type";
 
 @InputType()
 export class UpdateHealthRecordInput {
@@ -32,4 +32,7 @@ export class UpdateHealthRecordInput {
 
   @Field({ nullable: true })
   recordDate?: Date;
+
+  @Field(() => HealthRecordStatus, { nullable: true })
+  recordStatus?: HealthRecordStatus;
 }

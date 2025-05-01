@@ -56,6 +56,9 @@ export class GrowthRecord {
   @Column({ default: null })
   feed_conversion: number;
 
+  @Column({ default: null })
+  feed_consumption: number;
+
   @Column()
   notes: string;
 

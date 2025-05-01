@@ -8,6 +8,14 @@ export enum HealthRecordType {
   BATCH = "BATCH", // For batches like poultry/fish
 }
 
+enum HealthRecordStatus {
+  HEALTHY = "HEALTHY",
+  SICK = "SICK",
+  TREATED = "TREATED",
+  RECOVERING = "RECOVERING",
+  CRITICAL = "CRITICAL",
+}
+
 @Entity("health_records")
 export class HealthRecord {
   @PrimaryGeneratedColumn()
@@ -19,6 +27,13 @@ export class HealthRecord {
     default: HealthRecordType.INDIVIDUAL,
   })
   record_type: HealthRecordType;
+
+  @Column({
+    type: "enum",
+    enum: HealthRecordStatus,
+    default: HealthRecordStatus.HEALTHY,
+  })
+  record_status: HealthRecordStatus;
 
   @Column()
   record_date: Date;

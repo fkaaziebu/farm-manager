@@ -7,7 +7,7 @@ import {
 @InputType()
 export class UpdateGrowthRecordInput {
   @Field({ nullable: true })
-  feedConversion?: number;
+  feedConsumption?: number;
 
   @Field({ nullable: true })
   growthRate?: number;
