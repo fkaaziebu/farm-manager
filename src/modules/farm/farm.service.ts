@@ -46,6 +46,7 @@ import {
   UpdateLivestockInput,
   UpdatePenInput,
   UpdateSalesRecordInput,
+  UpdateWorkerInput,
   WorkerInput,
 } from "./inputs";
 import { HashHelper } from "../../helpers";
@@ -1800,6 +1801,37 @@ export class FarmService {
         return taskToUpdate;
       },
     );
+  }
+
+  async updateWorker({
+    email,
+    workerTag,
+    workerData,
+  }: {
+    email: string;
+    workerTag: string;
+    workerData: UpdateWorkerInput;
+  }) {
+    const worker = await this.workerRepository.findOne({
+      where: { worker_tag: workerTag, admin: { email } },
+    });
+
+    if (!worker) {
+      throw new NotFoundException("Worker not found");
+    }
+
+    worker.skills = workerData.skills || worker.skills;
+    worker.achievements = workerData.achievements || worker.achievements;
+    worker.address = workerData.address || worker.address;
+    worker.phone = workerData.phone || worker.phone;
+    worker.bio = workerData.bio || worker.bio;
+    worker.join_date = workerData.join_date || worker.join_date;
+    worker.name = workerData.name || worker.name;
+    worker.roles = workerData.roles || worker.roles;
+
+    const updatedWorker = await this.workerRepository.save(worker);
+
+    return updatedWorker;
   }
 
   private paginate<T>(

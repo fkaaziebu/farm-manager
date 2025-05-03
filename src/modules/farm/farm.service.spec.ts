@@ -1816,6 +1816,31 @@ describe("FarmService", () => {
     });
   });
 
+  describe("updateWorker", () => {
+    it("updates worker entity", async () => {
+      await setupForQueries();
+      const admin = await getAdmin();
+
+      const response = await farmService.updateWorker({
+        email: admin.email,
+        workerTag: admin.workers[0].worker_tag,
+        workerData: {
+          name: "Updated Worker Name",
+          phone: "1234567890",
+          achievements: [
+            { name: "Achievement 1", date: new Date() },
+            { name: "Achievement 2", date: new Date() },
+          ],
+        },
+      });
+
+      expect(response).toBeDefined();
+      expect(response.name).toEqual("Updated Worker Name");
+      expect(response.phone).toEqual("1234567890");
+      expect(response.achievements).toHaveLength(2);
+    });
+  });
+
   // Queries
   describe("listFarms", () => {
     it("should return a list of farms", async () => {

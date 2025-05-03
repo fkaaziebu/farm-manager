@@ -30,6 +30,7 @@ import {
   UpdateLivestockInput,
   UpdatePenInput,
   UpdateSalesRecordInput,
+  UpdateWorkerInput,
   WorkerInput,
 } from "./inputs";
 import {
@@ -260,6 +261,22 @@ export class FarmResolver {
       farmTag,
       email,
       workers,
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard)
+  @Mutation(() => FarmTypeClass)
+  updateWorker(
+    @Context() context,
+    @Args("workerTag") workerTag: string,
+    @Args("workerData", { type: () => UpdateWorkerInput!, nullable: false })
+    workerData: WorkerInput,
+  ) {
+    const { email } = context.req.user;
+    return this.farmService.updateWorker({
+      workerTag,
+      email,
+      workerData,
     });
   }
 
