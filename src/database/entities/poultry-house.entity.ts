@@ -37,15 +37,6 @@ export class PoultryHouse {
   })
   status: HousingStatus;
 
-  @ManyToOne(() => Farm, (farm) => farm.poultry_houses)
-  farm: Farm;
-
-  @OneToMany(
-    () => ExpenseRecord,
-    (expense_record) => expense_record.poultry_house,
-  )
-  expense_records: ExpenseRecord[];
-
   @Column({ default: 0 })
   area_sqm: number;
 
@@ -63,4 +54,13 @@ export class PoultryHouse {
 
   @OneToMany(() => Coop, (coop) => coop.poultryHouse)
   coops: Coop[];
+
+  @ManyToOne(() => Farm, (farm) => farm.poultry_houses)
+  farm: Farm;
+
+  @OneToMany(
+    () => ExpenseRecord,
+    (expense_record) => expense_record.poultry_house,
+  )
+  expense_records: ExpenseRecord[];
 }

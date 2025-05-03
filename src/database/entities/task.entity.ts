@@ -4,7 +4,6 @@ import {
   Column,
   OneToOne,
   ManyToOne,
-  OneToMany,
   JoinColumn,
 } from "typeorm";
 import { Farm } from "./farm.entity";

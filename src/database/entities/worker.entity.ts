@@ -45,7 +45,25 @@ export class Worker {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ default: null })
+  join_date: Date;
+
+  @Column({ default: null })
+  phone: string;
+
+  @Column({ default: null })
+  address: string;
+
+  @Column({ default: null, type: "json" })
+  bio: object;
+
+  @Column("text", { array: true, nullable: true })
+  skills: string[];
+
+  @Column({ default: null, type: "json" })
+  achievements: object[];
+
+  @Column({ default: null })
   @Exclude({ toPlainOnly: true })
   password: string;
 

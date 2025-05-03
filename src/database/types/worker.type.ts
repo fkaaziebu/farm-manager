@@ -2,6 +2,7 @@ import { Field, ID, ObjectType, registerEnumType } from "@nestjs/graphql";
 import { FarmTypeClass } from "./farm.type";
 import { AdminType } from "./admin.type";
 import { TaskType } from "./task.type";
+import GraphQLJSON from "graphql-type-json";
 
 export enum WorkerRole {
   FARM_MANAGER = "FARM_MANAGER",
@@ -34,6 +35,24 @@ export class WorkerType {
 
   @Field()
   email: string;
+
+  @Field({ nullable: true })
+  join_date?: Date;
+
+  @Field({ nullable: true })
+  phone?: string;
+
+  @Field({ nullable: true })
+  address?: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  bio?: any;
+
+  @Field(() => [String], { nullable: true })
+  skills?: string[];
+
+  @Field(() => [GraphQLJSON], { nullable: true })
+  achievements?: any[];
 
   @Field(() => [FarmTypeClass], { nullable: true })
   farms?: FarmTypeClass[];
