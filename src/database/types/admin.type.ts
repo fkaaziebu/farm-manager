@@ -1,7 +1,7 @@
 import { Field, ID, ObjectType } from "@nestjs/graphql";
 import { FarmTypeClass } from "./farm.type";
 import { WorkerType } from "./worker.type";
-import { TaskType } from "./task.type";
+import { TaskTypeClass } from "./task.type";
 
 @ObjectType("Admin")
 export class AdminType {
@@ -20,6 +20,6 @@ export class AdminType {
   @Field(() => [WorkerType], { nullable: true })
   workers?: WorkerType[];
 
-  @Field(() => [TaskType], { nullable: true })
-  assigned_tasks?: TaskType[];
+  @Field(() => [TaskTypeClass], { nullable: true })
+  assigned_tasks?: TaskTypeClass[];
 }
