@@ -2043,6 +2043,36 @@ describe("FarmService", () => {
     });
   });
 
+  describe("listTask", () => {
+    it("returns a list of tasks for admin", async () => {
+      await setupForQueries();
+
+      const farm = await farmService.createFarm({
+        ...farmInfo,
+        email: adminInfo.email,
+      });
+
+      await farmService.createTask({
+        email: adminInfo.email,
+        farmTag: farm.farm_tag,
+        task: {
+          description: "Test Task Description",
+          startingDate: new Date(),
+          completionDate: new Date(),
+          type: TaskType.REGULAR_INSPECTION,
+          notes: "Test Task Notes",
+          status: TaskStatus.PENDING,
+        },
+      });
+
+      const response = await farmService.listTask({
+        email: adminInfo.email,
+      });
+
+      expect(response).toHaveLength(1);
+    });
+  });
+
   const adminInfo = {
     name: "Frederick Aziebu",
     email: "frederickaziebu1998@gmail.com",

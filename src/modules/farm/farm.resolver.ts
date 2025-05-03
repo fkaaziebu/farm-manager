@@ -21,6 +21,7 @@ import {
   PenInput,
   PenSortInput,
   SalesRecordInput,
+  TaskFilterInput,
   TaskInput,
   UpdateBarnInput,
   UpdateBreedingRecordInput,
@@ -101,6 +102,19 @@ export class FarmResolver {
     return this.farmService.getWorker({
       email,
       workerTag,
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard)
+  @Query(() => [TaskTypeClass])
+  listTask(
+    @Context() context,
+    @Args("filter", { nullable: true }) filter?: TaskFilterInput,
+  ) {
+    const { email } = context.req.user;
+    return this.farmService.listTask({
+      email,
+      filter,
     });
   }
 

@@ -37,6 +37,7 @@ import {
   PenInput,
   PenSortInput,
   SalesRecordInput,
+  TaskFilterInput,
   TaskInput,
   UpdateBarnInput,
   UpdateBreedingRecordInput,
@@ -210,6 +211,26 @@ export class FarmService {
       },
       relations: ["barns.pens.livestock", "workers", "livestock"],
       order: sortOrder,
+    });
+  }
+
+  async listTask({
+    email,
+    filter,
+  }: {
+    email: string;
+    filter?: TaskFilterInput;
+  }) {
+    return this.taskRepository.find({
+      where: {
+        admin: {
+          email,
+          farms: {
+            farm_tag: filter?.farmTag,
+          },
+        },
+      },
+      relations: ["worker"],
     });
   }
 
