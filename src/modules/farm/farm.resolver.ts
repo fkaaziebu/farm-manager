@@ -265,7 +265,7 @@ export class FarmResolver {
   }
 
   @UseGuards(GqlJwtAuthGuard)
-  @Mutation(() => FarmTypeClass)
+  @Mutation(() => WorkerType)
   updateWorker(
     @Context() context,
     @Args("workerTag") workerTag: string,
