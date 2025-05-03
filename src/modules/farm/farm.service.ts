@@ -59,6 +59,7 @@ import {
   LivestockAvailabilityStatus,
   LivestockUnavailabilityReason,
 } from "../../database/types/livestock.type";
+import { ExpenseCategory } from "../../database/types/expense-record.type";
 
 @Injectable()
 export class FarmService {
@@ -1319,13 +1320,14 @@ export class FarmService {
               },
             },
           },
-          relations: ["health_records"],
+          relations: ["health_records", "expense_records"],
         });
 
         if (!livestock) {
           throw new NotFoundException("Livestock not found");
         }
 
+        // Create a new health record
         const newHealthRecord = new HealthRecord();
         newHealthRecord.cost = healthRecord.cost;
         newHealthRecord.diagnosis = healthRecord.diagnosis;
@@ -1347,7 +1349,21 @@ export class FarmService {
           newHealthRecord,
         );
 
+        // Create a new expense record
+        const newExpenseRecord = new ExpenseRecord();
+        newExpenseRecord.amount = healthRecord.cost;
+        newExpenseRecord.category = ExpenseCategory.MEDICAL;
+        newExpenseRecord.expense_date = new Date();
+        newExpenseRecord.notes = healthRecord.notes;
+        newExpenseRecord.livestock = livestock;
+
+        const savedExpenseRecord = await transactionalEntityManager.save(
+          ExpenseRecord,
+          newExpenseRecord,
+        );
+
         livestock.health_records.push(savedHealthRecord);
+        livestock.expense_records.push(savedExpenseRecord);
         livestock.health_status = HealthStatus[`${healthRecord.recordStatus}`];
 
         await transactionalEntityManager.save(Livestock, livestock);
