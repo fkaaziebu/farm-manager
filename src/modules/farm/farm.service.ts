@@ -1154,7 +1154,7 @@ export class FarmService {
                 },
               },
             },
-            relations: ["breeding_records", "pen"],
+            relations: ["breeding_records", "expense_records", "pen"],
           },
         );
 
@@ -1174,7 +1174,7 @@ export class FarmService {
                 },
               },
             },
-            relations: ["breeding_records", "pen"],
+            relations: ["breeding_records", "expense_records", "pen"],
           },
         );
 
@@ -1207,14 +1207,29 @@ export class FarmService {
         newBreedingRecord.mating_date = breedingRecord.matingDate;
         newBreedingRecord.notes = breedingRecord.notes;
         newBreedingRecord.breeding_method = breedingRecord.breedingMethod;
+        newBreedingRecord.cost = breedingRecord.cost || 0;
 
         const savedBreedingRecord = await transactionalEntityManager.save(
           BreedingRecord,
           newBreedingRecord,
         );
 
+        let expenseRecord: ExpenseRecord = null;
+        if (breedingRecord.cost) {
+          expenseRecord = new ExpenseRecord();
+          expenseRecord.amount = newBreedingRecord.cost;
+          expenseRecord.notes = `Breeding record cost for ${maleLivestock.livestock_tag} and ${femaleLivestock.livestock_tag}`;
+          expenseRecord.expense_date = new Date();
+          expenseRecord.category = ExpenseCategory.BREEDING;
+          await transactionalEntityManager.save(ExpenseRecord, expenseRecord);
+        }
+
         maleLivestock.breeding_records.push(newBreedingRecord);
         femaleLivestock.breeding_records.push(newBreedingRecord);
+        if (expenseRecord) {
+          maleLivestock.expense_records.push(expenseRecord);
+          femaleLivestock.expense_records.push(expenseRecord);
+        }
 
         await transactionalEntityManager.save([maleLivestock, femaleLivestock]);
 

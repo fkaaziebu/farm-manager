@@ -38,6 +38,9 @@ export class BreedingRecordType {
   @Field({ nullable: true })
   offspring_count_female?: number;
 
+  @Field()
+  cost: number;
+
   @Field({ nullable: true })
   notes?: string;
 

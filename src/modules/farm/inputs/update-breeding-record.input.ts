@@ -8,6 +8,9 @@ export class UpdateBreedingRecordInput {
   matingDate?: Date;
 
   @Field({ nullable: true })
+  cost?: number;
+
+  @Field({ nullable: true })
   expectedDelivery?: Date;
 
   @Field({ nullable: true })

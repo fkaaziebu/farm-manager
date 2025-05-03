@@ -14,6 +14,9 @@ export class BreedingRecordInput {
   breedingMethod?: any;
 
   @Field({ nullable: true })
+  cost?: number;
+
+  @Field({ nullable: true })
   notes?: string;
 
   @Field(() => BreedingStatus, { nullable: false })

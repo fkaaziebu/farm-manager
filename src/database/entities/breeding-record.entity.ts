@@ -40,6 +40,9 @@ export class BreedingRecord {
   @Column({ nullable: true })
   offspring_count_female: number;
 
+  @Column({ default: 0 })
+  cost: number;
+
   @Column({ default: null })
   notes: string;
 
