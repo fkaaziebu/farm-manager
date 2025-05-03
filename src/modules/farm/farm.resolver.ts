@@ -382,8 +382,7 @@ export class FarmResolver {
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => LivestockTypeClass)
   markLivestockAsUnavailable(
     @Context() context,
@@ -403,8 +402,7 @@ export class FarmResolver {
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => TaskTypeClass)
   createTask(
     @Context() context,
@@ -421,8 +419,7 @@ export class FarmResolver {
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => TaskTypeClass)
   assignTaskToWorker(
     @Context() context,
