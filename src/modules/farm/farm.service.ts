@@ -1154,7 +1154,7 @@ export class FarmService {
                 },
               },
             },
-            relations: ["breeding_records", "expense_records", "pen"],
+            relations: ["breeding_records", "pen"],
           },
         );
 
@@ -1227,7 +1227,6 @@ export class FarmService {
         maleLivestock.breeding_records.push(newBreedingRecord);
         femaleLivestock.breeding_records.push(newBreedingRecord);
         if (expenseRecord) {
-          maleLivestock.expense_records.push(expenseRecord);
           femaleLivestock.expense_records.push(expenseRecord);
         }
 
