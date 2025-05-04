@@ -1901,6 +1901,61 @@ describe("FarmService", () => {
         ).assigned_tasks,
       ).toHaveLength(1);
     });
+
+    it("throws an error if task not found", async () => {
+      await setupForQueries();
+      const admin = await getAdmin();
+
+      await expect(
+        farmService.assignTaskToWorker({
+          email: adminInfo.email,
+          taskId: 1,
+          workerTag: admin.workers[0].worker_tag,
+        }),
+      ).rejects.toThrow(NotFoundException);
+
+      await expect(
+        farmService.assignTaskToWorker({
+          email: adminInfo.email,
+          taskId: 1,
+          workerTag: admin.workers[0].worker_tag,
+        }),
+      ).rejects.toThrow("Task not found");
+    });
+
+    it("throws an error if worker not found", async () => {
+      await setupForQueries();
+      const admin = await getAdmin();
+
+      const task = await farmService.createTask({
+        email: adminInfo.email,
+        farmTag: admin.farms[0].farm_tag,
+        task: {
+          description: "Test Task Description",
+          startingDate: new Date(),
+          completionDate: new Date(),
+          type: TaskType.REGULAR_INSPECTION,
+          notes: "Test Task Notes",
+          status: TaskStatus.PENDING,
+        },
+      });
+
+      await expect(
+        farmService.assignTaskToWorker({
+          email: adminInfo.email,
+          taskId: task.id,
+          workerTag: "6eb3ca36-f74e-45f0-ae70-e17ad0a4c57d",
+        }),
+      ).rejects.toThrow(NotFoundException);
+
+      await expect(
+        farmService.assignTaskToWorker({
+          email: adminInfo.email,
+          taskId: task.id,
+          workerTag: "6eb3ca36-f74e-45f0-ae70-e17ad0a4c57d",
+        }),
+      ).rejects.toThrow("Worker not found");
+    });
   });
 
   describe("updateWorker", () => {
