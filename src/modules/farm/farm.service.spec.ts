@@ -1780,6 +1780,63 @@ describe("FarmService", () => {
     });
   });
 
+  describe("updateTask", () => {
+    it("returns a task after updating", async () => {
+      await registerAdmin(adminInfo);
+
+      const farm = await farmService.createFarm({
+        ...farmInfo,
+        email: adminInfo.email,
+      });
+
+      const farmWithBarns = await farmService.addBarnsToFarm({
+        email: adminInfo.email,
+        farmTag: farm.farm_tag,
+        barns: adminInfo.barns,
+      });
+
+      await farmService.addPensToBarn({
+        email: adminInfo.email,
+        barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
+          .unit_id,
+        pens: adminInfo.pens,
+      });
+
+      await farmService.addLivestockToPen({
+        email: adminInfo.email,
+        penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
+        livestock: adminInfo.livestock,
+      });
+
+      const task = await farmService.createTask({
+        email: adminInfo.email,
+        farmTag: farm.farm_tag,
+        task: {
+          description: "Test Task Description",
+          startingDate: new Date(),
+          completionDate: new Date(),
+          type: TaskType.REGULAR_INSPECTION,
+          notes: "Test Task Notes",
+          status: TaskStatus.PENDING,
+        },
+      });
+
+      const response = await farmService.updateTask({
+        email: adminInfo.email,
+        taskId: task.id,
+        task: {
+          startingDate: new Date(),
+          completionDate: new Date(),
+          notes: "Updated Task Notes",
+          status: TaskStatus.IN_PROGRESS,
+        },
+      });
+
+      expect(response).toBeDefined();
+      expect(response.status).toBe(TaskStatus.IN_PROGRESS);
+    });
+  });
+
   describe("assignTaskToWorkers", () => {
     it("returns task with assigned workers after assigning task", async () => {
       await setupForQueries();

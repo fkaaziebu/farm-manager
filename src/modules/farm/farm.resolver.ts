@@ -31,6 +31,7 @@ import {
   UpdateLivestockInput,
   UpdatePenInput,
   UpdateSalesRecordInput,
+  UpdateTaskInput,
   UpdateWorkerInput,
   WorkerInput,
 } from "./inputs";
@@ -429,6 +430,23 @@ export class FarmResolver {
     return this.farmService.createTask({
       email,
       farmTag,
+      task,
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard)
+  @Mutation(() => TaskTypeClass)
+  updateTask(
+    @Context() context,
+    @Args("taskId") taskId: number,
+    @Args("task", { type: () => UpdateTaskInput!, nullable: false })
+    task: UpdateTaskInput,
+  ) {
+    const { email } = context.req.user;
+
+    return this.farmService.updateTask({
+      email,
+      taskId,
       task,
     });
   }

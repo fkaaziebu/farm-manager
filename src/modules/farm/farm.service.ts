@@ -47,6 +47,7 @@ import {
   UpdateLivestockInput,
   UpdatePenInput,
   UpdateSalesRecordInput,
+  UpdateTaskInput,
   UpdateWorkerInput,
   WorkerInput,
 } from "./inputs";
@@ -1804,6 +1805,38 @@ export class FarmService {
 
         admin.assigned_tasks.push(savedTask);
         await transactionalEntityManager.save(Admin, admin);
+
+        return savedTask;
+      },
+    );
+  }
+
+  async updateTask({
+    email,
+    taskId,
+    task,
+  }: {
+    email: string;
+    taskId: number;
+    task: UpdateTaskInput;
+  }) {
+    return this.taskRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        const taskToUpdate = await transactionalEntityManager.findOne(Task, {
+          where: { id: taskId, admin: { email } },
+        });
+
+        taskToUpdate.starting_date =
+          task.startingDate || taskToUpdate.starting_date;
+        taskToUpdate.completion_date =
+          task.completionDate || taskToUpdate.completion_date;
+        taskToUpdate.status = task.status || taskToUpdate.status;
+        taskToUpdate.notes = task.notes || taskToUpdate.notes;
+
+        const savedTask = await transactionalEntityManager.save(
+          Task,
+          taskToUpdate,
+        );
 
         return savedTask;
       },
