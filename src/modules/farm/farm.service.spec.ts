@@ -1835,6 +1835,36 @@ describe("FarmService", () => {
       expect(response).toBeDefined();
       expect(response.status).toBe(TaskStatus.IN_PROGRESS);
     });
+
+    it("throws an error if task not found", async () => {
+      await registerAdmin(adminInfo);
+
+      await expect(
+        farmService.updateTask({
+          email: adminInfo.email,
+          taskId: 999999,
+          task: {
+            startingDate: new Date(),
+            completionDate: new Date(),
+            notes: "Updated Task Notes",
+            status: TaskStatus.IN_PROGRESS,
+          },
+        }),
+      ).rejects.toThrow(NotFoundException);
+
+      await expect(
+        farmService.updateTask({
+          email: adminInfo.email,
+          taskId: 999999,
+          task: {
+            startingDate: new Date(),
+            completionDate: new Date(),
+            notes: "Updated Task Notes",
+            status: TaskStatus.IN_PROGRESS,
+          },
+        }),
+      ).rejects.toThrow("Task not found");
+    });
   });
 
   describe("assignTaskToWorkers", () => {

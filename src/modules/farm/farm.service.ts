@@ -1826,6 +1826,10 @@ export class FarmService {
           where: { id: taskId, admin: { email } },
         });
 
+        if (!taskToUpdate) {
+          throw new NotFoundException("Task not found");
+        }
+
         taskToUpdate.starting_date =
           task.startingDate || taskToUpdate.starting_date;
         taskToUpdate.completion_date =
