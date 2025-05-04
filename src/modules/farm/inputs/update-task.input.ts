@@ -3,7 +3,7 @@ import { TaskStatus, TaskType } from "../../../database/types/task.type";
 
 @InputType()
 export class UpdateTaskInput {
-  @Field()
+  @Field({ nullable: true })
   completionDate?: Date;
 
   @Field({ nullable: true })
