@@ -57,8 +57,7 @@ export class Task {
   })
   status: TaskStatus;
 
-  @OneToOne(() => Admin, (admin) => admin.assigned_tasks)
-  @JoinColumn()
+  @ManyToOne(() => Admin, (admin) => admin.assigned_tasks)
   admin: Admin;
 
   @ManyToOne(() => Worker, (worker) => worker.assigned_tasks)

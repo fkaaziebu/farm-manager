@@ -1756,7 +1756,7 @@ describe("FarmService", () => {
         livestock: adminInfo.livestock,
       });
 
-      const response = await farmService.createTask({
+      let response = await farmService.createTask({
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         task: {
@@ -1775,8 +1775,30 @@ describe("FarmService", () => {
       expect(response.farm).toBeDefined();
       expect(response.farm.farm_tag).toEqual(farm.farm_tag);
 
-      const admin = await getAdmin();
+      let admin = await getAdmin();
       expect(admin.assigned_tasks).toHaveLength(1);
+
+      response = await farmService.createTask({
+        email: adminInfo.email,
+        farmTag: farm.farm_tag,
+        task: {
+          description: "Test Task Description",
+          startingDate: new Date(),
+          completionDate: new Date(),
+          type: TaskType.REGULAR_INSPECTION,
+          notes: "Test Task Notes",
+          status: TaskStatus.PENDING,
+        },
+      });
+
+      expect(response).toBeDefined();
+      expect(response.type).toBe(TaskType.REGULAR_INSPECTION);
+      expect(response.status).toBe(TaskStatus.PENDING);
+      expect(response.farm).toBeDefined();
+      expect(response.farm.farm_tag).toEqual(farm.farm_tag);
+
+      admin = await getAdmin();
+      expect(admin.assigned_tasks).toHaveLength(2);
     });
   });
 
