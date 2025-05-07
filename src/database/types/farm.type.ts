@@ -6,7 +6,7 @@ import { PoultryBatchType } from "./poultry-batch.type";
 import { AquacultureBatchType } from "./aquaculture-batch.type";
 import { CropBatchType } from "./crop-batch.type";
 import { HiveType } from "./hive.type";
-import { TaskType } from "./task.type";
+import { TaskTypeClass } from "./task.type";
 import { BarnType } from "./barn.type";
 import { AquacultureSystemTypeClass } from "./aquaculture-system.type";
 import { PondType } from "./pond.type";
@@ -103,6 +103,6 @@ export class FarmTypeClass {
   @Field(() => [HiveType], { nullable: true })
   hives?: HiveType[];
 
-  @Field(() => [TaskType], { nullable: true })
-  tasks?: TaskType[];
+  @Field(() => [TaskTypeClass], { nullable: true })
+  tasks?: TaskTypeClass[];
 }
