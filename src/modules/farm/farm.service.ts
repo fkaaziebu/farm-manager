@@ -210,7 +210,7 @@ export class FarmService {
         name: ILike(`%${searchTerm}%`),
         id: filter?.id,
       },
-      relations: ["barns.pens.livestock", "workers", "livestock"],
+      relations: ["barns.pens.livestock", "workers", "livestock", "tasks"],
       order: sortOrder,
     });
   }
