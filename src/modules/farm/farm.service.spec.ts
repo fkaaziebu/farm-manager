@@ -1800,6 +1800,40 @@ describe("FarmService", () => {
       admin = await getAdmin();
       expect(admin.assigned_tasks).toHaveLength(2);
     });
+
+    it("throws an error when admin with email or farmTag not found", async () => {
+      await registerAdmin(adminInfo);
+
+      await expect(
+        farmService.createTask({
+          email: adminInfo.email,
+          farmTag: "beeb7d59-3583-450d-9045-33c4bdb58f87",
+          task: {
+            description: "Test Task Description",
+            startingDate: new Date(),
+            completionDate: new Date(),
+            type: TaskType.REGULAR_INSPECTION,
+            notes: "Test Task Notes",
+            status: TaskStatus.PENDING,
+          },
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        farmService.createTask({
+          email: adminInfo.email,
+          farmTag: "beeb7d59-3583-450d-9045-33c4bdb58f87",
+          task: {
+            description: "Test Task Description",
+            startingDate: new Date(),
+            completionDate: new Date(),
+            type: TaskType.REGULAR_INSPECTION,
+            notes: "Test Task Notes",
+            status: TaskStatus.PENDING,
+          },
+        }),
+      ).rejects.toThrow("Admin with provided email or farmTag not found");
+    });
   });
 
   describe("updateTask", () => {

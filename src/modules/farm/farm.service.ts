@@ -1792,6 +1792,12 @@ export class FarmService {
           relations: ["farms", "assigned_tasks"],
         });
 
+        if (!admin) {
+          throw new BadRequestException(
+            "Admin with provided email or farmTag not found",
+          );
+        }
+
         const newTask = new Task();
         newTask.starting_date = task.startingDate;
         newTask.completion_date = task.completionDate;
