@@ -70,8 +70,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/farm-manager:latest .
+          docker build -t fkaaziebu/farm-manager:latest .
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/farm-manager:latest
+          docker push fkaaziebu/farm-manager:latest
