@@ -22,7 +22,7 @@ const defaultPostgresDBConnection = (
 
 const defaultRedisDBConnection = async (configService: ConfigService) => ({
   connection: {
-    // url: configService.get<string>("REDIS_URL"),
+    url: configService.get<string>("REDIS_URL"),
     host: configService.get<string>("REDIS_HOST"),
     port: configService.get<number>("REDIS_PORT"),
     password: configService.get<string>("REDIS_PASSWORD"),
