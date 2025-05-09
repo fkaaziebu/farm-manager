@@ -82,6 +82,7 @@ describe("FarmService", () => {
             username: configService.get("DB_USERNAME"),
             password: configService.get("DB_PASSWORD"),
             database: configService.get("DB_DATABASE_TEST"),
+            url: configService.get("DATABASE_URL"),
             entities: [
               Admin,
               Apiary,
