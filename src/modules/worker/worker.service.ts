@@ -226,7 +226,7 @@ export class WorkerService {
       throw new NotFoundException("Worker does not belong to this farm");
     }
 
-    if (!farm.workers[0].roles.includes(WorkerRole.AUDITOR)) {
+    if (farm.workers[0].roles.includes(WorkerRole.AUDITOR)) {
       throw new UnauthorizedException("Worker must not be an auditor");
     }
 
