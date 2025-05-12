@@ -53,6 +53,12 @@ export class FarmTypeClass {
   area?: string;
 
   @Field()
+  latitude: number;
+
+  @Field()
+  longitude: number;
+
+  @Field()
   performance: number;
 
   // We're not including the full relationships here to avoid circular references
