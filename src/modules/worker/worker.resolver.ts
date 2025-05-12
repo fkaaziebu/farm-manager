@@ -21,7 +21,10 @@ export class WorkerResolver {
   @Mutation(() => ReportType)
   createReport(@Context() context, @Args("farmTag") farmTag: string) {
     const { email } = context.req.user;
-    return { email, farmTag };
+    return this.workerService.createReport({
+      email,
+      farmTag,
+    });
   }
 
   @UseGuards(GqlJwtAuthGuard)
