@@ -2,7 +2,7 @@ import { UseGuards } from "@nestjs/common";
 import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { GqlJwtAuthGuard } from "./guards/gql-jwt-auth.guard";
 import { ReportType } from "src/database/types";
-import { ReportConnection } from "./types";
+import { QrCodeResponse, ReportConnection } from "./types";
 import {
   CoordinatesInput,
   ReportFilterInput,
@@ -94,7 +94,7 @@ export class WorkerResolver {
   }
 
   @UseGuards(GqlJwtAuthGuard)
-  @Query(() => ReportType)
+  @Query(() => QrCodeResponse)
   getQrCode(@Context() context, @Args("farmTag") farmTag: string) {
     const { email } = context.req.user;
     return this.workerService.getQrCode({

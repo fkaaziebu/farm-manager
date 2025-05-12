@@ -231,7 +231,7 @@ export class WorkerService {
 
     const base64 = qrBuffer.toString("base64");
 
-    return `data:image/png;base64,${base64}`;
+    return { qrCode: `data:image/png;base64,${base64}` };
   }
 
   private haversineDistance(
