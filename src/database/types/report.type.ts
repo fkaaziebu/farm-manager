@@ -10,6 +10,12 @@ export class ReportType {
   @Field()
   report_tag: string;
 
+  @Field()
+  verified: boolean;
+
+  @Field()
+  completed: boolean;
+
   @Field(() => WorkerType, { nullable: true })
   worker?: WorkerType;
 
