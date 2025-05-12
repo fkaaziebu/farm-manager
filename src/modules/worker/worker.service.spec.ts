@@ -465,7 +465,19 @@ describe("WorkerService", () => {
 
   describe("getReport", () => {});
 
-  describe("getQrCode", () => {});
+  describe("getQrCode", () => {
+    it("returns base64 qrcode string", async () => {
+      await createWorkerSetup(workerInfo);
+
+      const worker = await getWorker(workerInfo.email);
+      const response = await workerService.getQrCode({
+        email: workerInfo.email,
+        farmTag: worker.farms[0].farm_tag,
+      });
+
+      expect(response.qrCode).toBeDefined();
+    });
+  });
 
   const workerInfo = {
     email: "frederickaziebu1998@gmail.com",

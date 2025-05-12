@@ -212,20 +212,23 @@ export class WorkerService {
   }
 
   async getQrCode({ email, farmTag }: { email: string; farmTag: string }) {
-    const roles = [
-      WorkerRole.FARM_MANAGER,
-      WorkerRole.ANIMAL_CARETAKER,
-      WorkerRole.GENERAL_WORKER,
-    ];
     const farm = await this.farmRepository.findOne({
       where: {
         workers: {
           email,
-          roles: In(roles),
         },
         farm_tag: farmTag,
       },
+      relations: ["workers"],
     });
+
+    if (!farm) {
+      throw new NotFoundException("Worker does not belong to this farm");
+    }
+
+    if (!farm.workers[0].roles.includes(WorkerRole.AUDITOR)) {
+      throw new UnauthorizedException("Worker must not be an auditor");
+    }
 
     const qrBuffer = await this.generate(farm.verification_code);
 
