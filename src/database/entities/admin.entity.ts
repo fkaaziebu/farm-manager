@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  JoinTable,
+  ManyToMany,
+} from "typeorm";
 import { Exclude } from "class-transformer";
 import { Farm } from "./farm.entity";
 import { Worker } from "./worker.entity";
@@ -32,7 +39,8 @@ export class Admin {
   @OneToMany(() => Farm, (farm) => farm.admin)
   farms: Farm[];
 
-  @OneToMany(() => Worker, (worker) => worker.admin)
+  @ManyToMany(() => Worker, (worker) => worker.admins)
+  @JoinTable()
   workers: Worker[];
 
   @OneToMany(() => Task, (task) => task.admin)

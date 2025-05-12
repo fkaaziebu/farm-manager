@@ -21,6 +21,7 @@ import { PoultryHouse } from "./poultry-house.entity";
 import { SalesRecord } from "./sales-record.entity";
 import { Task } from "./task.entity";
 import { Worker } from "./worker.entity";
+import { Report } from "./report.entity";
 
 export {
   Admin,
@@ -46,4 +47,5 @@ export {
   SalesRecord,
   Task,
   Worker,
+  Report,
 };

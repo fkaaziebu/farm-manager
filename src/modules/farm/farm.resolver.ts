@@ -3,8 +3,7 @@ import { FarmType, FarmTypeClass } from "src/database/types/farm.type";
 import { FarmService } from "./farm.service";
 import { UseGuards } from "@nestjs/common";
 import { GqlJwtAuthGuard } from "./guards/gql-jwt-auth.guard";
-import { RolesGuard } from "./guards/roles.guard";
-import { Roles } from "./decorators/roles.decorator";
+
 import {
   BarnInput,
   BarnSortInput,
@@ -17,7 +16,6 @@ import {
   LivestockFilterInput,
   LivestockInput,
   LivestockSortInput,
-  PaginationInput,
   PenInput,
   PenSortInput,
   SalesRecordInput,
@@ -55,6 +53,7 @@ import {
   PenConnection,
   WorkerConnection,
 } from "./types";
+import { PaginationInput } from "src/database/inputs";
 
 @Resolver()
 export class FarmResolver {

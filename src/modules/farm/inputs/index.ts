@@ -38,7 +38,6 @@ export {
   UpdatePenInput,
 };
 export { FarmSortInput } from "./farm-sort.input";
-export { PaginationInput } from "./pagination.input";
 export { BarnSortInput } from "./barn-sort.input";
 export { PenSortInput } from "./pen-sort.input";
 export { LivestockSortInput } from "./livestock-sort.input";

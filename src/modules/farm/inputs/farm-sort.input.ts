@@ -1,13 +1,5 @@
 import { Field, InputType, registerEnumType } from "@nestjs/graphql";
-
-export enum SortDirection {
-  ASC = "ASC",
-  DESC = "DESC",
-}
-
-registerEnumType(SortDirection, {
-  name: "SortDirection",
-});
+import { SortDirection } from "src/database/inputs";
 
 enum FarmSortField {
   ID = "id",

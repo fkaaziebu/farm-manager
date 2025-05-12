@@ -1,20 +1,20 @@
 import { Field, InputType, registerEnumType } from "@nestjs/graphql";
 import { SortDirection } from "src/database/inputs";
 
-enum PenSortField {
+enum ReportSortField {
   ID = "id",
   NAME = "name",
   STATUS = "status",
 }
 
-registerEnumType(PenSortField, {
-  name: "PenSortField",
+registerEnumType(ReportSortField, {
+  name: "ReportSortField",
 });
 
 @InputType()
-export class PenSortInput {
-  @Field(() => PenSortField)
-  field: PenSortField;
+export class ReportSortInput {
+  @Field(() => ReportSortField)
+  field: ReportSortField;
 
   @Field(() => SortDirection)
   direction: SortDirection;

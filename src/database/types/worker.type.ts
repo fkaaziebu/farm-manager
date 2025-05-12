@@ -3,6 +3,7 @@ import { FarmTypeClass } from "./farm.type";
 import { AdminType } from "./admin.type";
 import { TaskTypeClass } from "./task.type";
 import GraphQLJSON from "graphql-type-json";
+import { ReportType } from "./report.type";
 
 export enum WorkerRole {
   FARM_MANAGER = "FARM_MANAGER",
@@ -12,6 +13,7 @@ export enum WorkerRole {
   CROP_SPECIALIST = "CROP_SPECIALIST",
   MAINTENANCE = "MAINTENANCE",
   GENERAL_WORKER = "GENERAL_WORKER",
+  AUDITOR = "AUDITOR",
 }
 
 registerEnumType(WorkerRole, {
@@ -62,4 +64,7 @@ export class WorkerType {
 
   @Field(() => [TaskTypeClass], { nullable: true })
   assigned_tasks?: TaskTypeClass[];
+
+  @Field(() => [ReportType], { nullable: true })
+  reports?: ReportType[];
 }

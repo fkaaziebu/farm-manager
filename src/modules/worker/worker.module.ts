@@ -1,10 +1,8 @@
 import { Module } from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { WorkerService } from "./worker.service";
+import { WorkerResolver } from "./worker.resolver";
+import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { JwtModule } from "@nestjs/jwt";
-import { JwtStrategy } from "./strategies/jwt.strategy";
-import { AuthResolver } from "./auth.resolver";
 
 // Entities
 import {
@@ -28,27 +26,15 @@ import {
   Pond,
   PoultryBatch,
   PoultryHouse,
+  Report,
   SalesRecord,
   Task,
   Worker,
-  Report,
 } from "src/database/entities";
-import { QueueModule } from "../queue/queue.module";
 
 @Module({
   imports: [
     ConfigModule,
-    QueueModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get("JWT_SECRET"),
-        signOptions: {
-          expiresIn: 86400,
-        },
-      }),
-    }),
     TypeOrmModule.forFeature([
       Admin,
       Apiary,
@@ -77,6 +63,6 @@ import { QueueModule } from "../queue/queue.module";
     ]),
   ],
   controllers: [],
-  providers: [AuthService, JwtStrategy, AuthResolver],
+  providers: [WorkerService, WorkerResolver],
 })
-export class AuthModule {}
+export class WorkerModule {}

@@ -33,7 +33,6 @@ import {
   LivestockFilterInput,
   LivestockInput,
   LivestockSortInput,
-  PaginationInput,
   PenInput,
   PenSortInput,
   SalesRecordInput,
@@ -62,6 +61,7 @@ import {
   LivestockUnavailabilityReason,
 } from "../../database/types/livestock.type";
 import { ExpenseCategory } from "../../database/types/expense-record.type";
+import { PaginationInput } from "src/database/inputs";
 
 @Injectable()
 export class FarmService {
@@ -244,24 +244,24 @@ export class FarmService {
   }) {
     return this.workerRepository.find({
       where: {
-        admin: {
+        admins: {
           email,
         },
         name: ILike(`%${searchTerm}%`),
       },
-      relations: ["farms", "admin", "assigned_tasks"],
+      relations: ["farms", "assigned_tasks"],
     });
   }
 
   async getWorker({ email, workerTag }: { email: string; workerTag: string }) {
     return this.workerRepository.findOne({
       where: {
-        admin: {
+        admins: {
           email,
         },
         worker_tag: workerTag,
       },
-      relations: ["farms", "admin", "assigned_tasks"],
+      relations: ["farms", "assigned_tasks"],
     });
   }
 
@@ -1907,7 +1907,7 @@ export class FarmService {
     workerData: UpdateWorkerInput;
   }) {
     const worker = await this.workerRepository.findOne({
-      where: { worker_tag: workerTag, admin: { email } },
+      where: { worker_tag: workerTag, admins: { email } },
     });
 
     if (!worker) {

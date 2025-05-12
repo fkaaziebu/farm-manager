@@ -31,6 +31,7 @@ import {
   SalesRecord,
   Task,
   Worker,
+  Report,
 } from "../../database/entities";
 import { FarmType } from "../../database/types/farm.type";
 import {
@@ -107,6 +108,7 @@ describe("FarmService", () => {
               SalesRecord,
               Task,
               Worker,
+              Report,
             ],
             synchronize: true,
           }),
@@ -136,6 +138,7 @@ describe("FarmService", () => {
           SalesRecord,
           Task,
           Worker,
+          Report,
         ]),
       ],
       controllers: [],
@@ -1776,7 +1779,7 @@ describe("FarmService", () => {
       expect(response.farm).toBeDefined();
       expect(response.farm.farm_tag).toEqual(farm.farm_tag);
 
-      let admin = await getAdmin();
+      let admin = await getAdmin(adminInfo.email);
       expect(admin.assigned_tasks).toHaveLength(1);
 
       response = await farmService.createTask({
@@ -1798,7 +1801,7 @@ describe("FarmService", () => {
       expect(response.farm).toBeDefined();
       expect(response.farm.farm_tag).toEqual(farm.farm_tag);
 
-      admin = await getAdmin();
+      admin = await getAdmin(adminInfo.email);
       expect(admin.assigned_tasks).toHaveLength(2);
     });
 
@@ -1927,7 +1930,7 @@ describe("FarmService", () => {
   describe("assignTaskToWorkers", () => {
     it("returns task with assigned workers after assigning task", async () => {
       await setupForQueries();
-      let admin = await getAdmin();
+      let admin = await getAdmin(adminInfo.email);
 
       const task = await farmService.createTask({
         email: adminInfo.email,
@@ -1951,7 +1954,7 @@ describe("FarmService", () => {
       expect(response).toBeDefined();
       expect(response.worker.worker_tag).toEqual(admin.workers[0].worker_tag);
 
-      admin = await getAdmin();
+      admin = await getAdmin(adminInfo.email);
       expect(
         admin.workers.find(
           (worker) => worker.worker_tag === response.worker.worker_tag,
@@ -1961,7 +1964,7 @@ describe("FarmService", () => {
 
     it("throws an error if task not found", async () => {
       await setupForQueries();
-      const admin = await getAdmin();
+      const admin = await getAdmin(adminInfo.email);
 
       await expect(
         farmService.assignTaskToWorker({
@@ -1982,7 +1985,7 @@ describe("FarmService", () => {
 
     it("throws an error if worker not found", async () => {
       await setupForQueries();
-      const admin = await getAdmin();
+      const admin = await getAdmin(adminInfo.email);
 
       const task = await farmService.createTask({
         email: adminInfo.email,
@@ -2018,7 +2021,7 @@ describe("FarmService", () => {
   describe("updateWorker", () => {
     it("updates worker entity", async () => {
       await setupForQueries();
-      const admin = await getAdmin();
+      const admin = await getAdmin(adminInfo.email);
 
       const response = await farmService.updateWorker({
         email: admin.email,
@@ -2218,8 +2221,10 @@ describe("FarmService", () => {
         searchTerm: "",
       });
 
+      const admin = await getAdmin(adminInfo.email);
+
       expect(workers).toHaveLength(2);
-      expect(workers[0].admin.email).toEqual(adminInfo.email);
+      expect(admin.workers).toHaveLength(2);
     });
   });
 
@@ -2346,10 +2351,15 @@ describe("FarmService", () => {
     farmType: FarmType.LIVESTOCK,
   };
 
-  const getAdmin = async () => {
+  const getAdmin = async (email: string) => {
     const admin = await adminRepository.findOne({
-      where: { email: adminInfo.email },
-      relations: ["farms", "assigned_tasks", "workers.assigned_tasks"],
+      where: { email },
+      relations: [
+        "farms",
+        "assigned_tasks",
+        "workers.assigned_tasks",
+        "workers",
+      ],
     });
 
     return admin;

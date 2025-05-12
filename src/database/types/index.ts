@@ -26,6 +26,8 @@ import { PoultryHouseType } from "./poultry-house.type";
 import { SalesRecordType } from "./sales-record.type";
 import { TaskTypeClass, TaskType } from "./task.type";
 import { WorkerType } from "./worker.type";
+import { ReportType } from "./report.type";
+import { PageInfo } from "./page-info.type";
 
 export {
   AdminType,
@@ -55,4 +57,6 @@ export {
   TaskType,
   TaskTypeClass,
   WorkerType,
+  ReportType,
+  PageInfo,
 };

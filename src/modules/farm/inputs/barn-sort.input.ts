@@ -1,5 +1,5 @@
 import { Field, InputType, registerEnumType } from "@nestjs/graphql";
-import { SortDirection } from "./farm-sort.input";
+import { SortDirection } from "src/database/inputs";
 
 enum BarnSortField {
   ID = "id",

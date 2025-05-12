@@ -2,7 +2,6 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   ManyToMany,
   OneToMany,
   Generated,
@@ -11,6 +10,7 @@ import { Exclude } from "class-transformer";
 import { Farm } from "./farm.entity";
 import { Admin } from "./admin.entity";
 import { Task } from "./task.entity";
+import { Report } from "./report.entity";
 
 export enum WorkerRole {
   FARM_MANAGER = "FARM_MANAGER",
@@ -20,6 +20,7 @@ export enum WorkerRole {
   CROP_SPECIALIST = "CROP_SPECIALIST",
   MAINTENANCE = "MAINTENANCE",
   GENERAL_WORKER = "GENERAL_WORKER",
+  AUDITOR = "AUDITOR",
 }
 
 @Entity("workers")
@@ -80,9 +81,12 @@ export class Worker {
   @ManyToMany(() => Farm, (farm) => farm.workers)
   farms: Farm[];
 
-  @ManyToOne(() => Admin, (admin) => admin.workers)
-  admin: Admin;
+  @ManyToMany(() => Admin, (admin) => admin.workers)
+  admins: Admin[];
 
   @OneToMany(() => Task, (task) => task.worker)
   assigned_tasks: Task[];
+
+  @OneToMany(() => Report, (report) => report.worker)
+  reports: Report[];
 }

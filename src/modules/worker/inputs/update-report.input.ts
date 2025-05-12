@@ -2,7 +2,7 @@ import { Field, InputType } from "@nestjs/graphql";
 import { TaskStatus } from "../../../database/types/task.type";
 
 @InputType()
-export class UpdateTaskInput {
+export class UpdateReportInput {
   @Field({ nullable: true })
   completionDate?: Date;
 

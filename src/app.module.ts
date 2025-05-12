@@ -8,6 +8,7 @@ import { GraphQLModule } from "@nestjs/graphql";
 import { GraphQLJSON } from "graphql-type-json";
 import { AuthModule } from "./modules/auth/auth.module";
 import { FarmModule } from "./modules/farm/farm.module";
+import { WorkerModule } from "./modules/worker/worker.module";
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { FarmModule } from "./modules/farm/farm.module";
     DatabaseModule,
     AuthModule,
     FarmModule,
+    WorkerModule,
   ],
   controllers: [],
   providers: [],

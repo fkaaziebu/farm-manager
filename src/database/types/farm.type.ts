@@ -16,6 +16,7 @@ import { ApiaryType } from "./apiary.type";
 import { PoultryHouseType } from "./poultry-house.type";
 import { CoopType } from "./coop.type";
 import { PenType } from "./pen.type";
+import { ReportType } from "./report.type";
 
 export enum FarmType {
   LIVESTOCK = "LIVESTOCK",
@@ -105,4 +106,7 @@ export class FarmTypeClass {
 
   @Field(() => [TaskTypeClass], { nullable: true })
   tasks?: TaskTypeClass[];
+
+  @Field(() => [ReportType], { nullable: true })
+  reports?: ReportType[];
 }

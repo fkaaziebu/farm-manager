@@ -25,6 +25,7 @@ import { Apiary } from "./apiary.entity";
 import { PoultryHouse } from "./poultry-house.entity";
 import { Coop } from "./coop.entity";
 import { Pen } from "./pen.entity";
+import { Report } from "./report.entity";
 
 export enum FarmType {
   LIVESTOCK = "LIVESTOCK",
@@ -56,6 +57,16 @@ export class Farm {
 
   @Column({ default: null })
   location: string;
+
+  @Column({ type: "float", default: 0.0 })
+  latitude: number;
+
+  @Column({ type: "float", default: 0.0 })
+  longitude: number;
+
+  @Column({ type: "uuid" })
+  @Generated("uuid")
+  verification_code: string;
 
   @Column({ default: null })
   area: string;
@@ -123,4 +134,7 @@ export class Farm {
 
   @OneToMany(() => Task, (task) => task.admin)
   tasks: Task[];
+
+  @OneToMany(() => Report, (report) => report.farm)
+  reports: Report[];
 }

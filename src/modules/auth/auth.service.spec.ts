@@ -34,6 +34,7 @@ import {
   SalesRecord,
   Task,
   Worker,
+  Report,
 } from "../../database/entities";
 
 describe("AuthService", () => {
@@ -94,6 +95,7 @@ describe("AuthService", () => {
               SalesRecord,
               Task,
               Worker,
+              Report,
             ],
             synchronize: true,
           }),
@@ -123,6 +125,7 @@ describe("AuthService", () => {
           SalesRecord,
           Task,
           Worker,
+          Report,
         ]),
       ],
       controllers: [],
@@ -233,6 +236,7 @@ describe("AuthService", () => {
 
   describe("loginWorker", () => {
     it("returns worker after successful login", async () => {
+      await registerAdmin(adminInfo);
       await registerWorker(adminInfo);
 
       const response = await authService.loginWorker({
@@ -506,15 +510,47 @@ describe("AuthService", () => {
     password: "Microsoft@2021",
   };
 
-  const registerWorker = async ({ name, email, password }) => {
-    const admin = await authService.registerAdmin(adminInfo);
+  const registerAdmin = async ({ name, email, password }) => {
+    const admin = new Admin();
+    admin.email = email;
+    admin.name = name;
+    admin.password = await HashHelper.encrypt(password);
+
+    return adminRepository.save(admin);
+  };
+
+  const getAdmin = async (email: string) => {
+    const admin = await adminRepository.findOne({
+      where: {
+        email,
+      },
+      relations: ["workers"],
+    });
+
+    return admin;
+  };
+
+  const registerWorker = async ({
+    name,
+    email,
+    password,
+  }: {
+    name: string;
+    email: string;
+    password: string;
+  }) => {
+    const admin = await getAdmin(adminInfo.email);
 
     const worker = new Worker();
-    worker.admin = admin;
     worker.name = name;
     worker.email = email;
     worker.password = await HashHelper.encrypt(password);
 
-    return await workerRepository.save(worker);
+    if (admin) {
+      admin.workers.push(worker);
+      await adminRepository.save(admin);
+    }
+
+    return workerRepository.save(worker);
   };
 });
