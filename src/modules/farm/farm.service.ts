@@ -424,12 +424,16 @@ export class FarmService {
     email,
     name,
     location,
+    latitude,
+    longitude,
     area,
     farmType,
   }: {
     email: string;
     name: string;
     location: string;
+    latitude: number;
+    longitude: number;
     area: string;
     farmType: FarmType;
   }) {
@@ -451,6 +455,8 @@ export class FarmService {
         farm.location = location;
         farm.area = area;
         farm.farm_type = farmType;
+        farm.latitude = latitude;
+        farm.longitude = longitude;
 
         admin.farms.push(farm);
         const savedFarm = await transactionalEntityManager.save(Farm, farm);

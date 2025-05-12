@@ -212,6 +212,8 @@ export class FarmResolver {
     @Args("name") name: string,
     @Args("location") location: string,
     @Args("area") area: string,
+    @Args("latitude") latitude: number,
+    @Args("longitude") longitude: number,
     @Args("farmType", { type: () => FarmType }) farmType: FarmType,
   ) {
     const { email } = context.req.user;
@@ -219,6 +221,8 @@ export class FarmResolver {
       email,
       name,
       location,
+      latitude,
+      longitude,
       area,
       farmType,
     });

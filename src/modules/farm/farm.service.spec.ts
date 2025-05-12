@@ -2349,6 +2349,8 @@ describe("FarmService", () => {
     location: "Kpong",
     area: "20 acres",
     farmType: FarmType.LIVESTOCK,
+    latitude: 0.0,
+    longitude: 0.01,
   };
 
   const getAdmin = async (email: string) => {
