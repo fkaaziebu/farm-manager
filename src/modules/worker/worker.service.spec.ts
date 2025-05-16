@@ -27,10 +27,11 @@ import {
   Pond,
   PoultryBatch,
   PoultryHouse,
+  Report,
+  Review,
   SalesRecord,
   Task,
   Worker,
-  Report,
 } from "../../database/entities";
 import { FarmType } from "../../database/types/farm.type";
 import { HashHelper } from "../../helpers";
@@ -95,10 +96,11 @@ describe("WorkerService", () => {
               Pond,
               PoultryBatch,
               PoultryHouse,
+              Report,
+              Review,
               SalesRecord,
               Task,
               Worker,
-              Report,
             ],
             synchronize: true,
           }),
@@ -125,10 +127,11 @@ describe("WorkerService", () => {
           Pond,
           PoultryBatch,
           PoultryHouse,
+          Report,
+          Review,
           SalesRecord,
           Task,
           Worker,
-          Report,
         ]),
       ],
       controllers: [],
@@ -467,7 +470,10 @@ describe("WorkerService", () => {
 
   describe("getQrCode", () => {
     it("returns base64 qrcode string", async () => {
-      await createWorkerSetup(workerInfo);
+      await createWorkerSetup({
+        ...workerInfo,
+        role: WorkerRole.ANIMAL_CARETAKER,
+      });
 
       const worker = await getWorker(workerInfo.email);
       const response = await workerService.getQrCode({

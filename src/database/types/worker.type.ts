@@ -4,6 +4,7 @@ import { AdminType } from "./admin.type";
 import { TaskTypeClass } from "./task.type";
 import GraphQLJSON from "graphql-type-json";
 import { ReportType } from "./report.type";
+import { ReviewType } from "./review.type";
 
 export enum WorkerRole {
   FARM_MANAGER = "FARM_MANAGER",
@@ -67,4 +68,7 @@ export class WorkerType {
 
   @Field(() => [ReportType], { nullable: true })
   reports?: ReportType[];
+
+  @Field(() => [ReviewType], { nullable: true })
+  reviews?: ReviewType[];
 }

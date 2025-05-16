@@ -10,6 +10,7 @@ import { Exclude } from "class-transformer";
 import { Farm } from "./farm.entity";
 import { Worker } from "./worker.entity";
 import { Task } from "./task.entity";
+import { Review } from "./review.entity";
 
 @Entity("admins")
 export class Admin {
@@ -45,4 +46,7 @@ export class Admin {
 
   @OneToMany(() => Task, (task) => task.admin)
   assigned_tasks: Task[];
+
+  @OneToMany(() => Review, (review) => review.admin)
+  reviews: Review[];
 }

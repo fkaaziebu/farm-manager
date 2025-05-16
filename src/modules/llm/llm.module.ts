@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
-import { FarmService } from "./farm.service";
-import { FarmResolver } from "./farm.resolver";
 import { ConfigModule } from "@nestjs/config";
-import { TypeOrmModule } from "@nestjs/typeorm";
 import { JwtStrategy } from "./strategies/jwt.strategy";
+import { LlmResolver } from "./llm.resolver";
+import { LlmService } from "./llm.service";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 // Entities
 import {
@@ -66,6 +66,6 @@ import {
     ]),
   ],
   controllers: [],
-  providers: [FarmService, FarmResolver, JwtStrategy],
+  providers: [LlmService, LlmResolver, JwtStrategy],
 })
-export class FarmModule {}
+export class LlmModule {}

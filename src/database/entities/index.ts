@@ -22,6 +22,7 @@ import { SalesRecord } from "./sales-record.entity";
 import { Task } from "./task.entity";
 import { Worker } from "./worker.entity";
 import { Report } from "./report.entity";
+import { Review } from "./review.entity";
 
 export {
   Admin,
@@ -48,4 +49,5 @@ export {
   Task,
   Worker,
   Report,
+  Review,
 };

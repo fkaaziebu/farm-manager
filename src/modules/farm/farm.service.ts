@@ -15,6 +15,7 @@ import {
   HealthRecord,
   Livestock,
   Pen,
+  Review,
   SalesRecord,
   Task,
   Worker,
@@ -35,6 +36,7 @@ import {
   LivestockSortInput,
   PenInput,
   PenSortInput,
+  ReviewInput,
   SalesRecordInput,
   TaskFilterInput,
   TaskInput,
@@ -47,6 +49,7 @@ import {
   UpdatePenInput,
   UpdateSalesRecordInput,
   UpdateTaskInput,
+  UpdateTaskProgressInput,
   UpdateWorkerInput,
   WorkerInput,
 } from "./inputs";
@@ -62,6 +65,7 @@ import {
 } from "../../database/types/livestock.type";
 import { ExpenseCategory } from "../../database/types/expense-record.type";
 import { PaginationInput } from "src/database/inputs";
+import { TaskStatus } from "../../database/types/task.type";
 
 @Injectable()
 export class FarmService {
@@ -88,6 +92,8 @@ export class FarmService {
     private salesRecordRepository: Repository<SalesRecord>,
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
+    @InjectRepository(Review)
+    private reviewRepository: Repository<Review>,
   ) {}
 
   async listFarmsPaginated({
@@ -96,14 +102,22 @@ export class FarmService {
     filter,
     pagination,
     sort,
+    role,
   }: {
     email: string;
     searchTerm?: string;
     filter?: FarmFilterInput;
     pagination: PaginationInput;
     sort?: FarmSortInput[];
+    role: "ADMIN" | "WORKER";
   }) {
-    const farms = await this.listFarms({ email, searchTerm, sort, filter });
+    const farms = await this.listFarms({
+      email,
+      searchTerm,
+      sort,
+      filter,
+      role,
+    });
 
     // Apply pagination and return in the connection format
     return this.paginate<Farm>(farms, pagination, (farm) => farm.id.toString());
@@ -131,13 +145,15 @@ export class FarmService {
     searchTerm,
     pagination,
     sort,
+    role,
   }: {
     email: string;
     searchTerm?: string;
     pagination: PaginationInput;
     sort?: BarnSortInput[];
+    role: "ADMIN" | "WORKER";
   }) {
-    const barns = await this.listBarns({ email, searchTerm, sort });
+    const barns = await this.listBarns({ email, searchTerm, sort, role });
 
     // Apply pagination and return in the connection format
     return this.paginate<Barn>(barns, pagination, (barn) => barn.id.toString());
@@ -148,13 +164,15 @@ export class FarmService {
     searchTerm,
     pagination,
     sort,
+    role,
   }: {
     email: string;
     searchTerm?: string;
     pagination: PaginationInput;
     sort?: PenSortInput[];
+    role: "ADMIN" | "WORKER";
   }) {
-    const pens = await this.listPens({ email, searchTerm, sort });
+    const pens = await this.listPens({ email, searchTerm, sort, role });
 
     // Apply pagination and return in the connection format
     return this.paginate<Pen>(pens, pagination, (pen) => pen.id.toString());
@@ -166,18 +184,21 @@ export class FarmService {
     filter,
     pagination,
     sort,
+    role,
   }: {
     email: string;
     searchTerm?: string;
     filter?: LivestockFilterInput;
     pagination: PaginationInput;
     sort?: LivestockSortInput[];
+    role: "ADMIN" | "WORKER";
   }) {
     const livestock = await this.listLivestock({
       email,
       searchTerm,
       sort,
       filter,
+      role,
     });
 
     // Apply pagination and return in the connection format
@@ -191,11 +212,13 @@ export class FarmService {
     searchTerm,
     sort,
     filter,
+    role,
   }: {
     email: string;
     searchTerm: string;
     sort?: FarmSortInput[];
     filter?: FarmFilterInput;
+    role: "ADMIN" | "WORKER";
   }) {
     const sortOrder = {};
     sort?.map((item) => {
@@ -204,7 +227,7 @@ export class FarmService {
 
     return this.farmRepository.find({
       where: {
-        admin: {
+        [role === "ADMIN" ? "admin" : "workers"]: {
           email,
         },
         name: ILike(`%${searchTerm}%`),
@@ -218,21 +241,32 @@ export class FarmService {
   async listTask({
     email,
     filter,
+    role,
   }: {
     email: string;
     filter?: TaskFilterInput;
+    role: "ADMIN" | "WORKER";
   }) {
-    return this.taskRepository.find({
-      where: {
-        admin: {
-          email,
-          farms: {
-            farm_tag: filter?.farmTag,
+    return role === "ADMIN"
+      ? this.taskRepository.find({
+          where: {
+            admin: {
+              email,
+              farms: {
+                farm_tag: filter?.farmTag,
+              },
+            },
           },
-        },
-      },
-      relations: ["worker"],
-    });
+          relations: ["worker"],
+        })
+      : this.taskRepository.find({
+          where: {
+            worker: {
+              email,
+            },
+          },
+          relations: ["worker"],
+        });
   }
 
   async listWorkers({
@@ -253,26 +287,43 @@ export class FarmService {
     });
   }
 
-  async getWorker({ email, workerTag }: { email: string; workerTag: string }) {
-    return this.workerRepository.findOne({
-      where: {
-        admins: {
-          email,
-        },
-        worker_tag: workerTag,
-      },
-      relations: ["farms", "assigned_tasks"],
-    });
+  async getWorker({
+    email,
+    workerTag,
+    role,
+  }: {
+    email: string;
+    workerTag: string;
+    role: "ADMIN" | "WORKER";
+  }) {
+    return role === "ADMIN"
+      ? this.workerRepository.findOne({
+          where: {
+            admins: {
+              email,
+            },
+            worker_tag: workerTag,
+          },
+          relations: ["farms", "assigned_tasks"],
+        })
+      : this.workerRepository.findOne({
+          where: {
+            email,
+          },
+          relations: ["farms", "assigned_tasks"],
+        });
   }
 
   async listBarns({
     email,
     searchTerm,
     sort,
+    role,
   }: {
     email: string;
     searchTerm: string;
     sort?: BarnSortInput[];
+    role: "ADMIN" | "WORKER";
   }) {
     const sortOrder = {};
     sort?.map((item) => {
@@ -282,7 +333,7 @@ export class FarmService {
     return this.barnRepository.find({
       where: {
         farm: {
-          admin: {
+          [role === "ADMIN" ? "admin" : "workers"]: {
             email,
           },
         },
@@ -293,11 +344,19 @@ export class FarmService {
     });
   }
 
-  async getBarn({ email, barnUnitId }: { email: string; barnUnitId: string }) {
+  async getBarn({
+    email,
+    barnUnitId,
+    role,
+  }: {
+    email: string;
+    barnUnitId: string;
+    role: "ADMIN" | "WORKER";
+  }) {
     return this.barnRepository.findOne({
       where: {
         farm: {
-          admin: {
+          [role === "ADMIN" ? "admin" : "workers"]: {
             email,
           },
         },
@@ -311,10 +370,12 @@ export class FarmService {
     email,
     searchTerm,
     sort,
+    role,
   }: {
     email: string;
     searchTerm: string;
     sort?: PenSortInput[];
+    role: "ADMIN" | "WORKER";
   }) {
     const sortOrder = {};
     sort?.map((item) => {
@@ -325,7 +386,7 @@ export class FarmService {
       where: {
         barn: {
           farm: {
-            admin: {
+            [role === "ADMIN" ? "admin" : "workers"]: {
               email,
             },
           },
@@ -337,11 +398,19 @@ export class FarmService {
     });
   }
 
-  async getPen({ email, penUnitId }: { email: string; penUnitId: string }) {
+  async getPen({
+    email,
+    penUnitId,
+    role,
+  }: {
+    email: string;
+    penUnitId: string;
+    role: "ADMIN" | "WORKER";
+  }) {
     return this.penRepository.findOne({
       where: {
         farm: {
-          admin: {
+          [role === "ADMIN" ? "admin" : "workers"]: {
             email,
           },
         },
@@ -356,11 +425,13 @@ export class FarmService {
     filter,
     searchTerm,
     sort,
+    role,
   }: {
     email: string;
     searchTerm: string;
     filter?: LivestockFilterInput;
     sort?: LivestockSortInput[];
+    role: "ADMIN" | "WORKER";
   }) {
     const sortOrder = {};
     sort?.map((item) => {
@@ -372,7 +443,7 @@ export class FarmService {
         pen: {
           barn: {
             farm: {
-              admin: {
+              [role === "ADMIN" ? "admin" : "workers"]: {
                 email,
               },
             },
@@ -390,16 +461,18 @@ export class FarmService {
   async getLivestock({
     email,
     livestockTag,
+    role,
   }: {
     email: string;
     livestockTag: string;
+    role: "ADMIN" | "WORKER";
   }) {
     return this.livestockRepository.findOne({
       where: {
         livestock_tag: livestockTag,
         pen: {
           farm: {
-            admin: {
+            [role === "ADMIN" ? "admin" : "workers"]: {
               email,
             },
           },
@@ -1118,10 +1191,12 @@ export class FarmService {
     email,
     livestockTag,
     unavailabilityReason,
+    role,
   }: {
     email: string;
     livestockTag: string;
     unavailabilityReason: LivestockUnavailabilityReason;
+    role: "ADMIN" | "WORKER";
   }) {
     return this.livestockRepository.manager.transaction(
       async (transactionalEntityManager) => {
@@ -1131,7 +1206,7 @@ export class FarmService {
             where: {
               livestock_tag: livestockTag,
               farm: {
-                admin: {
+                [role === "ADMIN" ? "admin" : "workers"]: {
                   email,
                 },
               },
@@ -1162,11 +1237,13 @@ export class FarmService {
     maleLivestockTag,
     femaleLivestockTag,
     breedingRecord,
+    role,
   }: {
     email: string;
     maleLivestockTag: string;
     femaleLivestockTag: string;
     breedingRecord: BreedingRecordInput;
+    role: "ADMIN" | "WORKER";
   }) {
     return this.breedingRecordRepository.manager.transaction(
       async (transactionalEntityManager) => {
@@ -1177,7 +1254,7 @@ export class FarmService {
               livestock_tag: maleLivestockTag,
               gender: LivestockGender.MALE,
               farm: {
-                admin: {
+                [role === "ADMIN" ? "admin" : "workers"]: {
                   email,
                 },
               },
@@ -1197,7 +1274,7 @@ export class FarmService {
               livestock_tag: femaleLivestockTag,
               gender: LivestockGender.FEMALE,
               farm: {
-                admin: {
+                [role === "ADMIN" ? "admin" : "workers"]: {
                   email,
                 },
               },
@@ -1269,17 +1346,19 @@ export class FarmService {
     email,
     breedingRecordId,
     breedingRecord,
+    role,
   }: {
     email: string;
     breedingRecordId: number;
     breedingRecord: UpdateBreedingRecordInput;
+    role: "ADMIN" | "WORKER";
   }) {
     return this.breedingRecordRepository.manager.transaction(
       async (transactionalEntityManager) => {
         const pen = await transactionalEntityManager.findOne(Pen, {
           where: {
             farm: {
-              admin: {
+              [role === "ADMIN" ? "admin" : "workers"]: {
                 email,
               },
               livestock: {
@@ -1346,10 +1425,12 @@ export class FarmService {
     email,
     livestockTag,
     healthRecord,
+    role,
   }: {
     email: string;
     livestockTag: string;
     healthRecord: HealthRecordInput;
+    role: "ADMIN" | "WORKER";
   }) {
     return this.healthRecordRepository.manager.transaction(
       async (transactionalEntityManager) => {
@@ -1357,7 +1438,7 @@ export class FarmService {
           where: {
             livestock_tag: livestockTag,
             farm: {
-              admin: {
+              [role === "ADMIN" ? "admin" : "workers"]: {
                 email,
               },
             },
@@ -1419,10 +1500,12 @@ export class FarmService {
     email,
     healthRecordId,
     healthRecord,
+    role,
   }: {
     email: string;
     healthRecordId: number;
     healthRecord: UpdateHealthRecordInput;
+    role: "ADMIN" | "WORKER";
   }) {
     return this.healthRecordRepository.manager.transaction(
       async (transactionalEntityManager) => {
@@ -1431,7 +1514,9 @@ export class FarmService {
           {
             where: {
               id: healthRecordId,
-              livestock: { farm: { admin: { email } } },
+              livestock: {
+                farm: { [role === "ADMIN" ? "admin" : "workers"]: { email } },
+              },
             },
             relations: ["livestock"],
           },
@@ -1488,10 +1573,12 @@ export class FarmService {
     email,
     livestockTag,
     growthRecord,
+    role,
   }: {
     email: string;
     livestockTag: string;
     growthRecord: GrowthRecordInput;
+    role: "ADMIN" | "WORKER";
   }) {
     return this.healthRecordRepository.manager.transaction(
       async (transactionalEntityManager) => {
@@ -1499,7 +1586,7 @@ export class FarmService {
           where: {
             livestock_tag: livestockTag,
             farm: {
-              admin: {
+              [role === "ADMIN" ? "admin" : "workers"]: {
                 email,
               },
             },
@@ -1542,10 +1629,12 @@ export class FarmService {
     email,
     growthRecordId,
     growthRecord,
+    role,
   }: {
     email: string;
     growthRecordId: number;
     growthRecord: UpdateGrowthRecordInput;
+    role: "ADMIN" | "WORKER";
   }) {
     return this.healthRecordRepository.manager.transaction(
       async (transactionalEntityManager) => {
@@ -1554,7 +1643,9 @@ export class FarmService {
           {
             where: {
               id: growthRecordId,
-              livestock: { farm: { admin: { email } } },
+              livestock: {
+                farm: { [role === "ADMIN" ? "admin" : "workers"]: { email } },
+              },
             },
           },
         );
@@ -1594,10 +1685,12 @@ export class FarmService {
     email,
     livestockTag,
     expenseRecord,
+    role,
   }: {
     email: string;
     livestockTag: string;
     expenseRecord: ExpenseRecordInput;
+    role: "ADMIN" | "WORKER";
   }) {
     return this.expenseRecordRepository.manager.transaction(
       async (transactionalEntityManager) => {
@@ -1605,7 +1698,7 @@ export class FarmService {
           where: {
             livestock_tag: livestockTag,
             farm: {
-              admin: {
+              [role === "ADMIN" ? "admin" : "workers"]: {
                 email,
               },
             },
@@ -1642,10 +1735,12 @@ export class FarmService {
     email,
     expenseRecordId,
     expenseRecord,
+    role,
   }: {
     email: string;
     expenseRecordId: number;
     expenseRecord: UpdateExpenseRecordInput;
+    role: "ADMIN" | "WORKER";
   }) {
     return this.expenseRecordRepository.manager.transaction(
       async (transactionalEntityManager) => {
@@ -1654,7 +1749,9 @@ export class FarmService {
           {
             where: {
               id: expenseRecordId,
-              livestock: { farm: { admin: { email } } },
+              livestock: {
+                farm: { [role === "ADMIN" ? "admin" : "workers"]: { email } },
+              },
             },
           },
         );
@@ -1686,10 +1783,12 @@ export class FarmService {
     email,
     livestockTag,
     salesRecord,
+    role,
   }: {
     email: string;
     livestockTag: string;
     salesRecord: SalesRecordInput;
+    role: "ADMIN" | "WORKER";
   }) {
     return this.salesRecordRepository.manager.transaction(
       async (transactionalEntityManager) => {
@@ -1697,7 +1796,7 @@ export class FarmService {
           where: {
             livestock_tag: livestockTag,
             farm: {
-              admin: {
+              [role === "ADMIN" ? "admin" : "workers"]: {
                 email,
               },
             },
@@ -1735,10 +1834,12 @@ export class FarmService {
     email,
     salesRecordId,
     salesRecord,
+    role,
   }: {
     email: string;
     salesRecordId: number;
     salesRecord: UpdateSalesRecordInput;
+    role: "ADMIN" | "WORKER";
   }) {
     return this.salesRecordRepository.manager.transaction(
       async (transactionalEntityManager) => {
@@ -1747,7 +1848,9 @@ export class FarmService {
           {
             where: {
               id: salesRecordId,
-              livestock: { farm: { admin: { email } } },
+              livestock: {
+                farm: { [role === "ADMIN" ? "admin" : "workers"]: { email } },
+              },
             },
           },
         );
@@ -1846,8 +1949,47 @@ export class FarmService {
           task.startingDate || taskToUpdate.starting_date;
         taskToUpdate.completion_date =
           task.completionDate || taskToUpdate.completion_date;
-        taskToUpdate.status = task.status || taskToUpdate.status;
         taskToUpdate.notes = task.notes || taskToUpdate.notes;
+
+        const savedTask = await transactionalEntityManager.save(
+          Task,
+          taskToUpdate,
+        );
+
+        return savedTask;
+      },
+    );
+  }
+
+  async updateTaskProgress({
+    email,
+    taskId,
+    task,
+  }: {
+    email: string;
+    taskId: number;
+    task: UpdateTaskProgressInput;
+  }) {
+    return this.taskRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        const taskToUpdate = await transactionalEntityManager.findOne(Task, {
+          where: { id: taskId, worker: { email } },
+        });
+
+        if (!taskToUpdate) {
+          throw new NotFoundException("Task not found");
+        }
+
+        if (task.status === TaskStatus.COMPLETED && !task.completedAt) {
+          throw new BadRequestException(
+            "Completion date must be provided when task is been completed",
+          );
+        }
+
+        taskToUpdate.started_at = task.startedAt || taskToUpdate.started_at;
+        taskToUpdate.completed_at =
+          task.completedAt || taskToUpdate.completed_at;
+        taskToUpdate.status = task.status || taskToUpdate.status;
 
         const savedTask = await transactionalEntityManager.save(
           Task,
@@ -1899,6 +2041,45 @@ export class FarmService {
         await transactionalEntityManager.save(Task, taskToUpdate);
 
         return taskToUpdate;
+      },
+    );
+  }
+
+  async addWorkerReview({
+    email,
+    workerTag,
+    review,
+  }: {
+    email: string;
+    workerTag: string;
+    review: ReviewInput;
+  }) {
+    return this.reviewRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        const admin = await transactionalEntityManager.findOne(Admin, {
+          where: { email, workers: { worker_tag: workerTag } },
+          relations: ["reviews", "workers"],
+        });
+
+        if (!admin) {
+          throw new BadRequestException(
+            "Either worker or admin does not exist",
+          );
+        }
+
+        const newReview = new Review();
+        newReview.description = review.description;
+        newReview.rating = review.rating;
+
+        const savedReview = await transactionalEntityManager.save(
+          Review,
+          newReview,
+        );
+
+        admin.reviews.push(savedReview);
+        await transactionalEntityManager.save(Admin, admin);
+
+        return savedReview;
       },
     );
   }

@@ -11,13 +11,16 @@ import {
 } from "./inputs";
 import { PaginationInput } from "src/database/inputs";
 import { WorkerService } from "./worker.service";
+import { Roles } from "./decorators/roles.decorator";
+import { RolesGuard } from "./guards/roles.guard";
 
 @Resolver()
 export class WorkerResolver {
   constructor(private readonly workerService: WorkerService) {}
 
   // Mutations
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("worker")
   @Mutation(() => ReportType)
   createReport(@Context() context, @Args("farmTag") farmTag: string) {
     const { email } = context.req.user;
@@ -27,7 +30,8 @@ export class WorkerResolver {
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("worker")
   @Mutation(() => ReportType)
   verifyReport(
     @Context() context,
@@ -45,7 +49,8 @@ export class WorkerResolver {
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("worker")
   @Mutation(() => ReportType)
   updateReport(
     @Context() context,
@@ -57,7 +62,8 @@ export class WorkerResolver {
     return { email, reportTag };
   }
 
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("worker")
   @Mutation(() => ReportType)
   completeReport(@Context() context, @Args("reportTag") reportTag: string) {
     const { email } = context.req.user;
@@ -68,7 +74,8 @@ export class WorkerResolver {
   }
 
   // Queries
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("worker")
   @Query(() => ReportConnection)
   listReports(
     @Context() context,
@@ -86,14 +93,16 @@ export class WorkerResolver {
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("worker")
   @Query(() => ReportType)
   getReport(@Context() context, @Args("reportTag") reportTag: string) {
     const { email } = context.req.user;
     return this.workerService.getReport({ email, reportTag });
   }
 
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("worker")
   @Query(() => QrCodeResponse)
   getQrCode(@Context() context, @Args("farmTag") farmTag: string) {
     const { email } = context.req.user;

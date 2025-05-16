@@ -40,8 +40,14 @@ export class Task {
   @Column()
   starting_date: Date;
 
+  @Column({ default: null, nullable: true })
+  started_at: Date;
+
   @Column()
   completion_date: Date;
+
+  @Column({ default: null, nullable: true })
+  completed_at: Date;
 
   @Column({
     type: "enum",

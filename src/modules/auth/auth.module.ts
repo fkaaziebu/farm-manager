@@ -28,10 +28,11 @@ import {
   Pond,
   PoultryBatch,
   PoultryHouse,
+  Report,
+  Review,
   SalesRecord,
   Task,
   Worker,
-  Report,
 } from "src/database/entities";
 import { QueueModule } from "../queue/queue.module";
 
@@ -70,10 +71,11 @@ import { QueueModule } from "../queue/queue.module";
       Pond,
       PoultryBatch,
       PoultryHouse,
+      Report,
+      Review,
       SalesRecord,
       Task,
       Worker,
-      Report,
     ]),
   ],
   controllers: [],

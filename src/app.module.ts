@@ -9,6 +9,7 @@ import { GraphQLJSON } from "graphql-type-json";
 import { AuthModule } from "./modules/auth/auth.module";
 import { FarmModule } from "./modules/farm/farm.module";
 import { WorkerModule } from "./modules/worker/worker.module";
+import { LlmModule } from "./modules/llm/llm.module";
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { WorkerModule } from "./modules/worker/worker.module";
     AuthModule,
     FarmModule,
     WorkerModule,
+    LlmModule,
   ],
   controllers: [],
   providers: [],

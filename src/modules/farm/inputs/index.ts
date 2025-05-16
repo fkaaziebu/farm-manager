@@ -46,3 +46,5 @@ export { LivestockFilterInput } from "./livestock-filter.input";
 export { UpdateWorkerInput } from "./update-worker.input";
 export { TaskFilterInput } from "./task-filter.input";
 export { UpdateTaskInput } from "./update-task.input";
+export { UpdateTaskProgressInput } from "./update-task-progress.input";
+export { ReviewInput } from "./review.input";

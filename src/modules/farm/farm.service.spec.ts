@@ -32,6 +32,7 @@ import {
   Task,
   Worker,
   Report,
+  Review,
 } from "../../database/entities";
 import { FarmType } from "../../database/types/farm.type";
 import {
@@ -105,10 +106,11 @@ describe("FarmService", () => {
               Pond,
               PoultryBatch,
               PoultryHouse,
+              Report,
+              Review,
               SalesRecord,
               Task,
               Worker,
-              Report,
             ],
             synchronize: true,
           }),
@@ -135,10 +137,11 @@ describe("FarmService", () => {
           Pond,
           PoultryBatch,
           PoultryHouse,
+          Report,
+          Review,
           SalesRecord,
           Task,
           Worker,
-          Report,
         ]),
       ],
       controllers: [],
@@ -351,6 +354,25 @@ describe("FarmService", () => {
       });
 
       expect(response.workers.length).toEqual(2);
+    });
+  });
+
+  describe("addWorkerReview", () => {
+    it("returns added review for worker", async () => {
+      await setupForQueries();
+      const admin = await getAdmin(adminInfo.email);
+
+      const response = await farmService.addWorkerReview({
+        email: adminInfo.email,
+        workerTag: admin.workers[0].worker_tag,
+        review: {
+          description: "All description",
+          rating: 90,
+        },
+      });
+
+      expect(response.description).toBe("All description");
+      expect(response.rating).toEqual(90);
     });
   });
 
@@ -650,6 +672,7 @@ describe("FarmService", () => {
       const motherLivestock = await farmService.getLivestock({
         email: adminInfo.email,
         livestockTag: response.mother.livestock_tag,
+        role: "ADMIN",
       });
 
       expect(motherLivestock.maternalOffspring.length).toBe(1);
@@ -658,6 +681,7 @@ describe("FarmService", () => {
       const fatherLivestock = await farmService.getLivestock({
         email: adminInfo.email,
         livestockTag: response.father.livestock_tag,
+        role: "ADMIN",
       });
 
       expect(fatherLivestock.paternalOffspring.length).toBe(1);
@@ -726,6 +750,7 @@ describe("FarmService", () => {
           expectedDelivery: new Date(),
           status: BreedingStatus.PLANNED,
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
@@ -743,6 +768,7 @@ describe("FarmService", () => {
             expectedDelivery: new Date(),
             status: BreedingStatus.PLANNED,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
       await expect(
@@ -755,6 +781,7 @@ describe("FarmService", () => {
             expectedDelivery: new Date(),
             status: BreedingStatus.PLANNED,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Male livestock not found");
     });
@@ -795,6 +822,7 @@ describe("FarmService", () => {
           expectedDelivery: new Date(),
           status: BreedingStatus.PLANNED,
         },
+        role: "ADMIN",
       });
 
       await expect(
@@ -807,6 +835,7 @@ describe("FarmService", () => {
             expectedDelivery: new Date(),
             status: BreedingStatus.PLANNED,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(ConflictException);
 
@@ -820,6 +849,7 @@ describe("FarmService", () => {
             expectedDelivery: new Date(),
             status: BreedingStatus.PLANNED,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(
         "Female livestock already has an active breeding record",
@@ -869,6 +899,7 @@ describe("FarmService", () => {
             expectedDelivery: new Date(),
             status: BreedingStatus.PLANNED,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(BadRequestException);
 
@@ -882,6 +913,7 @@ describe("FarmService", () => {
             expectedDelivery: new Date(),
             status: BreedingStatus.PLANNED,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(
         "Livestock must be in the same pen to create a breeding record",
@@ -926,6 +958,7 @@ describe("FarmService", () => {
           expectedDelivery: new Date(),
           status: BreedingStatus.PLANNED,
         },
+        role: "ADMIN",
       });
 
       const response = await farmService.updateLivestockBreedingRecord({
@@ -938,6 +971,7 @@ describe("FarmService", () => {
           offspringCountMale: 2,
           offspringCountFemale: 3,
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
@@ -958,6 +992,7 @@ describe("FarmService", () => {
             offspringCountMale: 2,
             offspringCountFemale: 3,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -972,6 +1007,7 @@ describe("FarmService", () => {
             offspringCountMale: 2,
             offspringCountFemale: 3,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Breeding record not found");
     });
@@ -1018,6 +1054,7 @@ describe("FarmService", () => {
           recordDate: new Date(),
           recordStatus: HealthRecordStatus.HEALTHY,
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
@@ -1040,6 +1077,7 @@ describe("FarmService", () => {
             recordDate: new Date(),
             recordStatus: HealthRecordStatus.HEALTHY,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -1057,6 +1095,7 @@ describe("FarmService", () => {
             recordDate: new Date(),
             recordStatus: HealthRecordStatus.HEALTHY,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Livestock not found");
     });
@@ -1103,6 +1142,7 @@ describe("FarmService", () => {
           recordDate: new Date(),
           recordStatus: HealthRecordStatus.HEALTHY,
         },
+        role: "ADMIN",
       });
 
       const response = await farmService.updateLivestockHealthRecord({
@@ -1117,6 +1157,7 @@ describe("FarmService", () => {
           treatment: "None",
           recordDate: new Date(),
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
@@ -1139,6 +1180,7 @@ describe("FarmService", () => {
             recordDate: new Date(),
             recordStatus: HealthRecordStatus.HEALTHY,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -1156,6 +1198,7 @@ describe("FarmService", () => {
             recordDate: new Date(),
             recordStatus: HealthRecordStatus.HEALTHY,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Livestock not found");
     });
@@ -1198,6 +1241,7 @@ describe("FarmService", () => {
           weight: 100,
           period: GrowthPeriod.BIRTH,
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
@@ -1216,6 +1260,7 @@ describe("FarmService", () => {
             weight: 100,
             period: GrowthPeriod.BIRTH,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -1229,6 +1274,7 @@ describe("FarmService", () => {
             weight: 100,
             period: GrowthPeriod.BIRTH,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Livestock not found");
     });
@@ -1271,6 +1317,7 @@ describe("FarmService", () => {
           weight: 100,
           period: GrowthPeriod.BIRTH,
         },
+        role: "ADMIN",
       });
 
       const response = await farmService.updateLivestockGrowthRecord({
@@ -1282,6 +1329,7 @@ describe("FarmService", () => {
           weight: 200,
           period: GrowthPeriod.FOUR_WEEKS,
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
@@ -1301,6 +1349,7 @@ describe("FarmService", () => {
             weight: 200,
             period: GrowthPeriod.FOUR_WEEKS,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -1314,6 +1363,7 @@ describe("FarmService", () => {
             weight: 200,
             period: GrowthPeriod.FOUR_WEEKS,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Growth record not found");
     });
@@ -1356,6 +1406,7 @@ describe("FarmService", () => {
           category: ExpenseCategory.FEED,
           notes: "Initial expense record",
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
@@ -1374,6 +1425,7 @@ describe("FarmService", () => {
             category: ExpenseCategory.FEED,
             notes: "Initial expense record",
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -1387,6 +1439,7 @@ describe("FarmService", () => {
             category: ExpenseCategory.FEED,
             notes: "Initial expense record",
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Livestock not found");
     });
@@ -1429,6 +1482,7 @@ describe("FarmService", () => {
           category: ExpenseCategory.FEED,
           notes: "Initial expense record",
         },
+        role: "ADMIN",
       });
 
       const response = await farmService.updateLivestockExpenseRecord({
@@ -1440,6 +1494,7 @@ describe("FarmService", () => {
           category: ExpenseCategory.CLEANING,
           notes: "Initial update record",
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
@@ -1459,6 +1514,7 @@ describe("FarmService", () => {
             category: ExpenseCategory.CLEANING,
             notes: "Initial update record",
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -1472,6 +1528,7 @@ describe("FarmService", () => {
             category: ExpenseCategory.CLEANING,
             notes: "Initial update record",
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Expense record not found");
     });
@@ -1517,6 +1574,7 @@ describe("FarmService", () => {
           totalAmount: 100,
           unit: "kg",
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
@@ -1540,6 +1598,7 @@ describe("FarmService", () => {
             totalAmount: 100,
             unit: "kg",
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -1556,6 +1615,7 @@ describe("FarmService", () => {
             totalAmount: 100,
             unit: "kg",
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Livestock not found");
     });
@@ -1601,6 +1661,7 @@ describe("FarmService", () => {
           totalAmount: 100,
           unit: "kg",
         },
+        role: "ADMIN",
       });
 
       const response = await farmService.updateLivestockSalesRecord({
@@ -1615,6 +1676,7 @@ describe("FarmService", () => {
           totalAmount: 225,
           unit: "kg",
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
@@ -1640,6 +1702,7 @@ describe("FarmService", () => {
             totalAmount: 225,
             unit: "kg",
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -1656,6 +1719,7 @@ describe("FarmService", () => {
             totalAmount: 225,
             unit: "kg",
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Sales record not found");
     });
@@ -1693,6 +1757,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         livestockTag: adminInfo.livestock[0].livestockTag,
         unavailabilityReason: LivestockUnavailabilityReason.DEAD,
+        role: "ADMIN",
       });
 
       expect(response.availability_status).toEqual(
@@ -1706,6 +1771,7 @@ describe("FarmService", () => {
       const response2 = await farmService.listLivestock({
         email: adminInfo.email,
         searchTerm: "",
+        role: "ADMIN",
       });
 
       expect(response2).toHaveLength(1);
@@ -1719,6 +1785,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           livestockTag: "invalid-tag",
           unavailabilityReason: LivestockUnavailabilityReason.SOLD,
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -1727,6 +1794,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           livestockTag: "invalid-tag",
           unavailabilityReason: LivestockUnavailabilityReason.SOLD,
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Livestock not found");
     });
@@ -1888,12 +1956,11 @@ describe("FarmService", () => {
           startingDate: new Date(),
           completionDate: new Date(),
           notes: "Updated Task Notes",
-          status: TaskStatus.IN_PROGRESS,
         },
       });
 
       expect(response).toBeDefined();
-      expect(response.status).toBe(TaskStatus.IN_PROGRESS);
+      expect(response.notes).toBe("Updated Task Notes");
     });
 
     it("throws an error if task not found", async () => {
@@ -1907,7 +1974,6 @@ describe("FarmService", () => {
             startingDate: new Date(),
             completionDate: new Date(),
             notes: "Updated Task Notes",
-            status: TaskStatus.IN_PROGRESS,
           },
         }),
       ).rejects.toThrow(NotFoundException);
@@ -1920,10 +1986,121 @@ describe("FarmService", () => {
             startingDate: new Date(),
             completionDate: new Date(),
             notes: "Updated Task Notes",
+          },
+        }),
+      ).rejects.toThrow("Task not found");
+    });
+  });
+
+  describe("updateTaskProgress", () => {
+    it("returns a task after updating it's progress", async () => {
+      await setupForQueries();
+      const admin = await getAdmin(adminInfo.email);
+
+      const task = await farmService.createTask({
+        email: adminInfo.email,
+        farmTag: admin.farms[0].farm_tag,
+        task: {
+          description: "Test Task Description",
+          startingDate: new Date(),
+          completionDate: new Date(),
+          type: TaskType.REGULAR_INSPECTION,
+          notes: "Test Task Notes",
+          status: TaskStatus.PENDING,
+        },
+      });
+
+      await farmService.assignTaskToWorker({
+        email: adminInfo.email,
+        taskId: task.id,
+        workerTag: admin.workers[0].worker_tag,
+      });
+
+      const response = await farmService.updateTaskProgress({
+        email: admin.workers[0].email,
+        taskId: task.id,
+        task: {
+          startedAt: new Date(),
+          status: TaskStatus.IN_PROGRESS,
+        },
+      });
+
+      expect(response).toBeDefined();
+      expect(response.status).toBe(TaskStatus.IN_PROGRESS);
+    });
+
+    it("throws an error if task not found", async () => {
+      await registerAdmin(adminInfo);
+
+      await expect(
+        farmService.updateTaskProgress({
+          email: adminInfo.workers[0].email,
+          taskId: 1,
+          task: {
+            startedAt: new Date(),
+            status: TaskStatus.IN_PROGRESS,
+          },
+        }),
+      ).rejects.toThrow(NotFoundException);
+
+      await expect(
+        farmService.updateTaskProgress({
+          email: adminInfo.workers[0].email,
+          taskId: 1,
+          task: {
+            startedAt: new Date(),
             status: TaskStatus.IN_PROGRESS,
           },
         }),
       ).rejects.toThrow("Task not found");
+    });
+
+    it("throws an error if completedAt is not provided when completing a stask", async () => {
+      await setupForQueries();
+      const admin = await getAdmin(adminInfo.email);
+
+      const task = await farmService.createTask({
+        email: adminInfo.email,
+        farmTag: admin.farms[0].farm_tag,
+        task: {
+          description: "Test Task Description",
+          startingDate: new Date(),
+          completionDate: new Date(),
+          type: TaskType.REGULAR_INSPECTION,
+          notes: "Test Task Notes",
+          status: TaskStatus.PENDING,
+        },
+      });
+
+      await farmService.assignTaskToWorker({
+        email: adminInfo.email,
+        taskId: task.id,
+        workerTag: admin.workers[0].worker_tag,
+      });
+
+      await expect(
+        farmService.updateTaskProgress({
+          email: admin.workers[0].email,
+          taskId: task.id,
+          task: {
+            startedAt: new Date(),
+            status: TaskStatus.COMPLETED,
+          },
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        farmService.updateTaskProgress({
+          email: admin.workers[0].email,
+          taskId: task.id,
+          task: {
+            startedAt: new Date(),
+            status: TaskStatus.COMPLETED,
+          },
+        }),
+      ).rejects.toThrow(
+        "Completion date must be provided when task is been completed",
+      );
     });
   });
 
@@ -2057,6 +2234,7 @@ describe("FarmService", () => {
       let farms = await farmService.listFarms({
         email: adminInfo.email,
         searchTerm: "",
+        role: "ADMIN",
       });
 
       expect(farms).toHaveLength(2);
@@ -2064,6 +2242,7 @@ describe("FarmService", () => {
       farms = await farmService.listFarms({
         email: adminInfo.email,
         searchTerm: "Fred Farms 1",
+        role: "ADMIN",
       });
 
       expect(farms).toHaveLength(1);
@@ -2073,6 +2252,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         searchTerm: "Fred Farms 1",
         filter: { id: farms[0].id },
+        role: "ADMIN",
       });
 
       expect(farms).toHaveLength(1);
@@ -2087,6 +2267,7 @@ describe("FarmService", () => {
       let barns = await farmService.listBarns({
         email: adminInfo.email,
         searchTerm: "",
+        role: "ADMIN",
       });
 
       expect(barns).toHaveLength(2);
@@ -2095,6 +2276,7 @@ describe("FarmService", () => {
       barns = await farmService.listBarns({
         email: adminInfo.email,
         searchTerm: "Fred Barn 1",
+        role: "ADMIN",
       });
 
       expect(barns).toHaveLength(1);
@@ -2109,6 +2291,7 @@ describe("FarmService", () => {
       const barn = await farmService.getBarn({
         email: adminInfo.email,
         barnUnitId: adminInfo.barns[0].unitId,
+        role: "ADMIN",
       });
 
       expect(barn).toBeDefined();
@@ -2123,6 +2306,7 @@ describe("FarmService", () => {
       let pens = await farmService.listPens({
         email: adminInfo.email,
         searchTerm: "",
+        role: "ADMIN",
       });
 
       expect(pens).toHaveLength(2);
@@ -2131,6 +2315,7 @@ describe("FarmService", () => {
       pens = await farmService.listPens({
         email: adminInfo.email,
         searchTerm: "Fred Pen 1",
+        role: "ADMIN",
       });
 
       expect(pens).toHaveLength(1);
@@ -2145,6 +2330,7 @@ describe("FarmService", () => {
       const pen = await farmService.getPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens[0].unitId,
+        role: "ADMIN",
       });
 
       expect(pen).toBeDefined();
@@ -2159,6 +2345,7 @@ describe("FarmService", () => {
       let livestock = await farmService.listLivestock({
         email: adminInfo.email,
         searchTerm: "",
+        role: "ADMIN",
       });
 
       expect(livestock).toHaveLength(2);
@@ -2169,6 +2356,7 @@ describe("FarmService", () => {
       livestock = await farmService.listLivestock({
         email: adminInfo.email,
         searchTerm: "LST1",
+        role: "ADMIN",
       });
 
       expect(livestock).toHaveLength(1);
@@ -2181,6 +2369,7 @@ describe("FarmService", () => {
         filter: {
           livestock_type: LivestockType.GRASSCUTTER,
         },
+        role: "ADMIN",
       });
 
       expect(livestock).toHaveLength(2);
@@ -2191,6 +2380,7 @@ describe("FarmService", () => {
         filter: {
           livestock_type: LivestockType.CATTLE,
         },
+        role: "ADMIN",
       });
 
       expect(livestock).toHaveLength(0);
@@ -2204,6 +2394,7 @@ describe("FarmService", () => {
       const livestock = await farmService.getLivestock({
         email: adminInfo.email,
         livestockTag: adminInfo.livestock[0].livestockTag,
+        role: "ADMIN",
       });
 
       expect(livestock).toBeDefined();
@@ -2240,6 +2431,7 @@ describe("FarmService", () => {
       const worker = await farmService.getWorker({
         email: adminInfo.email,
         workerTag: workers[0].worker_tag,
+        role: "ADMIN",
       });
 
       expect(worker).toBeDefined();
@@ -2271,6 +2463,7 @@ describe("FarmService", () => {
 
       const response = await farmService.listTask({
         email: adminInfo.email,
+        role: "ADMIN",
       });
 
       expect(response).toHaveLength(1);
@@ -2425,6 +2618,7 @@ describe("FarmService", () => {
         expectedDelivery: new Date(),
         status: BreedingStatus.PLANNED,
       },
+      role: "ADMIN",
     });
 
     // add livestock health record
@@ -2441,6 +2635,7 @@ describe("FarmService", () => {
         recordDate: new Date(),
         recordStatus: HealthRecordStatus.HEALTHY,
       },
+      role: "ADMIN",
     });
 
     // add livestock growth record
@@ -2453,6 +2648,7 @@ describe("FarmService", () => {
         weight: 100,
         period: GrowthPeriod.BIRTH,
       },
+      role: "ADMIN",
     });
 
     // add livestock expense record
@@ -2465,6 +2661,7 @@ describe("FarmService", () => {
         category: ExpenseCategory.FEED,
         notes: "Initial expense record",
       },
+      role: "ADMIN",
     });
 
     return { admin, farm };

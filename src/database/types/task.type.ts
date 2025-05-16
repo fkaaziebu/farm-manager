@@ -46,8 +46,14 @@ export class TaskTypeClass {
   @Field()
   starting_date: Date;
 
+  @Field({ nullable: true })
+  started_at?: Date;
+
   @Field()
   completion_date: Date;
+
+  @Field({ nullable: true })
+  completed_at?: Date;
 
   @Field(() => TaskStatus)
   status: TaskStatus;

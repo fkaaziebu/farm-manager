@@ -28,6 +28,7 @@ import { TaskTypeClass, TaskType } from "./task.type";
 import { WorkerType } from "./worker.type";
 import { ReportType } from "./report.type";
 import { PageInfo } from "./page-info.type";
+import { ReviewType } from "./review.type";
 
 export {
   AdminType,
@@ -53,10 +54,11 @@ export {
   PondType,
   PoultryBatchType,
   PoultryHouseType,
+  ReviewType,
+  ReportType,
   SalesRecordType,
   TaskType,
   TaskTypeClass,
   WorkerType,
-  ReportType,
   PageInfo,
 };
