@@ -2058,7 +2058,7 @@ export class FarmService {
       async (transactionalEntityManager) => {
         const admin = await transactionalEntityManager.findOne(Admin, {
           where: { email, workers: { worker_tag: workerTag } },
-          relations: ["reviews", "workers"],
+          relations: ["reviews", "workers.reviews"],
         });
 
         if (!admin) {
@@ -2076,8 +2076,13 @@ export class FarmService {
           newReview,
         );
 
+        // save review for admin
         admin.reviews.push(savedReview);
         await transactionalEntityManager.save(Admin, admin);
+
+        // save review for worker
+        admin.workers[0].reviews.push(savedReview);
+        await transactionalEntityManager.save(Worker, admin.workers);
 
         return savedReview;
       },

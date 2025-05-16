@@ -360,7 +360,7 @@ describe("FarmService", () => {
   describe("addWorkerReview", () => {
     it("returns added review for worker", async () => {
       await setupForQueries();
-      const admin = await getAdmin(adminInfo.email);
+      let admin = await getAdmin(adminInfo.email);
 
       const response = await farmService.addWorkerReview({
         email: adminInfo.email,
@@ -373,6 +373,9 @@ describe("FarmService", () => {
 
       expect(response.description).toBe("All description");
       expect(response.rating).toEqual(90);
+
+      admin = await getAdmin(adminInfo.email);
+      expect(admin.workers[0].reviews.length).toEqual(1);
     });
   });
 
@@ -2553,7 +2556,7 @@ describe("FarmService", () => {
         "farms",
         "assigned_tasks",
         "workers.assigned_tasks",
-        "workers",
+        "workers.reviews",
       ],
     });
 
