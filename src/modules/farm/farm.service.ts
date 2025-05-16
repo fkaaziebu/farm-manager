@@ -304,13 +304,13 @@ export class FarmService {
             },
             worker_tag: workerTag,
           },
-          relations: ["farms", "assigned_tasks"],
+          relations: ["farms", "assigned_tasks", "reviews"],
         })
       : this.workerRepository.findOne({
           where: {
             email,
           },
-          relations: ["farms", "assigned_tasks"],
+          relations: ["farms", "assigned_tasks", "reviews"],
         });
   }
 
