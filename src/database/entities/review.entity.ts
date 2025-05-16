@@ -26,6 +26,9 @@ export class Review {
   @ManyToOne(() => Worker, (worker) => worker.reviews)
   worker: Worker;
 
+  @ManyToOne(() => Worker, (worker) => worker.assigned_reviews)
+  assigned_worker: Worker;
+
   @CreateDateColumn()
   inserted_at: Date;
 

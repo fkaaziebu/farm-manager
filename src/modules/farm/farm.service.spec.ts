@@ -375,7 +375,7 @@ describe("FarmService", () => {
       expect(response.rating).toEqual(90);
 
       admin = await getAdmin(adminInfo.email);
-      expect(admin.workers[0].reviews.length).toEqual(1);
+      expect(admin.workers[0].assigned_reviews.length).toEqual(1);
     });
   });
 
@@ -2556,7 +2556,7 @@ describe("FarmService", () => {
         "farms",
         "assigned_tasks",
         "workers.assigned_tasks",
-        "workers.reviews",
+        "workers.assigned_reviews",
       ],
     });
 

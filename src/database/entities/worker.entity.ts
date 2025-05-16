@@ -93,4 +93,7 @@ export class Worker {
 
   @OneToMany(() => Review, (review) => review.worker)
   reviews: Review[];
+
+  @OneToMany(() => Review, (review) => review.assigned_worker)
+  assigned_reviews: Review[];
 }
