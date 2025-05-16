@@ -71,4 +71,7 @@ export class WorkerType {
 
   @Field(() => [ReviewType], { nullable: true })
   reviews?: ReviewType[];
+
+  @Field(() => [ReviewType], { nullable: true })
+  assigned_reviews?: ReviewType[];
 }
