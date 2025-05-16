@@ -58,6 +58,7 @@ import {
 import { PaginationInput } from "src/database/inputs";
 import { RolesGuard } from "./guards/roles.guard";
 import { Roles } from "./decorators/roles.decorator";
+import { ReviewType } from "../../database/types/review.type";
 
 @Resolver()
 export class FarmResolver {
@@ -739,7 +740,7 @@ export class FarmResolver {
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @Roles("admin")
-  @Mutation(() => TaskTypeClass)
+  @Mutation(() => ReviewType)
   addWorkerReview(
     @Context() context,
     @Args("workerTag") workerTag: string,
