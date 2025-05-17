@@ -59,7 +59,7 @@ export class LlmService {
             admin: { email },
           },
         },
-        relations: ["breeding_records"],
+        relations: ["father", "mother", "breeding_records"],
       });
 
       if (!currentLivestock) {
