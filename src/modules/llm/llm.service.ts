@@ -44,13 +44,13 @@ export class LlmService {
     livestockTag: string;
   }) {
     try {
-      const cacheKey = `breeding_pair_${livestockTag}`;
+      // const cacheKey = `breeding_pair_${livestockTag}`;
 
-      const results = await this.cacheManager.get(cacheKey);
+      // const results = await this.cacheManager.get(cacheKey);
 
-      if (results) {
-        return results;
-      }
+      // if (results) {
+      //   return results;
+      // }
       // Get all livestock
       const currentLivestock = await this.livestockRepository.findOne({
         where: {
@@ -97,7 +97,7 @@ export class LlmService {
         messages: [
           {
             role: "system",
-            content: `You are livestock breeding pair predictor, you are giving a list of livestocks on a farm and their breeding records, fathers and mothers. You can then use this information to predict which animals can be paired with the current one with livestockTag of ${livestockTag}. You are then required to return list of livestocks who can be paired with the current livestock in an array format with each item type similar to the livestock entity`,
+            content: `You are livestock breeding pair predictor, you are giving a list of livestocks on a farm and their breeding records, fathers and mothers. You can then use this information to predict which animals can be paired with the current one with livestockTag of ${livestockTag}. Take into consideration whether the current livestock has a planned or in-progress livestock, same for the pairs as well before making the prediction. You are then required to return list of livestocks who can be paired with the current livestock in an array format with each item type similar to the livestock entity`,
           },
           { role: "user", content: prompt },
         ],
@@ -124,7 +124,7 @@ export class LlmService {
         updated_at: new Date(livestock.updated_at),
       }));
 
-      await this.cacheManager.set(cacheKey, { breedingPairs: pairs });
+      // await this.cacheManager.set(cacheKey, { breedingPairs: pairs });
       return {
         breedingPairs: pairs,
       };
