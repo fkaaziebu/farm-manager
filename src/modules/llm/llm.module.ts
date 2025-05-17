@@ -33,10 +33,12 @@ import {
   Task,
   Worker,
 } from "src/database/entities";
+import { CacheModule } from "@nestjs/cache-manager";
 
 @Module({
   imports: [
     ConfigModule,
+    CacheModule.register(),
     TypeOrmModule.forFeature([
       Admin,
       Apiary,

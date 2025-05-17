@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -8,7 +9,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import OpenAI from "openai";
 import { Repository } from "typeorm";
 import { Livestock } from "../../database/entities";
-import type { LivestockTypeClass } from "src/database/types";
 import {
   HealthStatus,
   LivestockAvailabilityStatus,
@@ -16,12 +16,15 @@ import {
   LivestockType,
   LivestockUnavailabilityReason,
 } from "src/database/types/livestock.type";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
 
 @Injectable()
 export class LlmService {
   private readonly openai: OpenAI;
 
   constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: ConfigService,
     @InjectRepository(Livestock)
     private livestockRepository: Repository<Livestock>,
@@ -41,6 +44,13 @@ export class LlmService {
     livestockTag: string;
   }) {
     try {
+      const cacheKey = `breeding_pair_${livestockTag}`;
+
+      const results = await this.cacheManager.get(cacheKey);
+
+      if (results) {
+        return results;
+      }
       // Get all livestock
       const currentLivestock = await this.livestockRepository.findOne({
         where: {
@@ -95,25 +105,28 @@ export class LlmService {
       });
 
       // Parse the response
+      const pairs = JSON.parse(
+        response.choices[0].message.content.match(/\[\s*\{[\s\S]*\}\s*\]/)[0],
+      ).map((livestock) => ({
+        id: Number(livestock.id),
+        livestock_tag: livestock.livestock_tag,
+        livestock_type: LivestockType[livestock.livestock_type],
+        gender: LivestockGender[livestock.gender],
+        breed: livestock.breed,
+        birth_date: new Date(livestock.birth_date),
+        weight: livestock.weight,
+        health_status: HealthStatus[livestock.health_status],
+        availability_status:
+          LivestockAvailabilityStatus[livestock.availability_status],
+        unavailability_reason:
+          LivestockUnavailabilityReason[livestock.unavailability_reason],
+        inserted_at: new Date(livestock.inserted_at),
+        updated_at: new Date(livestock.updated_at),
+      }));
+
+      await this.cacheManager.set(cacheKey, { breedingPairs: pairs });
       return {
-        breedingPairs: JSON.parse(
-          response.choices[0].message.content.match(/\[\s*\{[\s\S]*\}\s*\]/)[0],
-        ).map((livestock) => ({
-          id: Number(livestock.id),
-          livestock_tag: livestock.livestock_tag,
-          livestock_type: LivestockType[livestock.livestock_type],
-          gender: LivestockGender[livestock.gender],
-          breed: livestock.breed,
-          birth_date: new Date(livestock.birth_date),
-          weight: livestock.weight,
-          health_status: HealthStatus[livestock.health_status],
-          availability_status:
-            LivestockAvailabilityStatus[livestock.availability_status],
-          unavailability_reason:
-            LivestockUnavailabilityReason[livestock.unavailability_reason],
-          inserted_at: new Date(livestock.inserted_at),
-          updated_at: new Date(livestock.updated_at),
-        })),
+        breedingPairs: pairs,
       };
     } catch (err) {
       throw new BadRequestException(`Error creating response, ${err}`);
