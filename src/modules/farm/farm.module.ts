@@ -19,6 +19,7 @@ import {
   Farm,
   Field,
   Greenhouse,
+  Group,
   GrowthRecord,
   HealthRecord,
   Hive,
@@ -33,6 +34,8 @@ import {
   Task,
   Worker,
 } from "src/database/entities";
+import { GroupResolver } from "./resolvers/group.resolver";
+import { GroupService } from "./services/group.service";
 
 @Module({
   imports: [
@@ -50,6 +53,7 @@ import {
       Farm,
       Field,
       Greenhouse,
+      Group,
       GrowthRecord,
       HealthRecord,
       Hive,
@@ -66,6 +70,12 @@ import {
     ]),
   ],
   controllers: [],
-  providers: [FarmService, FarmResolver, JwtStrategy],
+  providers: [
+    FarmService,
+    GroupService,
+    FarmResolver,
+    GroupResolver,
+    JwtStrategy,
+  ],
 })
 export class FarmModule {}

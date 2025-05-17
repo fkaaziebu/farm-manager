@@ -23,6 +23,7 @@ import { Task } from "./task.entity";
 import { Worker } from "./worker.entity";
 import { Report } from "./report.entity";
 import { Review } from "./review.entity";
+import { Group } from "./group.entity";
 
 export {
   Admin,
@@ -37,6 +38,7 @@ export {
   Farm,
   Field,
   Greenhouse,
+  Group,
   GrowthRecord,
   HealthRecord,
   Hive,

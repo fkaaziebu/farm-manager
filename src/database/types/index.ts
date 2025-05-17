@@ -29,6 +29,7 @@ import { WorkerType } from "./worker.type";
 import { ReportType } from "./report.type";
 import { PageInfo } from "./page-info.type";
 import { ReviewType } from "./review.type";
+import { GroupType } from "./group.type";
 
 export {
   AdminType,
@@ -43,6 +44,7 @@ export {
   FarmTypeClass,
   FieldType,
   GreenhouseType,
+  GroupType,
   GrowthRecordTypeClass,
   HealthRecordTypeClass,
   HiveType,

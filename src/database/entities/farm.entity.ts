@@ -26,6 +26,7 @@ import { PoultryHouse } from "./poultry-house.entity";
 import { Coop } from "./coop.entity";
 import { Pen } from "./pen.entity";
 import { Report } from "./report.entity";
+import { Group } from "./group.entity";
 
 export enum FarmType {
   LIVESTOCK = "LIVESTOCK",
@@ -137,4 +138,7 @@ export class Farm {
 
   @OneToMany(() => Report, (report) => report.farm)
   reports: Report[];
+
+  @ManyToMany(() => Group, (report) => report.farms)
+  groups: Group[];
 }

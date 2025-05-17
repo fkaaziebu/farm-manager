@@ -11,6 +11,7 @@ import { Farm } from "./farm.entity";
 import { Worker } from "./worker.entity";
 import { Task } from "./task.entity";
 import { Review } from "./review.entity";
+import { Group } from "./group.entity";
 
 @Entity("admins")
 export class Admin {
@@ -49,4 +50,7 @@ export class Admin {
 
   @OneToMany(() => Review, (review) => review.admin)
   reviews: Review[];
+
+  @OneToMany(() => Group, (group) => group.admin)
+  groups: Group[];
 }

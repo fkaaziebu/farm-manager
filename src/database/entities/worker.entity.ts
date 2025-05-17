@@ -12,6 +12,7 @@ import { Admin } from "./admin.entity";
 import { Task } from "./task.entity";
 import { Report } from "./report.entity";
 import { Review } from "./review.entity";
+import { Group } from "./group.entity";
 
 export enum WorkerRole {
   FARM_MANAGER = "FARM_MANAGER",
@@ -96,4 +97,7 @@ export class Worker {
 
   @OneToMany(() => Review, (review) => review.assigned_worker)
   assigned_reviews: Review[];
+
+  @ManyToMany(() => Group, (review) => review.workers)
+  groups: Group[];
 }
