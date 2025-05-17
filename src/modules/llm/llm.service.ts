@@ -13,6 +13,8 @@ import {
   HealthStatus,
   LivestockAvailabilityStatus,
   LivestockGender,
+  LivestockType,
+  LivestockUnavailabilityReason,
 } from "src/database/types/livestock.type";
 
 @Injectable()
@@ -26,7 +28,8 @@ export class LlmService {
   ) {
     // Initialize OpenAI client
     this.openai = new OpenAI({
-      apiKey: this.configService.get<string>("OPENAI_API_KEY"),
+      apiKey: this.configService.get<string>("ANTHROPIC_API_KEY"),
+      baseURL: this.configService.get<string>("ANTHROPIC_API_URL"),
     });
   }
 
@@ -80,11 +83,11 @@ export class LlmService {
 
       // Call OpenAI
       const response = await this.openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "claude-3-7-sonnet-20250219",
         messages: [
           {
             role: "system",
-            content: `You are livestock breeding pair predictor, you are giving a list of livestocks on a farm and their breeding records, fathers and mothers. You can then use this information to predict which animals can be paired with the current one with livestockTag of ${livestockTag}. You are then required to return list of livestocks who can be paired with the current livestock`,
+            content: `You are livestock breeding pair predictor, you are giving a list of livestocks on a farm and their breeding records, fathers and mothers. You can then use this information to predict which animals can be paired with the current one with livestockTag of ${livestockTag}. You are then required to return list of livestocks who can be paired with the current livestock in an array format with each item type similar to the livestock entity`,
           },
           { role: "user", content: prompt },
         ],
@@ -92,7 +95,26 @@ export class LlmService {
       });
 
       // Parse the response
-      return { breedingPairs: JSON.parse(response.choices[0].message.content) };
+      return {
+        breedingPairs: JSON.parse(
+          response.choices[0].message.content.match(/\[\s*\{[\s\S]*\}\s*\]/)[0],
+        ).map((livestock) => ({
+          id: Number(livestock.id),
+          livestock_tag: livestock.livestock_tag,
+          livestock_type: LivestockType[livestock.livestock_type],
+          gender: LivestockGender[livestock.gender],
+          breed: livestock.breed,
+          birth_date: new Date(livestock.birth_date),
+          weight: livestock.weight,
+          health_status: HealthStatus[livestock.health_status],
+          availability_status:
+            LivestockAvailabilityStatus[livestock.availability_status],
+          unavailability_reason:
+            LivestockUnavailabilityReason[livestock.unavailability_reason],
+          inserted_at: new Date(livestock.inserted_at),
+          updated_at: new Date(livestock.updated_at),
+        })),
+      };
     } catch (err) {
       throw new BadRequestException(`Error creating response, ${err}`);
     }
