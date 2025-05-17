@@ -30,6 +30,7 @@ import { ReportType } from "./report.type";
 import { PageInfo } from "./page-info.type";
 import { ReviewType } from "./review.type";
 import { GroupType } from "./group.type";
+import { RequestTypeClass, RequestType, RequestStatus } from "./request.type";
 
 export {
   AdminType,
@@ -56,6 +57,9 @@ export {
   PondType,
   PoultryBatchType,
   PoultryHouseType,
+  RequestTypeClass,
+  RequestType,
+  RequestStatus,
   ReviewType,
   ReportType,
   SalesRecordType,

@@ -5,15 +5,17 @@ import {
   ManyToMany,
   JoinTable,
   Column,
+  OneToMany,
 } from "typeorm";
 import { Farm } from "./farm.entity";
 import { Admin } from "./admin.entity";
 import { Worker } from "./worker.entity";
+import { Request } from "./request.entity";
 
 @Entity("groups")
 export class Group {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
   @Column()
   name: string;
@@ -27,4 +29,7 @@ export class Group {
 
   @ManyToMany(() => Farm, (farm) => farm.groups)
   farms: Farm[];
+
+  @OneToMany(() => Request, (request) => request.group)
+  requests: Request[];
 }

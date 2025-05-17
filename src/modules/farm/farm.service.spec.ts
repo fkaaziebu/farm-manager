@@ -33,6 +33,7 @@ import {
   Task,
   Worker,
   Report,
+  Request,
   Review,
 } from "../../database/entities";
 import { FarmType } from "../../database/types/farm.type";
@@ -109,6 +110,7 @@ describe("FarmService", () => {
               PoultryBatch,
               PoultryHouse,
               Report,
+              Request,
               Review,
               SalesRecord,
               Task,
@@ -141,6 +143,7 @@ describe("FarmService", () => {
           PoultryBatch,
           PoultryHouse,
           Report,
+          Request,
           Review,
           SalesRecord,
           Task,

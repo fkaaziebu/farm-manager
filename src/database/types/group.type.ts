@@ -2,11 +2,12 @@ import { Field, ID, ObjectType } from "@nestjs/graphql";
 import { FarmTypeClass } from "./farm.type";
 import { AdminType } from "./admin.type";
 import { WorkerType } from "./worker.type";
+import { RequestTypeClass } from "./request.type";
 
 @ObjectType("Group")
 export class GroupType {
   @Field(() => ID)
-  id: number;
+  id: string;
 
   @Field()
   name: string;
@@ -19,4 +20,7 @@ export class GroupType {
 
   @Field(() => [FarmTypeClass], { nullable: true })
   farms?: FarmTypeClass[];
+
+  @Field(() => [RequestTypeClass], { nullable: true })
+  requests?: RequestTypeClass[];
 }

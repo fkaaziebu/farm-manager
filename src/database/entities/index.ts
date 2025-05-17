@@ -24,6 +24,7 @@ import { Worker } from "./worker.entity";
 import { Report } from "./report.entity";
 import { Review } from "./review.entity";
 import { Group } from "./group.entity";
+import { Request } from "./request.entity";
 
 export {
   Admin,
@@ -47,6 +48,7 @@ export {
   Pond,
   PoultryBatch,
   PoultryHouse,
+  Request,
   SalesRecord,
   Task,
   Worker,

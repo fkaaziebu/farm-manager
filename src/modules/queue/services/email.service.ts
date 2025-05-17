@@ -54,7 +54,7 @@ export class EmailService {
   private compileTemplate(templateName: string, context: any): string {
     const templatePath = path.join(
       __dirname,
-      "../../../../",
+      "../../../..",
       "/src/modules/queue/services/templates",
       `${templateName}.hbs`,
     );

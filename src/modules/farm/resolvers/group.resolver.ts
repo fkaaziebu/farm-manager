@@ -5,7 +5,12 @@ import { RolesGuard } from "../guards/roles.guard";
 import { Roles } from "../decorators/roles.decorator";
 import { FarmTypeClass, GroupType, WorkerType } from "src/database/types";
 import { UpdateAuditorInput, UpdateWorkerInput, WorkerInput } from "../inputs";
-import { FarmConnection, WorkerConnection } from "../types";
+import {
+  AcceptRequestResponse,
+  FarmConnection,
+  RequestToJoinResponse,
+  WorkerConnection,
+} from "../types";
 import { GroupConnection } from "../types/group-connection.type";
 import { GroupService } from "../services/group.service";
 
@@ -27,12 +32,58 @@ export class GroupResolver {
   @Mutation(() => WorkerType)
   createAuditor(
     @Context() context,
-    @Args("groupTag") groupTag: string,
+    @Args("groupId") groupId: string,
     @Args("worker", { type: () => WorkerInput!, nullable: false })
     worker: WorkerInput,
   ) {
     const { email } = context.req.user;
-    return this.groupService.createAuditor({ email, groupTag, worker });
+    return this.groupService.createAuditor({ email, groupId, worker });
+  }
+
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("admin")
+  @Mutation(() => RequestToJoinResponse)
+  requestWorkersToJoinGroup(
+    @Context() context,
+    @Args("groupId") groupId: string,
+    @Args("workerEmails", { type: () => [String!]!, nullable: false })
+    workerEmails: string[],
+  ) {
+    const { email } = context.req.user;
+    return this.groupService.requestWorkersToJoinGroup({
+      email,
+      groupId,
+      workerEmails,
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("admin")
+  @Mutation(() => RequestToJoinResponse)
+  requestFarmsToJoinGroup(
+    @Context() context,
+    @Args("groupId") groupId: string,
+    @Args("farmTags", { type: () => [String!]!, nullable: false })
+    farmTags: string[],
+  ) {
+    const { email } = context.req.user;
+    return this.groupService.requestFarmsToJoinGroup({
+      email,
+      groupId,
+      farmTags,
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("admin", "worker")
+  @Mutation(() => AcceptRequestResponse)
+  acceptRequest(@Context() context, @Args("requestId") requestId: string) {
+    const { email, role } = context.req.user;
+    return this.groupService.acceptRequest({
+      email,
+      requestId,
+      role,
+    });
   }
 
   // Queries
