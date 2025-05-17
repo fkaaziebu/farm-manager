@@ -5,4 +5,7 @@ import { LivestockTypeClass } from "src/database/types";
 export class BreedingPairPredictionResponse {
   @Field(() => [LivestockTypeClass])
   breedingPairs: LivestockTypeClass[];
+
+  @Field()
+  description: string;
 }

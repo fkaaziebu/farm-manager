@@ -127,6 +127,9 @@ export class LlmService {
       // await this.cacheManager.set(cacheKey, { breedingPairs: pairs });
       return {
         breedingPairs: pairs,
+        description: response.choices[0].message.content.match(
+          /\[\s*\{[\s\S]*\}\s*\]/,
+        ).input,
       };
     } catch (err) {
       throw new BadRequestException(`Error creating response, ${err}`);
