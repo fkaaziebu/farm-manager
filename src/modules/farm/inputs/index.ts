@@ -50,3 +50,7 @@ export { UpdateTaskProgressInput } from "./update-task-progress.input";
 export { ReviewInput } from "./review.input";
 export { UpdateAuditorInput } from "./update-auditor.input";
 export { AuditorInput } from "./auditor.input";
+export { CoordinatesInput } from "./coordinates.input";
+export { UpdateReportInput } from "./update-report.input";
+export { ReportFilterInput } from "./report-filter.input";
+export { ReportSortInput } from "./report-sort.input";

@@ -5,3 +5,5 @@ export { LivestockConnection } from "./livestock-connection.type";
 export { WorkerConnection } from "./worker-connection.type";
 export { AcceptRequestResponse } from "./accept-request-response.type";
 export { RequestToJoinResponse } from "./request-to-join-response.type";
+export { ReportConnection } from "./report-connection.type";
+export { QrCodeResponse } from "./qr-code-response.type";

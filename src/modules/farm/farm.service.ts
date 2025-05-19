@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import {
@@ -66,6 +67,8 @@ import {
 import { ExpenseCategory } from "../../database/types/expense-record.type";
 import { PaginationInput } from "src/database/inputs";
 import { TaskStatus } from "../../database/types/task.type";
+import { WorkerRole } from "src/database/types/worker.type";
+import * as QRCode from "qrcode";
 
 @Injectable()
 export class FarmService {
@@ -2120,6 +2123,32 @@ export class FarmService {
     return updatedWorker;
   }
 
+  async getQrCode({ email, farmTag }: { email: string; farmTag: string }) {
+    const farm = await this.farmRepository.findOne({
+      where: {
+        workers: {
+          email,
+        },
+        farm_tag: farmTag,
+      },
+      relations: ["workers"],
+    });
+
+    if (!farm) {
+      throw new NotFoundException("Worker does not belong to this farm");
+    }
+
+    if (farm.workers[0].roles.includes(WorkerRole.AUDITOR)) {
+      throw new UnauthorizedException("Worker must not be an auditor");
+    }
+
+    const qrBuffer = await this.generate(farm.verification_code);
+
+    const base64 = qrBuffer.toString("base64");
+
+    return { qrCode: `data:image/png;base64,${base64}` };
+  }
+
   private paginate<T>(
     items: T[],
     paginationInput: PaginationInput = {},
@@ -2204,5 +2233,12 @@ export class FarmService {
    */
   private decodeCursor(cursor: string): string {
     return Buffer.from(cursor, "base64").toString("utf-8");
+  }
+
+  private async generate(uuid: string): Promise<Buffer> {
+    return await QRCode.toBuffer(uuid, {
+      type: "png",
+      width: 300,
+    });
   }
 }

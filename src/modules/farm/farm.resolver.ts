@@ -53,6 +53,7 @@ import {
   FarmConnection,
   LivestockConnection,
   PenConnection,
+  QrCodeResponse,
   WorkerConnection,
 } from "./types";
 import { PaginationInput } from "src/database/inputs";
@@ -756,6 +757,17 @@ export class FarmResolver {
       email,
       workerTag,
       review,
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("worker")
+  @Query(() => QrCodeResponse)
+  getQrCode(@Context() context, @Args("farmTag") farmTag: string) {
+    const { email } = context.req.user;
+    return this.farmService.getQrCode({
+      email,
+      farmTag,
     });
   }
 }

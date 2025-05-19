@@ -35,7 +35,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { getRepositoryToken, TypeOrmModule } from "@nestjs/typeorm";
 import { HashHelper } from "../../../helpers";
-import { NotFoundException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { EmailProducer } from "../../../modules/queue/producers/email.producer";
 import { QueueModule } from "../../../modules/queue/queue.module";
 
@@ -363,6 +363,372 @@ describe("GroupService", () => {
     });
   });
 
+  describe("createReport", () => {
+    it("returns created report for auditor", async () => {
+      await registerAdmin(adminInfo);
+      await registerWorker({ ...adminInfo.workers[0], password: "password" });
+      const farmOne = await createFarm({
+        name: "Farm 1",
+        adminEmail: "fkaaziebu1998@gmail.com",
+      });
+
+      const group = await groupService.createGroup({
+        email: adminInfo.email,
+        name: adminInfo.groupName,
+      });
+
+      await groupService.requestWorkersToJoinGroup({
+        email: adminInfo.email,
+        groupId: group.id,
+        workerEmails: [adminInfo.workers[0].email],
+      });
+
+      await groupService.requestFarmsToJoinGroup({
+        email: adminInfo.email,
+        groupId: group.id,
+        farmTags: [farmOne.farm_tag],
+      });
+
+      const admin = await getAdmin(adminInfo.email);
+      await groupService.acceptRequest({
+        email: adminInfo.workers[0].email,
+        requestId: admin.groups[0].requests[0].id,
+        role: "WORKER",
+      });
+
+      await groupService.acceptRequest({
+        email: "fkaaziebu1998@gmail.com",
+        requestId: admin.groups[0].requests[1].id,
+        role: "ADMIN",
+      });
+
+      const response = await groupService.createReport({
+        email: adminInfo.workers[0].email,
+        farmTag: farmOne.farm_tag,
+      });
+
+      expect(response.verified).toBeFalsy();
+      expect(response.completed).toBeFalsy();
+    });
+
+    it("throws an erro if worker does not belong to the farm", async () => {
+      await expect(
+        groupService.createReport({
+          email: adminInfo.workers[0].email,
+          farmTag: "fb96af68-8f17-4e59-b50e-6cd94a81d904",
+        }),
+      ).rejects.toThrow(NotFoundException);
+
+      await expect(
+        groupService.createReport({
+          email: adminInfo.workers[0].email,
+          farmTag: "fb96af68-8f17-4e59-b50e-6cd94a81d904",
+        }),
+      ).rejects.toThrow("Worker does not belong to this farm");
+    });
+  });
+
+  describe("verifyReport", () => {
+    it("renders the report verified after worker verifies it", async () => {
+      await registerAdmin(adminInfo);
+      await registerWorker({ ...adminInfo.workers[0], password: "password" });
+      const farmOne = await createFarm({
+        name: "Farm 1",
+        adminEmail: "fkaaziebu1998@gmail.com",
+      });
+
+      const group = await groupService.createGroup({
+        email: adminInfo.email,
+        name: adminInfo.groupName,
+      });
+
+      await groupService.requestWorkersToJoinGroup({
+        email: adminInfo.email,
+        groupId: group.id,
+        workerEmails: [adminInfo.workers[0].email],
+      });
+
+      await groupService.requestFarmsToJoinGroup({
+        email: adminInfo.email,
+        groupId: group.id,
+        farmTags: [farmOne.farm_tag],
+      });
+
+      let admin = await getAdmin(adminInfo.email);
+      await groupService.acceptRequest({
+        email: adminInfo.workers[0].email,
+        requestId: admin.groups[0].requests[0].id,
+        role: "WORKER",
+      });
+
+      await groupService.acceptRequest({
+        email: "fkaaziebu1998@gmail.com",
+        requestId: admin.groups[0].requests[1].id,
+        role: "ADMIN",
+      });
+
+      const report = await groupService.createReport({
+        email: adminInfo.workers[0].email,
+        farmTag: farmOne.farm_tag,
+      });
+
+      admin = await getAdmin("fkaaziebu1998@gmail.com");
+
+      const response = await groupService.verifyReport({
+        email: adminInfo.workers[0].email,
+        reportId: report.id,
+        verificationCode: admin.farms[0].verification_code,
+        coordinate: {
+          lat: 0,
+          lon: 0,
+        },
+      });
+
+      expect(response.verified).toBeTruthy();
+    });
+
+    it("throws an error if report not found", async () => {
+      await expect(
+        groupService.verifyReport({
+          email: adminInfo.workers[0].email,
+          reportId: "fb96af68-8f17-4e59-b50e-6cd94a81d904",
+          verificationCode: "fb96af68-8f17-4e59-b50e-6cd94a81d904",
+          coordinate: {
+            lat: 6.266741524410753,
+            lon: 0.04420958275423949,
+          },
+        }),
+      ).rejects.toThrow(NotFoundException);
+
+      await expect(
+        groupService.verifyReport({
+          email: adminInfo.workers[0].email,
+          reportId: "fb96af68-8f17-4e59-b50e-6cd94a81d904",
+          verificationCode: "fb96af68-8f17-4e59-b50e-6cd94a81d904",
+          coordinate: {
+            lat: 6.266741524410753,
+            lon: 0.04420958275423949,
+          },
+        }),
+      ).rejects.toThrow("Report not found");
+    });
+
+    it("throws an error if qrcode is invalid", async () => {
+      await registerAdmin(adminInfo);
+      await registerWorker({ ...adminInfo.workers[0], password: "password" });
+      const farmOne = await createFarm({
+        name: "Farm 1",
+        adminEmail: "fkaaziebu1998@gmail.com",
+      });
+
+      const group = await groupService.createGroup({
+        email: adminInfo.email,
+        name: adminInfo.groupName,
+      });
+
+      await groupService.requestWorkersToJoinGroup({
+        email: adminInfo.email,
+        groupId: group.id,
+        workerEmails: [adminInfo.workers[0].email],
+      });
+
+      await groupService.requestFarmsToJoinGroup({
+        email: adminInfo.email,
+        groupId: group.id,
+        farmTags: [farmOne.farm_tag],
+      });
+
+      let admin = await getAdmin(adminInfo.email);
+      await groupService.acceptRequest({
+        email: adminInfo.workers[0].email,
+        requestId: admin.groups[0].requests[0].id,
+        role: "WORKER",
+      });
+
+      await groupService.acceptRequest({
+        email: "fkaaziebu1998@gmail.com",
+        requestId: admin.groups[0].requests[1].id,
+        role: "ADMIN",
+      });
+
+      const report = await groupService.createReport({
+        email: adminInfo.workers[0].email,
+        farmTag: farmOne.farm_tag,
+      });
+
+      admin = await getAdmin("fkaaziebu1998@gmail.com");
+
+      await expect(
+        groupService.verifyReport({
+          email: adminInfo.workers[0].email,
+          reportId: report.id,
+          verificationCode: "fb96af68-8f17-4e59-b50e-6cd94a81d904",
+          coordinate: {
+            lat: 0,
+            lon: 0,
+          },
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        groupService.verifyReport({
+          email: adminInfo.workers[0].email,
+          reportId: report.id,
+          verificationCode: "fb96af68-8f17-4e59-b50e-6cd94a81d904",
+          coordinate: {
+            lat: 0,
+            lon: 0,
+          },
+        }),
+      ).rejects.toThrow("QR code is invalid");
+    });
+  });
+
+  describe("updateReport", () => {});
+
+  describe("completeReport", () => {
+    it("returns completed report after AUDITOR completes it", async () => {
+      await registerAdmin(adminInfo);
+      await registerWorker({ ...adminInfo.workers[0], password: "password" });
+      const farmOne = await createFarm({
+        name: "Farm 1",
+        adminEmail: "fkaaziebu1998@gmail.com",
+      });
+
+      const group = await groupService.createGroup({
+        email: adminInfo.email,
+        name: adminInfo.groupName,
+      });
+
+      await groupService.requestWorkersToJoinGroup({
+        email: adminInfo.email,
+        groupId: group.id,
+        workerEmails: [adminInfo.workers[0].email],
+      });
+
+      await groupService.requestFarmsToJoinGroup({
+        email: adminInfo.email,
+        groupId: group.id,
+        farmTags: [farmOne.farm_tag],
+      });
+
+      let admin = await getAdmin(adminInfo.email);
+      await groupService.acceptRequest({
+        email: adminInfo.workers[0].email,
+        requestId: admin.groups[0].requests[0].id,
+        role: "WORKER",
+      });
+
+      await groupService.acceptRequest({
+        email: "fkaaziebu1998@gmail.com",
+        requestId: admin.groups[0].requests[1].id,
+        role: "ADMIN",
+      });
+
+      const report = await groupService.createReport({
+        email: adminInfo.workers[0].email,
+        farmTag: farmOne.farm_tag,
+      });
+
+      admin = await getAdmin("fkaaziebu1998@gmail.com");
+
+      await groupService.verifyReport({
+        email: adminInfo.workers[0].email,
+        reportId: report.id,
+        verificationCode: admin.farms[0].verification_code,
+        coordinate: {
+          lat: 0,
+          lon: 0,
+        },
+      });
+
+      const response = await groupService.completeReport({
+        email: adminInfo.workers[0].email,
+        reportId: report.id,
+      });
+
+      expect(response.completed).toBeTruthy();
+    });
+
+    it("throws an error if the report is not verified", async () => {
+      await registerAdmin(adminInfo);
+      await registerWorker({ ...adminInfo.workers[0], password: "password" });
+      const farmOne = await createFarm({
+        name: "Farm 1",
+        adminEmail: "fkaaziebu1998@gmail.com",
+      });
+
+      const group = await groupService.createGroup({
+        email: adminInfo.email,
+        name: adminInfo.groupName,
+      });
+
+      await groupService.requestWorkersToJoinGroup({
+        email: adminInfo.email,
+        groupId: group.id,
+        workerEmails: [adminInfo.workers[0].email],
+      });
+
+      await groupService.requestFarmsToJoinGroup({
+        email: adminInfo.email,
+        groupId: group.id,
+        farmTags: [farmOne.farm_tag],
+      });
+
+      let admin = await getAdmin(adminInfo.email);
+      await groupService.acceptRequest({
+        email: adminInfo.workers[0].email,
+        requestId: admin.groups[0].requests[0].id,
+        role: "WORKER",
+      });
+
+      await groupService.acceptRequest({
+        email: "fkaaziebu1998@gmail.com",
+        requestId: admin.groups[0].requests[1].id,
+        role: "ADMIN",
+      });
+
+      const report = await groupService.createReport({
+        email: adminInfo.workers[0].email,
+        farmTag: farmOne.farm_tag,
+      });
+
+      admin = await getAdmin("fkaaziebu1998@gmail.com");
+
+      await expect(
+        groupService.completeReport({
+          email: adminInfo.workers[0].email,
+          reportId: report.id,
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        groupService.completeReport({
+          email: adminInfo.workers[0].email,
+          reportId: report.id,
+        }),
+      ).rejects.toThrow(
+        "This report is not verified, please verify and update before completing",
+      );
+    });
+
+    it("throws an error if the report is not found", async () => {
+      await expect(
+        groupService.completeReport({
+          email: adminInfo.workers[0].email,
+          reportId: "fb96af68-8f17-4e59-b50e-6cd94a81d904",
+        }),
+      ).rejects.toThrow(NotFoundException);
+
+      await expect(
+        groupService.completeReport({
+          email: adminInfo.workers[0].email,
+          reportId: "fb96af68-8f17-4e59-b50e-6cd94a81d904",
+        }),
+      ).rejects.toThrow("Report not found");
+    });
+  });
+
   // QUERIES
   describe("listGroups", () => {
     it("returns a list of admin groups", async () => {
@@ -516,6 +882,7 @@ describe("GroupService", () => {
         "groups.requests.worker",
         "groups.requests.farm",
         "groups.farms",
+        "farms",
       ],
     });
 

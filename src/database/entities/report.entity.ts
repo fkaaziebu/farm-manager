@@ -10,12 +10,8 @@ import { Farm } from "./farm.entity";
 
 @Entity("reports")
 export class Report {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ type: "uuid", unique: true })
-  @Generated("uuid")
-  report_tag: string;
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
   @Column({ default: false })
   verified: boolean;
