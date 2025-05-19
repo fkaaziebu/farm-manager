@@ -37,10 +37,12 @@ import {
 } from "src/database/entities";
 import { GroupResolver } from "./resolvers/group.resolver";
 import { GroupService } from "./services/group.service";
+import { QueueModule } from "../queue/queue.module";
 
 @Module({
   imports: [
     ConfigModule,
+    QueueModule,
     TypeOrmModule.forFeature([
       Admin,
       Apiary,

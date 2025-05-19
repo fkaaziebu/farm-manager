@@ -28,6 +28,7 @@ export class Group {
   workers: Worker[];
 
   @ManyToMany(() => Farm, (farm) => farm.groups)
+  @JoinTable()
   farms: Farm[];
 
   @OneToMany(() => Request, (request) => request.group)

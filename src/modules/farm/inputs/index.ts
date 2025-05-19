@@ -49,3 +49,4 @@ export { UpdateTaskInput } from "./update-task.input";
 export { UpdateTaskProgressInput } from "./update-task-progress.input";
 export { ReviewInput } from "./review.input";
 export { UpdateAuditorInput } from "./update-auditor.input";
+export { AuditorInput } from "./auditor.input";

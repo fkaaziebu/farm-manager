@@ -5,6 +5,7 @@ import * as handlebars from "handlebars";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import axios from "axios";
+import { RequestType } from "src/database/types";
 
 @Injectable()
 export class EmailService {
@@ -72,6 +73,39 @@ export class EmailService {
   ): Promise<void> {
     const resetLink = `${this.configService.get<string>("APP_URL", "http://localhost:3000")}/${role}/reset-password?resetCode=${resetToken}`;
     const html = this.compileTemplate("password-reset", { name, resetLink });
+
+    const mailOptions = {
+      from: this.configService.get<string>("EMAIL_FROM"),
+      subject: "Reset Your Password",
+      to,
+      html,
+    };
+
+    try {
+      await this.sendMail(
+        mailOptions.to,
+        mailOptions.subject,
+        "",
+        mailOptions.html,
+      );
+    } catch (error) {
+      console.error("Failed to send password reset email:", error);
+      throw new Error("Failed to send password reset email");
+    }
+  }
+
+  async sendGroupJoinRequest(
+    to: string,
+    name: string,
+    requestId: string,
+    type: RequestType,
+  ): Promise<void> {
+    const requestLink = `${this.configService.get<string>("APP_URL", "http://localhost:3000")}/group-request?requestId=${requestId}`;
+    const html = this.compileTemplate("join-request", {
+      name,
+      requestLink,
+      type,
+    });
 
     const mailOptions = {
       from: this.configService.get<string>("EMAIL_FROM"),

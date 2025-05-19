@@ -3,8 +3,8 @@ import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { GqlJwtAuthGuard } from "../guards/gql-jwt-auth.guard";
 import { RolesGuard } from "../guards/roles.guard";
 import { Roles } from "../decorators/roles.decorator";
-import { FarmTypeClass, GroupType, WorkerType } from "src/database/types";
-import { UpdateAuditorInput, UpdateWorkerInput, WorkerInput } from "../inputs";
+import { GroupType, WorkerType } from "src/database/types";
+import { WorkerInput } from "../inputs";
 import {
   AcceptRequestResponse,
   FarmConnection,
@@ -90,17 +90,17 @@ export class GroupResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @Roles("admin")
   @Query(() => FarmConnection)
-  listGroupFarms(@Context() context, @Args("groupTag") groupTag: string) {
+  listGroupFarms(@Context() context, @Args("groupId") groupId: string) {
     const { email } = context.req.user;
-    return { email, groupTag };
+    return this.groupService.listGroupFarms({ email, groupId });
   }
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @Roles("admin")
   @Query(() => WorkerConnection)
-  listGroupAuditors(@Context() context, @Args("groupTag") groupTag: string) {
+  listGroupAuditors(@Context() context, @Args("groupId") groupId: string) {
     const { email } = context.req.user;
-    return { email, groupTag };
+    return this.groupService.listGroupAuditors({ email, groupId });
   }
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -108,19 +108,19 @@ export class GroupResolver {
   @Query(() => WorkerType)
   getGroupAuditor(
     @Context() context,
-    @Args("groupTag") groupTag: string,
+    @Args("groupId") groupId: string,
     @Args("workerTag") workerTag: string,
   ) {
     const { email } = context.req.user;
-    return { email, groupTag, workerTag };
+    return this.groupService.getGroupAuditor({ email, groupId, workerTag });
   }
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @Roles("admin")
-  @Query(() => WorkerType)
-  getGroup(@Context() context, @Args("groupTag") groupTag: string) {
+  @Query(() => GroupType)
+  getGroup(@Context() context, @Args("groupId") groupId: string) {
     const { email } = context.req.user;
-    return { email, groupTag };
+    return this.groupService.getGroup({ email, groupId });
   }
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -128,6 +128,6 @@ export class GroupResolver {
   @Query(() => GroupConnection)
   listGroups(@Context() context) {
     const { email } = context.req.user;
-    return { email };
+    return this.groupService.listGroups({ email });
   }
 }

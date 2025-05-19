@@ -22,6 +22,19 @@ export class EmailConsumer extends WorkerHost {
 
         break;
       }
+
+      case "send-group-join-request": {
+        const { email, name, request_id, type } = job.data;
+
+        await this.emailService.sendGroupJoinRequest(
+          email,
+          name,
+          request_id,
+          type,
+        );
+
+        break;
+      }
     }
   }
 }

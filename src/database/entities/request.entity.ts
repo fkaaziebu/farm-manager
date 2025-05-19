@@ -4,6 +4,7 @@ import {
   Column,
   OneToOne,
   ManyToOne,
+  JoinColumn,
 } from "typeorm";
 import { Farm } from "./farm.entity";
 import { Worker } from "./worker.entity";
@@ -42,9 +43,11 @@ export class Request {
   expires_at: Date;
 
   @OneToOne(() => Worker)
+  @JoinColumn()
   worker: Worker;
 
   @OneToOne(() => Farm)
+  @JoinColumn()
   farm: Farm;
 
   @ManyToOne(() => Group, (group) => group.requests)
