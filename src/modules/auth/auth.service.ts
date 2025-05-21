@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Admin, Worker } from "../../database/entities";
 import { JwtService } from "@nestjs/jwt";
 import { EmailProducer } from "../queue/producers/email.producer";
+import { WorkerRole } from "src/database/types/worker.type";
 
 @Injectable()
 export class AuthService {
@@ -111,11 +112,13 @@ export class AuthService {
       name: string;
       email: string;
       role: "ADMIN" | "WORKER";
+      roles: WorkerRole[];
     } = {
       id: user.id,
       name: user.name,
       email: user.email,
       role: "WORKER",
+      roles: user.roles,
     };
 
     const access_token = this.jwtService.sign(payload);

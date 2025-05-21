@@ -41,6 +41,7 @@ import {
   BadRequestException,
   ConflictException,
   NotFoundException,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { WorkerRole } from "../../database/types/worker.type";
 import { LivestockGender, TaskType } from "../../database/types";
@@ -212,17 +213,30 @@ describe("FarmService", () => {
 
   describe("updateFarm", () => {
     it("returns farm object when admin updates farm", async () => {
-      await registerAdmin(adminInfo);
+      await setupForQueries();
 
-      const farm = await farmService.createFarm({
+      const admin = await getAdmin(adminInfo.email);
+
+      let response = await farmService.updateFarm({
         ...farmInfo,
+        farmTag: admin.farms[0].farm_tag,
         email: adminInfo.email,
+        role: "ADMIN",
       });
 
-      const response = await farmService.updateFarm({
+      expect(response.name).toBe(farmInfo.name);
+      expect(response.farm_type).toBe(farmInfo.farmType);
+      expect(response.location).toBe(farmInfo.location);
+      expect(response.area).toBe(farmInfo.area);
+      expect(response.barns).toBeUndefined();
+      expect(response.pens).toBeUndefined();
+      expect(response.livestock).toBeUndefined();
+
+      response = await farmService.updateFarm({
         ...farmInfo,
-        farmTag: farm.farm_tag,
-        email: adminInfo.email,
+        farmTag: admin.farms[0].farm_tag,
+        email: adminInfo.workers[1].email,
+        role: "WORKER",
       });
 
       expect(response.name).toBe(farmInfo.name);
@@ -240,6 +254,7 @@ describe("FarmService", () => {
           ...farmInfo,
           farmTag: "52c13e61-be8e-4b8b-8da8-dd0940f87906",
           email: adminInfo.email,
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -248,6 +263,7 @@ describe("FarmService", () => {
           ...farmInfo,
           farmTag: "52c13e61-be8e-4b8b-8da8-dd0940f87906",
           email: adminInfo.email,
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Farm not found");
     });
@@ -266,6 +282,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         workers: adminInfo.workers,
+        role: "ADMIN",
       });
 
       expect(response.workers.length).toEqual(2);
@@ -278,6 +295,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           farmTag: "52c13e61-be8e-4b8b-8da8-dd0940f87906",
           workers: adminInfo.workers,
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -286,6 +304,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           farmTag: "52c13e61-be8e-4b8b-8da8-dd0940f87906",
           workers: adminInfo.workers,
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Farm not found");
 
@@ -294,6 +313,7 @@ describe("FarmService", () => {
           email: "fkaaziebu1998@gmail.com",
           farmTag: "52c13e61-be8e-4b8b-8da8-dd0940f87906",
           workers: adminInfo.workers,
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Farm not found");
     });
@@ -310,6 +330,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         workers: [adminInfo.workers[0]],
+        role: "ADMIN",
       });
 
       await expect(
@@ -317,6 +338,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           farmTag: farm.farm_tag,
           workers: adminInfo.workers,
+          role: "ADMIN",
         }),
       ).rejects.toThrow(BadRequestException);
 
@@ -325,6 +347,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           farmTag: farm.farm_tag,
           workers: adminInfo.workers,
+          role: "ADMIN",
         }),
       ).rejects.toThrow(
         `This email has already been taken, ${adminInfo.workers[0].email}`,
@@ -345,6 +368,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         workers: adminInfo.workers,
+        role: "ADMIN",
       });
 
       const farm2 = await farmService.createFarm({
@@ -357,6 +381,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm2.farm_tag,
         workerTags: farm1.workers.map((worker) => worker.worker_tag),
+        role: "ADMIN",
       });
 
       expect(response.workers.length).toEqual(2);
@@ -387,20 +412,27 @@ describe("FarmService", () => {
 
   describe("addBarnsToFarm", () => {
     it("returns farm with barns when barns added successfully", async () => {
-      await registerAdmin(adminInfo);
+      await setupForQueries();
 
-      const farm = await farmService.createFarm({
-        ...farmInfo,
+      const admin = await getAdmin(adminInfo.email);
+
+      let response = await farmService.addBarnsToFarm({
         email: adminInfo.email,
+        farmTag: admin.farms[0].farm_tag,
+        barns: [{ ...adminInfo.barns[0], unitId: "HN3" }],
+        role: "ADMIN",
       });
 
-      const response = await farmService.addBarnsToFarm({
-        email: adminInfo.email,
-        farmTag: farm.farm_tag,
-        barns: adminInfo.barns,
+      expect(response.barns.length).toEqual(3);
+
+      response = await farmService.addBarnsToFarm({
+        email: adminInfo.workers[1].email,
+        farmTag: admin.farms[0].farm_tag,
+        barns: [{ ...adminInfo.barns[0], unitId: "HN4" }],
+        role: "WORKER",
       });
 
-      expect(response.barns.length).toEqual(2);
+      expect(response.barns.length).toEqual(4);
     });
   });
 
@@ -417,6 +449,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       const response = await farmService.updateBarn({
@@ -428,6 +461,7 @@ describe("FarmService", () => {
           ),
           name: "Fred Barn updated",
         },
+        role: "ADMIN",
       });
 
       expect(response.name).toBe("Fred Barn updated");
@@ -442,6 +476,7 @@ describe("FarmService", () => {
             ...adminInfo.barns.find((bn) => bn.unitId === "HN1"),
             name: "Fred Barn updated",
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -453,6 +488,7 @@ describe("FarmService", () => {
             ...adminInfo.barns.find((bn) => bn.unitId === "HN1"),
             name: "Fred Barn updated",
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Barn not found");
     });
@@ -460,94 +496,79 @@ describe("FarmService", () => {
 
   describe("addPensToBarn", () => {
     it("returns barn with pen when pen added successfully", async () => {
-      await registerAdmin(adminInfo);
+      await setupForQueries();
 
-      const farm = await farmService.createFarm({
-        ...farmInfo,
+      let response = await farmService.addPensToBarn({
         email: adminInfo.email,
+        barnUnitId: adminInfo.barns.find((bn) => bn.unitId === "HN1").unitId,
+        pens: [{ ...adminInfo.pens[0], unitId: "PEN3" }],
+        role: "ADMIN",
       });
 
-      const farmWithBarns = await farmService.addBarnsToFarm({
-        email: adminInfo.email,
-        farmTag: farm.farm_tag,
-        barns: adminInfo.barns,
+      expect(response.pens.length).toEqual(3);
+
+      response = await farmService.addPensToBarn({
+        email: adminInfo.workers[1].email,
+        barnUnitId: adminInfo.barns.find((bn) => bn.unitId === "HN1").unitId,
+        pens: [{ ...adminInfo.pens[0], unitId: "PEN4" }],
+        role: "WORKER",
       });
 
-      const response = await farmService.addPensToBarn({
-        email: adminInfo.email,
-        barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
-          .unit_id,
-        pens: adminInfo.pens,
-      });
-
-      expect(response.pens.length).toEqual(2);
+      expect(response.pens.length).toEqual(4);
     });
   });
 
   describe("updatePen", () => {
     it("returns pen when pen added successfully", async () => {
-      await registerAdmin(adminInfo);
+      await setupForQueries();
 
-      const farm = await farmService.createFarm({
-        ...farmInfo,
-        email: adminInfo.email,
-      });
-
-      const farmWithBarns = await farmService.addBarnsToFarm({
-        email: adminInfo.email,
-        farmTag: farm.farm_tag,
-        barns: adminInfo.barns,
-      });
-
-      await farmService.addPensToBarn({
-        email: adminInfo.email,
-        barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
-          .unit_id,
-        pens: adminInfo.pens,
-      });
-
-      const response = await farmService.updatePen({
+      let response = await farmService.updatePen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         pen: {
           ...adminInfo.pens.find((pn) => pn.unitId === "PEN1"),
           name: "Fred Pen 1 updated",
         },
+        role: "ADMIN",
       });
 
       expect(response.name).toBe("Fred Pen 1 updated");
+
+      response = await farmService.updatePen({
+        email: adminInfo.workers[1].email,
+        penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
+        pen: {
+          ...adminInfo.pens.find((pn) => pn.unitId === "PEN1"),
+          name: "Fred Pen 2 updated",
+        },
+        role: "WORKER",
+      });
+
+      expect(response.name).toBe("Fred Pen 2 updated");
     });
   });
 
   describe("addLivestockToPen", () => {
     it("returns pen with livestock when added successfully", async () => {
-      await registerAdmin(adminInfo);
+      await setupForQueries();
 
-      const farm = await farmService.createFarm({
-        ...farmInfo,
-        email: adminInfo.email,
-      });
-
-      const farmWithBarns = await farmService.addBarnsToFarm({
-        email: adminInfo.email,
-        farmTag: farm.farm_tag,
-        barns: adminInfo.barns,
-      });
-
-      await farmService.addPensToBarn({
-        email: adminInfo.email,
-        barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
-          .unit_id,
-        pens: adminInfo.pens,
-      });
-
-      const response = await farmService.addLivestockToPen({
+      let response = await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
-        livestock: adminInfo.livestock,
+        livestock: [{ ...adminInfo.livestock[0], livestockTag: "LST3" }],
+        role: "ADMIN",
       });
 
-      expect(response.livestock.length).toEqual(2);
+      expect(response.livestock.length).toEqual(3);
+
+      response = await farmService.addLivestockToPen({
+        email: adminInfo.workers[1].email,
+        penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
+        livestock: [{ ...adminInfo.livestock[0], livestockTag: "LST4" }],
+        role: "WORKER",
+      });
+
+      expect(response.livestock.length).toEqual(4);
     });
 
     it("throws an error if livestock already exist", async () => {
@@ -562,6 +583,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -569,12 +591,14 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: adminInfo.livestock,
+        role: "ADMIN",
       });
 
       await expect(
@@ -582,6 +606,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
           livestock: [adminInfo.livestock[0]],
+          role: "ADMIN",
         }),
       ).rejects.toThrow(BadRequestException);
 
@@ -590,6 +615,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
           livestock: [adminInfo.livestock[0]],
+          role: "ADMIN",
         }),
       ).rejects.toThrow(
         `A livestock with livestock tag ${adminInfo.livestock[0].livestockTag} already exist`,
@@ -602,6 +628,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
           livestock: adminInfo.livestock,
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -610,6 +637,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
           livestock: adminInfo.livestock,
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Pen not found");
     });
@@ -617,31 +645,12 @@ describe("FarmService", () => {
 
   describe("updateLivestock", () => {
     it("returns updated livestock when successful", async () => {
-      await registerAdmin(adminInfo);
-
-      const farm = await farmService.createFarm({
-        ...farmInfo,
-        email: adminInfo.email,
-      });
-
-      const farmWithBarns = await farmService.addBarnsToFarm({
-        email: adminInfo.email,
-        farmTag: farm.farm_tag,
-        barns: adminInfo.barns,
-      });
-
-      await farmService.addPensToBarn({
-        email: adminInfo.email,
-        barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
-          .unit_id,
-        pens: adminInfo.pens,
-      });
+      await setupForQueries();
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: [
-          ...adminInfo.livestock,
           {
             livestockTag: "LST3",
             livestockType: LivestockType.GRASSCUTTER,
@@ -651,9 +660,10 @@ describe("FarmService", () => {
             weight: 20,
           },
         ],
+        role: "ADMIN",
       });
 
-      const response = await farmService.updateLivestock({
+      let response = await farmService.updateLivestock({
         email: adminInfo.email,
         livestockTag: "LST3",
         livestock: {
@@ -668,6 +678,7 @@ describe("FarmService", () => {
           motherTag: adminInfo.livestock[1].livestockTag,
           fatherTag: adminInfo.livestock[0].livestockTag,
         },
+        role: "ADMIN",
       });
 
       expect(response.mother.livestock_tag).toBe(
@@ -678,7 +689,7 @@ describe("FarmService", () => {
         adminInfo.livestock[0].livestockTag,
       );
 
-      const motherLivestock = await farmService.getLivestock({
+      let motherLivestock = await farmService.getLivestock({
         email: adminInfo.email,
         livestockTag: response.mother.livestock_tag,
         role: "ADMIN",
@@ -687,10 +698,55 @@ describe("FarmService", () => {
       expect(motherLivestock.maternalOffspring.length).toBe(1);
       expect(motherLivestock.maternalOffspring[0].livestock_tag).toBe("LST3");
 
-      const fatherLivestock = await farmService.getLivestock({
+      let fatherLivestock = await farmService.getLivestock({
         email: adminInfo.email,
         livestockTag: response.father.livestock_tag,
         role: "ADMIN",
+      });
+
+      expect(fatherLivestock.paternalOffspring.length).toBe(1);
+      expect(fatherLivestock.paternalOffspring[0].livestock_tag).toBe("LST3");
+
+      // worker stuffs
+      response = await farmService.updateLivestock({
+        email: adminInfo.workers[1].email,
+        livestockTag: "LST3",
+        livestock: {
+          ...{
+            livestockTag: "LST3",
+            livestockType: LivestockType.GRASSCUTTER,
+            birthDate: new Date(),
+            breed: "WHITE",
+            gender: LivestockGender.MALE,
+            weight: 20,
+          },
+          motherTag: adminInfo.livestock[1].livestockTag,
+          fatherTag: adminInfo.livestock[0].livestockTag,
+        },
+        role: "WORKER",
+      });
+
+      expect(response.mother.livestock_tag).toBe(
+        adminInfo.livestock[1].livestockTag,
+      );
+
+      expect(response.father.livestock_tag).toBe(
+        adminInfo.livestock[0].livestockTag,
+      );
+
+      motherLivestock = await farmService.getLivestock({
+        email: adminInfo.workers[1].email,
+        livestockTag: response.mother.livestock_tag,
+        role: "WORKER",
+      });
+
+      expect(motherLivestock.maternalOffspring.length).toBe(1);
+      expect(motherLivestock.maternalOffspring[0].livestock_tag).toBe("LST3");
+
+      fatherLivestock = await farmService.getLivestock({
+        email: adminInfo.workers[1].email,
+        livestockTag: response.father.livestock_tag,
+        role: "WORKER",
       });
 
       expect(fatherLivestock.paternalOffspring.length).toBe(1);
@@ -706,6 +762,7 @@ describe("FarmService", () => {
             ...adminInfo.livestock[0],
             motherTag: adminInfo.livestock[1].livestockTag,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -717,6 +774,7 @@ describe("FarmService", () => {
             ...adminInfo.livestock[0],
             motherTag: adminInfo.livestock[1].livestockTag,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Livestock not found");
     });
@@ -735,6 +793,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -742,12 +801,14 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: adminInfo.livestock,
+        role: "ADMIN",
       });
 
       const response = await farmService.addLivestockBreedingRecord({
@@ -807,6 +868,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -814,12 +876,14 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: adminInfo.livestock,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockBreedingRecord({
@@ -877,6 +941,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -884,18 +949,21 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: [adminInfo.livestock[0]],
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN2").unitId,
         livestock: [adminInfo.livestock[1]],
+        role: "ADMIN",
       });
 
       await expect(
@@ -943,6 +1011,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -950,12 +1019,14 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: adminInfo.livestock,
+        role: "ADMIN",
       });
 
       const record = await farmService.addLivestockBreedingRecord({
@@ -1035,6 +1106,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -1042,12 +1114,14 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: adminInfo.livestock,
+        role: "ADMIN",
       });
 
       const response = await farmService.addLivestockHealthRecord({
@@ -1123,6 +1197,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -1130,12 +1205,14 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: adminInfo.livestock,
+        role: "ADMIN",
       });
 
       const record = await farmService.addLivestockHealthRecord({
@@ -1226,6 +1303,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -1233,12 +1311,14 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: adminInfo.livestock,
+        role: "ADMIN",
       });
 
       const response = await farmService.addLivestockGrowthRecord({
@@ -1302,6 +1382,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -1309,12 +1390,14 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: adminInfo.livestock,
+        role: "ADMIN",
       });
 
       const record = await farmService.addLivestockGrowthRecord({
@@ -1391,6 +1474,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -1398,12 +1482,14 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: adminInfo.livestock,
+        role: "ADMIN",
       });
 
       const response = await farmService.addLivestockExpenseRecord({
@@ -1467,6 +1553,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -1474,12 +1561,14 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: adminInfo.livestock,
+        role: "ADMIN",
       });
 
       const record = await farmService.addLivestockExpenseRecord({
@@ -1556,6 +1645,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -1563,12 +1653,14 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: adminInfo.livestock,
+        role: "ADMIN",
       });
 
       const response = await farmService.addLivestockSalesRecord({
@@ -1643,6 +1735,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -1650,12 +1743,14 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: adminInfo.livestock,
+        role: "ADMIN",
       });
 
       const record = await farmService.addLivestockSalesRecord({
@@ -1747,6 +1842,7 @@ describe("FarmService", () => {
         email: adminInfo.email,
         farmTag: farm.farm_tag,
         barns: adminInfo.barns,
+        role: "ADMIN",
       });
 
       await farmService.addPensToBarn({
@@ -1754,12 +1850,14 @@ describe("FarmService", () => {
         barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
           .unit_id,
         pens: adminInfo.pens,
+        role: "ADMIN",
       });
 
       await farmService.addLivestockToPen({
         email: adminInfo.email,
         penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
         livestock: adminInfo.livestock,
+        role: "ADMIN",
       });
 
       const response = await farmService.markLivestockAsUnavailable({
@@ -1811,35 +1909,13 @@ describe("FarmService", () => {
 
   describe("createTask", () => {
     it("returns a task after creation", async () => {
-      await registerAdmin(adminInfo);
+      await setupForQueries();
 
-      const farm = await farmService.createFarm({
-        ...farmInfo,
-        email: adminInfo.email,
-      });
-
-      const farmWithBarns = await farmService.addBarnsToFarm({
-        email: adminInfo.email,
-        farmTag: farm.farm_tag,
-        barns: adminInfo.barns,
-      });
-
-      await farmService.addPensToBarn({
-        email: adminInfo.email,
-        barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
-          .unit_id,
-        pens: adminInfo.pens,
-      });
-
-      await farmService.addLivestockToPen({
-        email: adminInfo.email,
-        penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
-        livestock: adminInfo.livestock,
-      });
+      let admin = await getAdmin(adminInfo.email);
 
       let response = await farmService.createTask({
         email: adminInfo.email,
-        farmTag: farm.farm_tag,
+        farmTag: admin.farms[0].farm_tag,
         task: {
           description: "Test Task Description",
           startingDate: new Date(),
@@ -1848,20 +1924,21 @@ describe("FarmService", () => {
           notes: "Test Task Notes",
           status: TaskStatus.PENDING,
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
       expect(response.type).toBe(TaskType.REGULAR_INSPECTION);
       expect(response.status).toBe(TaskStatus.PENDING);
       expect(response.farm).toBeDefined();
-      expect(response.farm.farm_tag).toEqual(farm.farm_tag);
+      expect(response.farm.farm_tag).toEqual(admin.farms[0].farm_tag);
 
-      let admin = await getAdmin(adminInfo.email);
+      admin = await getAdmin(adminInfo.email);
       expect(admin.assigned_tasks).toHaveLength(1);
 
       response = await farmService.createTask({
         email: adminInfo.email,
-        farmTag: farm.farm_tag,
+        farmTag: admin.farms[0].farm_tag,
         task: {
           description: "Test Task Description",
           startingDate: new Date(),
@@ -1870,16 +1947,40 @@ describe("FarmService", () => {
           notes: "Test Task Notes",
           status: TaskStatus.PENDING,
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
       expect(response.type).toBe(TaskType.REGULAR_INSPECTION);
       expect(response.status).toBe(TaskStatus.PENDING);
       expect(response.farm).toBeDefined();
-      expect(response.farm.farm_tag).toEqual(farm.farm_tag);
+      expect(response.farm.farm_tag).toEqual(admin.farms[0].farm_tag);
 
       admin = await getAdmin(adminInfo.email);
       expect(admin.assigned_tasks).toHaveLength(2);
+
+      response = await farmService.createTask({
+        email: adminInfo.workers[1].email,
+        farmTag: admin.farms[0].farm_tag,
+        task: {
+          description: "Test Task Description",
+          startingDate: new Date(),
+          completionDate: new Date(),
+          type: TaskType.REGULAR_INSPECTION,
+          notes: "Test Task Notes",
+          status: TaskStatus.PENDING,
+        },
+        role: "WORKER",
+      });
+
+      expect(response).toBeDefined();
+      expect(response.type).toBe(TaskType.REGULAR_INSPECTION);
+      expect(response.status).toBe(TaskStatus.PENDING);
+      expect(response.farm).toBeDefined();
+      expect(response.farm.farm_tag).toEqual(admin.farms[0].farm_tag);
+
+      admin = await getAdmin(adminInfo.email);
+      expect(admin.assigned_tasks).toHaveLength(3);
     });
 
     it("throws an error when admin with email or farmTag not found", async () => {
@@ -1897,6 +1998,7 @@ describe("FarmService", () => {
             notes: "Test Task Notes",
             status: TaskStatus.PENDING,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(BadRequestException);
 
@@ -1912,6 +2014,7 @@ describe("FarmService", () => {
             notes: "Test Task Notes",
             status: TaskStatus.PENDING,
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Admin with provided email or farmTag not found");
     });
@@ -1919,35 +2022,13 @@ describe("FarmService", () => {
 
   describe("updateTask", () => {
     it("returns a task after updating", async () => {
-      await registerAdmin(adminInfo);
+      await setupForQueries();
 
-      const farm = await farmService.createFarm({
-        ...farmInfo,
-        email: adminInfo.email,
-      });
-
-      const farmWithBarns = await farmService.addBarnsToFarm({
-        email: adminInfo.email,
-        farmTag: farm.farm_tag,
-        barns: adminInfo.barns,
-      });
-
-      await farmService.addPensToBarn({
-        email: adminInfo.email,
-        barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
-          .unit_id,
-        pens: adminInfo.pens,
-      });
-
-      await farmService.addLivestockToPen({
-        email: adminInfo.email,
-        penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
-        livestock: adminInfo.livestock,
-      });
+      const admin = await getAdmin(adminInfo.email);
 
       const task = await farmService.createTask({
         email: adminInfo.email,
-        farmTag: farm.farm_tag,
+        farmTag: admin.farms[0].farm_tag,
         task: {
           description: "Test Task Description",
           startingDate: new Date(),
@@ -1956,9 +2037,10 @@ describe("FarmService", () => {
           notes: "Test Task Notes",
           status: TaskStatus.PENDING,
         },
+        role: "ADMIN",
       });
 
-      const response = await farmService.updateTask({
+      let response = await farmService.updateTask({
         email: adminInfo.email,
         taskId: task.id,
         task: {
@@ -1966,10 +2048,25 @@ describe("FarmService", () => {
           completionDate: new Date(),
           notes: "Updated Task Notes",
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
       expect(response.notes).toBe("Updated Task Notes");
+
+      response = await farmService.updateTask({
+        email: adminInfo.workers[1].email,
+        taskId: task.id,
+        task: {
+          startingDate: new Date(),
+          completionDate: new Date(),
+          notes: "Updated Task Notes 2",
+        },
+        role: "WORKER",
+      });
+
+      expect(response).toBeDefined();
+      expect(response.notes).toBe("Updated Task Notes 2");
     });
 
     it("throws an error if task not found", async () => {
@@ -1984,6 +2081,7 @@ describe("FarmService", () => {
             completionDate: new Date(),
             notes: "Updated Task Notes",
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -1996,6 +2094,7 @@ describe("FarmService", () => {
             completionDate: new Date(),
             notes: "Updated Task Notes",
           },
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Task not found");
     });
@@ -2017,12 +2116,14 @@ describe("FarmService", () => {
           notes: "Test Task Notes",
           status: TaskStatus.PENDING,
         },
+        role: "ADMIN",
       });
 
       await farmService.assignTaskToWorker({
         email: adminInfo.email,
         taskId: task.id,
         workerTag: admin.workers[0].worker_tag,
+        role: "ADMIN",
       });
 
       const response = await farmService.updateTaskProgress({
@@ -2079,12 +2180,14 @@ describe("FarmService", () => {
           notes: "Test Task Notes",
           status: TaskStatus.PENDING,
         },
+        role: "ADMIN",
       });
 
       await farmService.assignTaskToWorker({
         email: adminInfo.email,
         taskId: task.id,
         workerTag: admin.workers[0].worker_tag,
+        role: "ADMIN",
       });
 
       await expect(
@@ -2113,12 +2216,12 @@ describe("FarmService", () => {
     });
   });
 
-  describe("assignTaskToWorkers", () => {
+  describe("assignTaskToWorker", () => {
     it("returns task with assigned workers after assigning task", async () => {
       await setupForQueries();
       let admin = await getAdmin(adminInfo.email);
 
-      const task = await farmService.createTask({
+      let task = await farmService.createTask({
         email: adminInfo.email,
         farmTag: admin.farms[0].farm_tag,
         task: {
@@ -2129,12 +2232,14 @@ describe("FarmService", () => {
           notes: "Test Task Notes",
           status: TaskStatus.PENDING,
         },
+        role: "ADMIN",
       });
 
-      const response = await farmService.assignTaskToWorker({
+      let response = await farmService.assignTaskToWorker({
         email: adminInfo.email,
         taskId: task.id,
         workerTag: admin.workers[0].worker_tag,
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
@@ -2146,6 +2251,38 @@ describe("FarmService", () => {
           (worker) => worker.worker_tag === response.worker.worker_tag,
         ).assigned_tasks,
       ).toHaveLength(1);
+
+      // worker
+      task = await farmService.createTask({
+        email: adminInfo.workers[1].email,
+        farmTag: admin.farms[0].farm_tag,
+        task: {
+          description: "Test Task Description",
+          startingDate: new Date(),
+          completionDate: new Date(),
+          type: TaskType.REGULAR_INSPECTION,
+          notes: "Test Task Notes",
+          status: TaskStatus.PENDING,
+        },
+        role: "WORKER",
+      });
+
+      response = await farmService.assignTaskToWorker({
+        email: adminInfo.workers[1].email,
+        taskId: task.id,
+        workerTag: admin.workers[0].worker_tag,
+        role: "WORKER",
+      });
+
+      expect(response).toBeDefined();
+      expect(response.worker.worker_tag).toEqual(admin.workers[0].worker_tag);
+
+      admin = await getAdmin(adminInfo.email);
+      expect(
+        admin.workers.find(
+          (worker) => worker.worker_tag === response.worker.worker_tag,
+        ).assigned_tasks,
+      ).toHaveLength(2);
     });
 
     it("throws an error if task not found", async () => {
@@ -2157,6 +2294,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           taskId: 1,
           workerTag: admin.workers[0].worker_tag,
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -2165,6 +2303,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           taskId: 1,
           workerTag: admin.workers[0].worker_tag,
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Task not found");
     });
@@ -2184,6 +2323,7 @@ describe("FarmService", () => {
           notes: "Test Task Notes",
           status: TaskStatus.PENDING,
         },
+        role: "ADMIN",
       });
 
       await expect(
@@ -2191,6 +2331,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           taskId: task.id,
           workerTag: "6eb3ca36-f74e-45f0-ae70-e17ad0a4c57d",
+          role: "ADMIN",
         }),
       ).rejects.toThrow(NotFoundException);
 
@@ -2199,6 +2340,7 @@ describe("FarmService", () => {
           email: adminInfo.email,
           taskId: task.id,
           workerTag: "6eb3ca36-f74e-45f0-ae70-e17ad0a4c57d",
+          role: "ADMIN",
         }),
       ).rejects.toThrow("Worker not found");
     });
@@ -2209,7 +2351,7 @@ describe("FarmService", () => {
       await setupForQueries();
       const admin = await getAdmin(adminInfo.email);
 
-      const response = await farmService.updateWorker({
+      let response = await farmService.updateWorker({
         email: admin.email,
         workerTag: admin.workers[0].worker_tag,
         workerData: {
@@ -2220,10 +2362,30 @@ describe("FarmService", () => {
             { name: "Achievement 2", date: new Date() },
           ],
         },
+        role: "ADMIN",
       });
 
       expect(response).toBeDefined();
       expect(response.name).toEqual("Updated Worker Name");
+      expect(response.phone).toEqual("1234567890");
+      expect(response.achievements).toHaveLength(2);
+
+      response = await farmService.updateWorker({
+        email: adminInfo.workers[1].email,
+        workerTag: admin.workers[0].worker_tag,
+        workerData: {
+          name: "Updated Worker Name 2",
+          phone: "1234567890",
+          achievements: [
+            { name: "Achievement 1", date: new Date() },
+            { name: "Achievement 2", date: new Date() },
+          ],
+        },
+        role: "WORKER",
+      });
+
+      expect(response).toBeDefined();
+      expect(response.name).toEqual("Updated Worker Name 2");
       expect(response.phone).toEqual("1234567890");
       expect(response.achievements).toHaveLength(2);
     });
@@ -2468,6 +2630,7 @@ describe("FarmService", () => {
           notes: "Test Task Notes",
           status: TaskStatus.PENDING,
         },
+        role: "ADMIN",
       });
 
       const response = await farmService.listTask({
@@ -2493,7 +2656,7 @@ describe("FarmService", () => {
       {
         name: "Delali Dorwu",
         email: "delalidorwu@gmail.com",
-        roles: [WorkerRole.ANIMAL_CARETAKER],
+        roles: [WorkerRole.FARM_MANAGER, WorkerRole.ANIMAL_CARETAKER],
       },
     ],
     barns: [
@@ -2593,6 +2756,7 @@ describe("FarmService", () => {
       email: adminInfo.email,
       farmTag: farm.farm_tag,
       workers: adminInfo.workers,
+      role: "ADMIN",
     });
 
     // add barns to farm
@@ -2600,6 +2764,7 @@ describe("FarmService", () => {
       email: adminInfo.email,
       farmTag: farm.farm_tag,
       barns: adminInfo.barns,
+      role: "ADMIN",
     });
 
     // add pens to farm
@@ -2608,6 +2773,7 @@ describe("FarmService", () => {
       barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
         .unit_id,
       pens: adminInfo.pens,
+      role: "ADMIN",
     });
 
     // add livestock to pen
@@ -2615,6 +2781,7 @@ describe("FarmService", () => {
       email: adminInfo.email,
       penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
       livestock: adminInfo.livestock,
+      role: "ADMIN",
     });
 
     // add livestock breeding record

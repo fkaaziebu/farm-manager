@@ -60,6 +60,9 @@ import { PaginationInput } from "src/database/inputs";
 import { RolesGuard } from "./guards/roles.guard";
 import { Roles } from "./decorators/roles.decorator";
 import { ReviewType } from "../../database/types/review.type";
+import { WorkerRolesGuard } from "./guards/worker-roles.guard";
+import { WorkerRoles } from "./decorators/worker-roles.decorator";
+import { WorkerRole } from "src/database/types/worker.type";
 
 @Resolver()
 export class FarmResolver {
@@ -254,8 +257,9 @@ export class FarmResolver {
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard, RolesGuard, WorkerRolesGuard)
+  @Roles("admin", "worker")
+  @WorkerRoles(WorkerRole.FARM_MANAGER)
   @Mutation(() => FarmTypeClass)
   updateFarm(
     @Context() context,
@@ -266,7 +270,7 @@ export class FarmResolver {
     @Args("farmType", { type: () => FarmType, nullable: true })
     farmType?: FarmType,
   ) {
-    const { email } = context.req.user;
+    const { email, role } = context.req.user;
     return this.farmService.updateFarm({
       farmTag,
       email,
@@ -274,11 +278,13 @@ export class FarmResolver {
       location,
       area,
       farmType,
+      role,
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard, RolesGuard, WorkerRolesGuard)
+  @Roles("admin", "worker")
+  @WorkerRoles(WorkerRole.FARM_MANAGER)
   @Mutation(() => FarmTypeClass)
   assignWorkersToFarm(
     @Context() context,
@@ -286,16 +292,18 @@ export class FarmResolver {
     @Args("workerTags", { type: () => [String!]!, nullable: false })
     workerTags: string[],
   ) {
-    const { email } = context.req.user;
+    const { email, role } = context.req.user;
     return this.farmService.assignWorkersToFarm({
       farmTag,
       email,
       workerTags,
+      role,
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard, RolesGuard, WorkerRolesGuard)
+  @Roles("admin", "worker")
+  @WorkerRoles(WorkerRole.FARM_MANAGER)
   @Mutation(() => FarmTypeClass)
   addWorkersToFarm(
     @Context() context,
@@ -303,16 +311,18 @@ export class FarmResolver {
     @Args("workers", { type: () => [WorkerInput!]!, nullable: false })
     workers: WorkerInput[],
   ) {
-    const { email } = context.req.user;
+    const { email, role } = context.req.user;
     return this.farmService.addWorkersToFarm({
       farmTag,
       email,
       workers,
+      role,
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard, RolesGuard, WorkerRolesGuard)
+  @Roles("admin", "worker")
+  @WorkerRoles(WorkerRole.FARM_MANAGER)
   @Mutation(() => WorkerType)
   updateWorker(
     @Context() context,
@@ -320,16 +330,18 @@ export class FarmResolver {
     @Args("workerData", { type: () => UpdateWorkerInput!, nullable: false })
     workerData: WorkerInput,
   ) {
-    const { email } = context.req.user;
+    const { email, role } = context.req.user;
     return this.farmService.updateWorker({
       workerTag,
       email,
       workerData,
+      role,
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard, RolesGuard, WorkerRolesGuard)
+  @Roles("admin", "worker")
+  @WorkerRoles(WorkerRole.FARM_MANAGER)
   @Mutation(() => FarmTypeClass)
   addBarnsToFarm(
     @Context() context,
@@ -337,17 +349,19 @@ export class FarmResolver {
     @Args("barns", { type: () => [BarnInput!]!, nullable: false })
     barns: BarnInput[],
   ) {
-    const { email } = context.req.user;
+    const { email, role } = context.req.user;
 
     return this.farmService.addBarnsToFarm({
       farmTag,
       email,
       barns,
+      role,
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard, RolesGuard, WorkerRolesGuard)
+  @Roles("admin", "worker")
+  @WorkerRoles(WorkerRole.FARM_MANAGER)
   @Mutation(() => BarnType)
   updateBarn(
     @Context() context,
@@ -355,17 +369,19 @@ export class FarmResolver {
     @Args("barn", { type: () => UpdateBarnInput, nullable: false })
     barn: UpdateBarnInput,
   ) {
-    const { email } = context.req.user;
+    const { email, role } = context.req.user;
 
     return this.farmService.updateBarn({
       email,
       barnUnitId,
       barn,
+      role,
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard, RolesGuard, WorkerRolesGuard)
+  @Roles("admin", "worker")
+  @WorkerRoles(WorkerRole.FARM_MANAGER)
   @Mutation(() => BarnType)
   addPensToBarn(
     @Context() context,
@@ -373,17 +389,19 @@ export class FarmResolver {
     @Args("pens", { type: () => [PenInput!]!, nullable: false })
     pens: PenInput[],
   ) {
-    const { email } = context.req.user;
+    const { email, role } = context.req.user;
 
     return this.farmService.addPensToBarn({
       email,
       barnUnitId,
       pens,
+      role,
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard, RolesGuard, WorkerRolesGuard)
+  @Roles("admin", "worker")
+  @WorkerRoles(WorkerRole.FARM_MANAGER)
   @Mutation(() => PenType)
   updatePen(
     @Context() context,
@@ -391,17 +409,19 @@ export class FarmResolver {
     @Args("pen", { type: () => UpdatePenInput!, nullable: false })
     pen: UpdatePenInput,
   ) {
-    const { email } = context.req.user;
+    const { email, role } = context.req.user;
 
     return this.farmService.updatePen({
       email,
       penUnitId,
       pen,
+      role,
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard, RolesGuard, WorkerRolesGuard)
+  @Roles("admin", "worker")
+  @WorkerRoles(WorkerRole.FARM_MANAGER)
   @Mutation(() => PenType)
   addLivestockToPen(
     @Context() context,
@@ -409,17 +429,18 @@ export class FarmResolver {
     @Args("livestock", { type: () => [LivestockInput!]!, nullable: false })
     livestock: LivestockInput[],
   ) {
-    const { email } = context.req.user;
+    const { email, role } = context.req.user;
 
     return this.farmService.addLivestockToPen({
       email,
       penUnitId,
       livestock,
+      role,
     });
   }
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @Roles("admin", "worker")
   @Mutation(() => LivestockTypeClass)
   updateLivestock(
     @Context() context,
@@ -427,12 +448,13 @@ export class FarmResolver {
     @Args("livestock", { type: () => UpdateLivestockInput, nullable: false })
     livestock: UpdateLivestockInput,
   ) {
-    const { email } = context.req.user;
+    const { email, role } = context.req.user;
 
     return this.farmService.updateLivestock({
       email,
       livestockTag,
       livestock,
+      role,
     });
   }
 
@@ -458,8 +480,9 @@ export class FarmResolver {
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard, RolesGuard, WorkerRolesGuard)
+  @Roles("admin", "worker")
+  @WorkerRoles(WorkerRole.FARM_MANAGER)
   @Mutation(() => TaskTypeClass)
   createTask(
     @Context() context,
@@ -467,17 +490,19 @@ export class FarmResolver {
     @Args("task", { type: () => TaskInput!, nullable: false })
     task: TaskInput,
   ) {
-    const { email } = context.req.user;
+    const { email, role } = context.req.user;
 
     return this.farmService.createTask({
       email,
       farmTag,
       task,
+      role,
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard, RolesGuard, WorkerRolesGuard)
+  @Roles("admin", "worker")
+  @WorkerRoles(WorkerRole.FARM_MANAGER)
   @Mutation(() => TaskTypeClass)
   updateTask(
     @Context() context,
@@ -485,12 +510,13 @@ export class FarmResolver {
     @Args("task", { type: () => UpdateTaskInput!, nullable: false })
     task: UpdateTaskInput,
   ) {
-    const { email } = context.req.user;
+    const { email, role } = context.req.user;
 
     return this.farmService.updateTask({
       email,
       taskId,
       task,
+      role,
     });
   }
 
@@ -512,20 +538,22 @@ export class FarmResolver {
     });
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @UseGuards(GqlJwtAuthGuard, RolesGuard, WorkerRolesGuard)
+  @Roles("admin", "worker")
+  @WorkerRoles(WorkerRole.FARM_MANAGER)
   @Mutation(() => TaskTypeClass)
   assignTaskToWorker(
     @Context() context,
     @Args("taskId") taskId: number,
     @Args("workerTag") workerTag: string,
   ) {
-    const { email } = context.req.user;
+    const { email, role } = context.req.user;
 
     return this.farmService.assignTaskToWorker({
       email,
       taskId,
       workerTag,
+      role,
     });
   }
 
@@ -740,7 +768,7 @@ export class FarmResolver {
   }
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @Roles("admin", "worker")
   @Mutation(() => ReviewType)
   addWorkerReview(
     @Context() context,
