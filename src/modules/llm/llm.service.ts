@@ -39,9 +39,11 @@ export class LlmService {
   async livestockBreedingPairPrediction({
     email,
     livestockTag,
+    role,
   }: {
     email: string;
     livestockTag: string;
+    role: "ADMIN" | "WORKER";
   }) {
     try {
       // const cacheKey = `breeding_pair_${livestockTag}`;
@@ -56,7 +58,7 @@ export class LlmService {
         where: {
           livestock_tag: livestockTag,
           farm: {
-            admin: { email },
+            [role === "ADMIN" ? "admin" : "workers"]: { email },
           },
         },
         relations: ["father", "mother", "breeding_records"],
@@ -71,7 +73,7 @@ export class LlmService {
       const breedingPairs = await this.livestockRepository.find({
         where: {
           farm: {
-            admin: { email },
+            [role === "ADMIN" ? "admin" : "workers"]: { email },
           },
           availability_status: LivestockAvailabilityStatus.AVAILABLE,
           livestock_type: currentLivestock.livestock_type,
@@ -97,7 +99,16 @@ export class LlmService {
         messages: [
           {
             role: "system",
-            content: `You are livestock breeding pair predictor, you are giving a list of livestocks on a farm and their breeding records, fathers and mothers. You can then use this information to predict which animals can be paired with the current one with livestockTag of ${livestockTag}. Take into consideration whether the current livestock has a planned or in-progress livestock, same for the pairs as well before making the prediction. You are then required to return list of livestocks who can be paired with the current livestock in an array format with each item type similar to the livestock entity`,
+            content: `You are livestock breeding pair predictor, you are
+            giving a list of livestocks on a farm and their breeding records,
+            fathers and mothers. You can then use this information to predict
+            which animals can be paired with the current one with livestockTag
+            of ${livestockTag}. Take into consideration whether the current
+            livestock has a planned or in-progress livestock, same for the
+            pairs as well before making the prediction. You are then required
+            to return list of livestocks who can be paired with the current
+            livestock in an array format with each item type similar to the
+            livestock entity`,
           },
           { role: "user", content: prompt },
         ],
