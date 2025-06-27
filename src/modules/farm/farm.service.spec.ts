@@ -1041,23 +1041,57 @@ describe("FarmService", () => {
         role: "ADMIN",
       });
 
-      const response = await farmService.updateLivestockBreedingRecord({
+      let response = await farmService.updateLivestockBreedingRecord({
         email: adminInfo.email,
         breedingRecordId: record.id,
         breedingRecord: {
           matingDate: new Date(),
           expectedDelivery: new Date(),
           status: BreedingStatus.IN_PROGRESS,
-          offspringCountMale: 2,
-          offspringCountFemale: 3,
+        },
+        role: "ADMIN",
+      });
+
+      expect(response).toBeDefined();
+      expect(response.offspring_count_male).toEqual(null);
+      expect(response.offspring_count_female).toEqual(null);
+      expect(response.status).toEqual(BreedingStatus.IN_PROGRESS);
+
+      response = await farmService.updateLivestockBreedingRecord({
+        email: adminInfo.email,
+        breedingRecordId: record.id,
+        breedingRecord: {
+          matingDate: new Date(),
+          actualDelivery: new Date(),
+          status: BreedingStatus.SUCCESSFUL,
+          offsprings: [
+            {
+              livestockTag: "OF1",
+              breed: "WHITE",
+              weight: 20,
+              gender: LivestockGender.MALE,
+            },
+            {
+              livestockTag: "OF2",
+              breed: "WHITE",
+              weight: 20,
+              gender: LivestockGender.MALE,
+            },
+            {
+              livestockTag: "OF3",
+              breed: "BLACK",
+              weight: 17,
+              gender: LivestockGender.FEMALE,
+            },
+          ],
         },
         role: "ADMIN",
       });
 
       expect(response).toBeDefined();
       expect(response.offspring_count_male).toEqual(2);
-      expect(response.offspring_count_female).toEqual(3);
-      expect(response.status).toEqual(BreedingStatus.IN_PROGRESS);
+      expect(response.offspring_count_female).toEqual(1);
+      expect(response.status).toEqual(BreedingStatus.SUCCESSFUL);
     });
 
     it("throws an error if breeding record does not exist", async () => {
@@ -1069,8 +1103,6 @@ describe("FarmService", () => {
             matingDate: new Date(),
             expectedDelivery: new Date(),
             status: BreedingStatus.IN_PROGRESS,
-            offspringCountMale: 2,
-            offspringCountFemale: 3,
           },
           role: "ADMIN",
         }),
@@ -1084,12 +1116,299 @@ describe("FarmService", () => {
             matingDate: new Date(),
             expectedDelivery: new Date(),
             status: BreedingStatus.IN_PROGRESS,
-            offspringCountMale: 2,
-            offspringCountFemale: 3,
           },
           role: "ADMIN",
         }),
       ).rejects.toThrow("Breeding record not found");
+    });
+
+    it("throws an error for offspring update without actual delivery date", async () => {
+      await registerAdmin(adminInfo);
+
+      const farm = await farmService.createFarm({
+        ...farmInfo,
+        email: adminInfo.email,
+      });
+
+      const farmWithBarns = await farmService.addBarnsToFarm({
+        email: adminInfo.email,
+        farmTag: farm.farm_tag,
+        barns: adminInfo.barns,
+        role: "ADMIN",
+      });
+
+      await farmService.addPensToBarn({
+        email: adminInfo.email,
+        barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
+          .unit_id,
+        pens: adminInfo.pens,
+        role: "ADMIN",
+      });
+
+      await farmService.addLivestockToPen({
+        email: adminInfo.email,
+        penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
+        livestock: adminInfo.livestock,
+        role: "ADMIN",
+      });
+
+      const record = await farmService.addLivestockBreedingRecord({
+        email: adminInfo.email,
+        maleLivestockTag: adminInfo.livestock[0].livestockTag,
+        femaleLivestockTag: adminInfo.livestock[1].livestockTag,
+        breedingRecord: {
+          matingDate: new Date(),
+          expectedDelivery: new Date(),
+          status: BreedingStatus.PLANNED,
+        },
+        role: "ADMIN",
+      });
+
+      await expect(
+        farmService.updateLivestockBreedingRecord({
+          email: adminInfo.email,
+          breedingRecordId: record.id,
+          breedingRecord: {
+            matingDate: new Date(),
+            status: BreedingStatus.SUCCESSFUL,
+            offsprings: [
+              {
+                livestockTag: "OF1",
+                breed: "WHITE",
+                weight: 20,
+                gender: LivestockGender.MALE,
+              },
+              {
+                livestockTag: "OF2",
+                breed: "WHITE",
+                weight: 20,
+                gender: LivestockGender.MALE,
+              },
+              {
+                livestockTag: "OF3",
+                breed: "BLACK",
+                weight: 17,
+                gender: LivestockGender.FEMALE,
+              },
+            ],
+          },
+          role: "ADMIN",
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        farmService.updateLivestockBreedingRecord({
+          email: adminInfo.email,
+          breedingRecordId: record.id,
+          breedingRecord: {
+            matingDate: new Date(),
+            status: BreedingStatus.SUCCESSFUL,
+            offsprings: [
+              {
+                livestockTag: "OF1",
+                breed: "WHITE",
+                weight: 20,
+                gender: LivestockGender.MALE,
+              },
+              {
+                livestockTag: "OF2",
+                breed: "WHITE",
+                weight: 20,
+                gender: LivestockGender.MALE,
+              },
+              {
+                livestockTag: "OF3",
+                breed: "BLACK",
+                weight: 17,
+                gender: LivestockGender.FEMALE,
+              },
+            ],
+          },
+          role: "ADMIN",
+        }),
+      ).rejects.toThrow(
+        "Actual delivery date must be provided when there are offsprings",
+      );
+    });
+
+    it("throws an error for offspring update without proper status value", async () => {
+      await registerAdmin(adminInfo);
+
+      const farm = await farmService.createFarm({
+        ...farmInfo,
+        email: adminInfo.email,
+      });
+
+      const farmWithBarns = await farmService.addBarnsToFarm({
+        email: adminInfo.email,
+        farmTag: farm.farm_tag,
+        barns: adminInfo.barns,
+        role: "ADMIN",
+      });
+
+      await farmService.addPensToBarn({
+        email: adminInfo.email,
+        barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
+          .unit_id,
+        pens: adminInfo.pens,
+        role: "ADMIN",
+      });
+
+      await farmService.addLivestockToPen({
+        email: adminInfo.email,
+        penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
+        livestock: adminInfo.livestock,
+        role: "ADMIN",
+      });
+
+      const record = await farmService.addLivestockBreedingRecord({
+        email: adminInfo.email,
+        maleLivestockTag: adminInfo.livestock[0].livestockTag,
+        femaleLivestockTag: adminInfo.livestock[1].livestockTag,
+        breedingRecord: {
+          matingDate: new Date(),
+          expectedDelivery: new Date(),
+          status: BreedingStatus.PLANNED,
+        },
+        role: "ADMIN",
+      });
+
+      await expect(
+        farmService.updateLivestockBreedingRecord({
+          email: adminInfo.email,
+          breedingRecordId: record.id,
+          breedingRecord: {
+            matingDate: new Date(),
+            actualDelivery: new Date(),
+            status: BreedingStatus.IN_PROGRESS,
+            offsprings: [
+              {
+                livestockTag: "OF1",
+                breed: "WHITE",
+                weight: 20,
+                gender: LivestockGender.MALE,
+              },
+              {
+                livestockTag: "OF2",
+                breed: "WHITE",
+                weight: 20,
+                gender: LivestockGender.MALE,
+              },
+              {
+                livestockTag: "OF3",
+                breed: "BLACK",
+                weight: 17,
+                gender: LivestockGender.FEMALE,
+              },
+            ],
+          },
+          role: "ADMIN",
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        farmService.updateLivestockBreedingRecord({
+          email: adminInfo.email,
+          breedingRecordId: record.id,
+          breedingRecord: {
+            matingDate: new Date(),
+            actualDelivery: new Date(),
+            status: BreedingStatus.IN_PROGRESS,
+            offsprings: [
+              {
+                livestockTag: "OF1",
+                breed: "WHITE",
+                weight: 20,
+                gender: LivestockGender.MALE,
+              },
+              {
+                livestockTag: "OF2",
+                breed: "WHITE",
+                weight: 20,
+                gender: LivestockGender.MALE,
+              },
+              {
+                livestockTag: "OF3",
+                breed: "BLACK",
+                weight: 17,
+                gender: LivestockGender.FEMALE,
+              },
+            ],
+          },
+          role: "ADMIN",
+        }),
+      ).rejects.toThrow(
+        "Breeding status must be 'SUCCESSFUL' when there are offsprings",
+      );
+    });
+
+    it("throws an error for offspring is empty but status is 'SUCCESSFUL'", async () => {
+      await registerAdmin(adminInfo);
+
+      const farm = await farmService.createFarm({
+        ...farmInfo,
+        email: adminInfo.email,
+      });
+
+      const farmWithBarns = await farmService.addBarnsToFarm({
+        email: adminInfo.email,
+        farmTag: farm.farm_tag,
+        barns: adminInfo.barns,
+        role: "ADMIN",
+      });
+
+      await farmService.addPensToBarn({
+        email: adminInfo.email,
+        barnUnitId: farmWithBarns.barns.find((bn) => bn.unit_id === "HN1")
+          .unit_id,
+        pens: adminInfo.pens,
+        role: "ADMIN",
+      });
+
+      await farmService.addLivestockToPen({
+        email: adminInfo.email,
+        penUnitId: adminInfo.pens.find((pn) => pn.unitId === "PEN1").unitId,
+        livestock: adminInfo.livestock,
+        role: "ADMIN",
+      });
+
+      const record = await farmService.addLivestockBreedingRecord({
+        email: adminInfo.email,
+        maleLivestockTag: adminInfo.livestock[0].livestockTag,
+        femaleLivestockTag: adminInfo.livestock[1].livestockTag,
+        breedingRecord: {
+          matingDate: new Date(),
+          expectedDelivery: new Date(),
+          status: BreedingStatus.PLANNED,
+        },
+        role: "ADMIN",
+      });
+
+      await expect(
+        farmService.updateLivestockBreedingRecord({
+          email: adminInfo.email,
+          breedingRecordId: record.id,
+          breedingRecord: {
+            matingDate: new Date(),
+            status: BreedingStatus.SUCCESSFUL,
+          },
+          role: "ADMIN",
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      await expect(
+        farmService.updateLivestockBreedingRecord({
+          email: adminInfo.email,
+          breedingRecordId: record.id,
+          breedingRecord: {
+            matingDate: new Date(),
+            status: BreedingStatus.SUCCESSFUL,
+          },
+          role: "ADMIN",
+        }),
+      ).rejects.toThrow(
+        "There must be atleast one offspring for a successful breeding record",
+      );
     });
   });
 

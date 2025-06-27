@@ -1389,7 +1389,11 @@ export class FarmService {
               },
             },
           },
-          relations: ["farm.livestock.breeding_records"],
+          relations: [
+            "livestock.maternalOffspring",
+            "livestock.paternalOffspring",
+            "farm.livestock.breeding_records",
+          ],
         });
 
         let breedingRecordToUpdate: BreedingRecord;
@@ -1406,6 +1410,71 @@ export class FarmService {
 
         if (!breedingRecordToUpdate) {
           throw new NotFoundException("Breeding record not found");
+        }
+
+        // if offspring is provided validate actualDelivery and status fields
+        if (
+          breedingRecord?.offsprings?.length &&
+          !breedingRecord.actualDelivery
+        ) {
+          throw new BadRequestException(
+            "Actual delivery date must be provided when there are offsprings",
+          );
+        }
+
+        if (
+          breedingRecord?.offsprings?.length &&
+          !(breedingRecord.status === BreedingStatus.SUCCESSFUL)
+        ) {
+          throw new BadRequestException(
+            "Breeding status must be 'SUCCESSFUL' when there are offsprings",
+          );
+        }
+
+        if (
+          breedingRecord.status === BreedingStatus.SUCCESSFUL &&
+          !breedingRecord?.offsprings?.length
+        ) {
+          throw new BadRequestException(
+            "There must be atleast one offspring for a successful breeding record",
+          );
+        }
+
+        // Create offsprings if any
+        let offsprings: Livestock[] = [];
+        if (breedingRecord.offsprings?.length) {
+          offsprings = await Promise.all(
+            breedingRecord.offsprings?.map(async (livestock) => {
+              const existingLivestock =
+                await transactionalEntityManager.findOne(Livestock, {
+                  where: {
+                    livestock_tag: livestock.livestockTag,
+                  },
+                });
+
+              if (existingLivestock) {
+                throw new BadRequestException(
+                  `A livestock with livestock tag ${livestock.livestockTag} already exist`,
+                );
+              }
+
+              const new_livestock = new Livestock();
+              new_livestock.livestock_tag = livestock.livestockTag;
+              new_livestock.birth_date = breedingRecord.actualDelivery;
+              new_livestock.breed = livestock.breed;
+              new_livestock.weight = livestock.weight;
+              new_livestock.livestock_type = pen.livestock[0].livestock_type;
+              new_livestock.gender = livestock.gender;
+              new_livestock.mother = pen.livestock.filter(
+                (animal) => animal.gender === LivestockGender.FEMALE,
+              )[0];
+              new_livestock.father = pen.livestock.filter(
+                (animal) => animal.gender === LivestockGender.MALE,
+              )[0];
+
+              return new_livestock;
+            }),
+          );
         }
 
         breedingRecordToUpdate.expected_delivery =
@@ -1425,13 +1494,27 @@ export class FarmService {
           breedingRecordToUpdate.actual_delivery;
         // offspringCountMale
         breedingRecordToUpdate.offspring_count_male =
-          breedingRecord.offspringCountMale ||
-          breedingRecordToUpdate.offspring_count_male;
+          offsprings.filter(
+            (offspring) => offspring.gender === LivestockGender.MALE,
+          ).length || breedingRecordToUpdate.offspring_count_male;
         // offspringCountFemale
         breedingRecordToUpdate.offspring_count_female =
-          breedingRecord.offspringCountFemale ||
-          breedingRecordToUpdate.offspring_count_female;
+          offsprings.filter(
+            (offspring) => offspring.gender === LivestockGender.FEMALE,
+          ).length || breedingRecordToUpdate.offspring_count_female;
 
+        const createdOffsprings =
+          await transactionalEntityManager.save(offsprings);
+
+        // partenal and martenal offspring updates
+        pen.livestock
+          .filter((animal) => animal.gender === LivestockGender.FEMALE)[0]
+          .maternalOffspring.push(...createdOffsprings);
+        pen.livestock
+          .filter((animal) => animal.gender === LivestockGender.MALE)[0]
+          .paternalOffspring.push(...createdOffsprings);
+
+        await transactionalEntityManager.save(pen.livestock);
         const updatedBreedingRecord = await transactionalEntityManager.save(
           BreedingRecord,
           breedingRecordToUpdate,

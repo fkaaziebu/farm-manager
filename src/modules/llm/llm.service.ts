@@ -6,7 +6,6 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
-import OpenAI from "openai";
 import { Repository } from "typeorm";
 import { Livestock } from "../../database/entities";
 import {
@@ -18,10 +17,25 @@ import {
 } from "src/database/types/livestock.type";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { Cache } from "cache-manager";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import {
+  MessageParam,
+  Tool,
+} from "@anthropic-ai/sdk/resources/messages/messages.mjs";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { Anthropic } from "@anthropic-ai/sdk";
+import OpenAI from "openai";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 @Injectable()
 export class LlmService {
-  private readonly openai: OpenAI;
+  private openai: OpenAI;
+  private anthropic: Anthropic;
+  private server: McpServer;
+  private mcp: Client;
+  private transport: StdioClientTransport | StdioServerTransport | null = null;
+  private tools: Tool[] = [];
 
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -34,6 +48,76 @@ export class LlmService {
       apiKey: this.configService.get<string>("ANTHROPIC_API_KEY"),
       baseURL: this.configService.get<string>("ANTHROPIC_API_URL"),
     });
+    // Initialize Anthropic client
+    this.anthropic = new Anthropic({
+      apiKey: this.configService.get<string>("ANTHROPIC_API_KEY"),
+    });
+
+    // Initialize MCP client
+    this.mcp = new Client({ name: "mcp-client-cli", version: "1.0.0" });
+
+    this.connectToServer(this.configService.get<string>("MCP_SERVER_PATH"));
+  }
+
+  async processQuery(query: string) {
+    try {
+      const messages: MessageParam[] = [
+        {
+          role: "user",
+          content: query,
+        },
+      ];
+
+      const response = await this.anthropic.messages.create({
+        model: "claude-3-5-sonnet-20241022",
+        max_tokens: 1000,
+        messages,
+        tools: this.tools,
+      });
+
+      console.log(response);
+
+      const finalText = [];
+
+      for (const content of response.content) {
+        if (content.type === "text") {
+          finalText.push(content.text);
+        } else if (content.type === "tool_use") {
+          const toolName = content.name;
+          const toolArgs = content.input as
+            | { [x: string]: unknown }
+            | undefined;
+
+          const result = await this.mcp.callTool({
+            name: toolName,
+            arguments: toolArgs,
+          });
+
+          finalText.push(
+            `[Calling tool ${toolName} with args ${JSON.stringify(toolArgs)}]`,
+          );
+
+          messages.push({
+            role: "user",
+            content: result.content as string,
+          });
+
+          const response = await this.anthropic.messages.create({
+            model: "claude-3-5-sonnet-20241022",
+            max_tokens: 1000,
+            messages,
+          });
+
+          finalText.push(
+            response.content[0].type === "text" ? response.content[0].text : "",
+          );
+        }
+      }
+
+      return finalText.join("\n");
+    } catch (e) {
+      throw new BadRequestException("Request could not be processed", e);
+    }
   }
 
   async livestockBreedingPairPrediction({
@@ -46,13 +130,6 @@ export class LlmService {
     role: "ADMIN" | "WORKER";
   }) {
     try {
-      // const cacheKey = `breeding_pair_${livestockTag}`;
-
-      // const results = await this.cacheManager.get(cacheKey);
-
-      // if (results) {
-      //   return results;
-      // }
       // Get all livestock
       const currentLivestock = await this.livestockRepository.findOne({
         where: {
@@ -100,15 +177,15 @@ export class LlmService {
           {
             role: "system",
             content: `You are livestock breeding pair predictor, you are
-            giving a list of livestocks on a farm and their breeding records,
-            fathers and mothers. You can then use this information to predict
-            which animals can be paired with the current one with livestockTag
-            of ${livestockTag}. Take into consideration whether the current
-            livestock has a planned or in-progress livestock, same for the
-            pairs as well before making the prediction. You are then required
-            to return list of livestocks who can be paired with the current
-            livestock in an array format with each item type similar to the
-            livestock entity`,
+                 giving a list of livestocks on a farm and their breeding records,
+                 fathers and mothers. You can then use this information to predict
+                 which animals can be paired with the current one with livestockTag
+                 of ${livestockTag}. Take into consideration whether the current
+                 livestock has a planned or in-progress livestock, same for the
+                 pairs as well before making the prediction. You are then required
+                 to return list of livestocks who can be paired with the current
+                 livestock in an array format with each item type similar to the
+                 livestock entity`,
           },
           { role: "user", content: prompt },
         ],
@@ -158,5 +235,44 @@ export class LlmService {
 
     Consider things like partenity, martenity and breeding_record history
     `;
+  }
+
+  private async connectToServer(serverScriptPath: string) {
+    try {
+      const isJs = serverScriptPath.endsWith(".js");
+      const isPy = serverScriptPath.endsWith(".py");
+      if (!isJs && !isPy) {
+        throw new Error("Server script must be a .js or .py file");
+      }
+      const command = isPy
+        ? process.platform === "win32"
+          ? "python"
+          : "python3"
+        : process.execPath;
+
+      this.transport = new StdioClientTransport({
+        command,
+        args: [serverScriptPath],
+      });
+      await this.mcp.connect(this.transport);
+
+      const toolsResult = await this.mcp.listTools();
+      // @ts-expect-error error
+      this.tools = toolsResult.tools.map((tool) => {
+        return {
+          name: tool.name,
+          description: tool.description,
+          input_schema: tool.inputSchema,
+        };
+      });
+
+      console.log(
+        "Connected to server with tools:",
+        this.tools.map(({ name }) => name),
+      );
+    } catch (e) {
+      console.log("Failed to connect to MCP server: ", e);
+      throw e;
+    }
   }
 }

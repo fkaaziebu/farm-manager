@@ -24,4 +24,12 @@ export class LlmResolver {
       role,
     });
   }
+
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("admin", "worker")
+  @Query(() => String)
+  mcpRequest(@Args("query") query: string) {
+    // const { email, role } = context.req.user;
+    return this.llmService.processQuery(query);
+  }
 }

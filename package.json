@@ -23,7 +23,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.55.0",
     "@hapi/joi": "^17.1.1",
+    "@modelcontextprotocol/sdk": "^1.13.1",
     "@nestjs/apollo": "^13.0.4",
     "@nestjs/bullmq": "^11.0.2",
     "@nestjs/cache-manager": "^3.0.1",
@@ -61,7 +63,8 @@
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.1",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
