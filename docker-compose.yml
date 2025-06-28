@@ -49,6 +49,22 @@ services:
     networks:
       - farm-network
 
+  farm-manager-mcp-server:
+    image: fkaaziebu/farm-manager-mcp-server
+    container_name: farm-manager-mcp-server
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "3001:3000"
+    networks:
+      - farm-network
+
 networks:
   farm-network:
     driver: bridge

@@ -50,7 +50,7 @@ export class LlmService {
     // Initialize MCP client
     this.mcp = new Client({ name: "mcp-client-cli", version: "1.0.0" });
 
-    // this.connectToServer(this.configService.get<string>("MCP_SERVER_PATH"));
+    this.connectToServer(this.configService.get<string>("MCP_SERVER_PATH"));
   }
 
   async processQuery(query: string) {
