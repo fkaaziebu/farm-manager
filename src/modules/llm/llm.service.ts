@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -15,8 +14,6 @@ import {
   LivestockType,
   LivestockUnavailabilityReason,
 } from "src/database/types/livestock.type";
-import { CACHE_MANAGER } from "@nestjs/cache-manager";
-import { Cache } from "cache-manager";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import {
   MessageParam,
@@ -26,19 +23,16 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { Anthropic } from "@anthropic-ai/sdk";
 import OpenAI from "openai";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 @Injectable()
 export class LlmService {
   private openai: OpenAI;
   private anthropic: Anthropic;
-  private server: McpServer;
   private mcp: Client;
   private transport: StdioClientTransport | StdioServerTransport | null = null;
   private tools: Tool[] = [];
 
   constructor(
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: ConfigService,
     @InjectRepository(Livestock)
     private livestockRepository: Repository<Livestock>,
@@ -56,7 +50,7 @@ export class LlmService {
     // Initialize MCP client
     this.mcp = new Client({ name: "mcp-client-cli", version: "1.0.0" });
 
-    this.connectToServer(this.configService.get<string>("MCP_SERVER_PATH"));
+    // this.connectToServer(this.configService.get<string>("MCP_SERVER_PATH"));
   }
 
   async processQuery(query: string) {
