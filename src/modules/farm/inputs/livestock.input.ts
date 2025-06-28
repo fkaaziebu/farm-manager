@@ -3,8 +3,8 @@ import { LivestockGender, LivestockType } from "../../../database/types";
 
 @InputType()
 export class LivestockInput {
-  @Field()
-  livestockTag: string;
+  @Field({ nullable: true })
+  livestockTag?: string;
 
   @Field()
   birthDate: Date;

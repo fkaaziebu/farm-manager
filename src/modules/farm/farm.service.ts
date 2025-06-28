@@ -533,6 +533,7 @@ export class FarmService {
         farm.farm_type = farmType;
         farm.latitude = latitude;
         farm.longitude = longitude;
+        farm.default_start_tag = `${name.slice(0, 3)}${uuidv4().slice(0, 3)}`;
 
         admin.farms.push(farm);
         const savedFarm = await transactionalEntityManager.save(Farm, farm);
@@ -550,6 +551,7 @@ export class FarmService {
     area,
     farmType,
     farmTag,
+    defaultStartTag,
     role,
   }: {
     email: string;
@@ -558,6 +560,7 @@ export class FarmService {
     area: string;
     farmType: FarmType;
     farmTag: string;
+    defaultStartTag?: string;
     role: "ADMIN" | "WORKER";
   }) {
     return this.farmRepository.manager.transaction(
@@ -579,6 +582,7 @@ export class FarmService {
         farm.location = location || farm.location;
         farm.area = area || farm.area;
         farm.farm_type = farmType || farm.farm_type;
+        farm.default_start_tag = defaultStartTag || farm.default_start_tag;
 
         const savedFarm = await transactionalEntityManager.save(Farm, farm);
 
@@ -979,7 +983,9 @@ export class FarmService {
             }
 
             const new_livestock = new Livestock();
-            new_livestock.livestock_tag = livestock.livestockTag;
+            new_livestock.livestock_tag =
+              livestock.livestockTag ||
+              `${pen.farm.default_start_tag}-${uuidv4().slice(0, 5)}`;
             new_livestock.birth_date = livestock.birthDate;
             new_livestock.breed = livestock.breed;
             new_livestock.weight = livestock.weight;
@@ -1459,7 +1465,9 @@ export class FarmService {
               }
 
               const new_livestock = new Livestock();
-              new_livestock.livestock_tag = livestock.livestockTag;
+              new_livestock.livestock_tag =
+                livestock.livestockTag ||
+                `${pen.farm.default_start_tag}-${uuidv4().slice(0, 5)}`;
               new_livestock.birth_date = breedingRecord.actualDelivery;
               new_livestock.breed = livestock.breed;
               new_livestock.weight = livestock.weight;

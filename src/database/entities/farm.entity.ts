@@ -49,6 +49,10 @@ export class Farm {
   @Column()
   name: string;
 
+  // settings props
+  @Column({ default: null })
+  default_start_tag: string;
+
   @Column({
     type: "enum",
     enum: FarmType,

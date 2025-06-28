@@ -267,6 +267,7 @@ export class FarmResolver {
     @Args("name", { nullable: true }) name?: string,
     @Args("location", { nullable: true }) location?: string,
     @Args("area", { nullable: true }) area?: string,
+    @Args("defaultStartTag", { nullable: true }) defaultStartTag?: string,
     @Args("farmType", { type: () => FarmType, nullable: true })
     farmType?: FarmType,
   ) {
@@ -278,6 +279,7 @@ export class FarmResolver {
       location,
       area,
       farmType,
+      defaultStartTag,
       role,
     });
   }

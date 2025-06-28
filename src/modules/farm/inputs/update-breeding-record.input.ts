@@ -5,8 +5,8 @@ import { LivestockGender } from "src/database/types";
 
 @InputType()
 class Offspring {
-  @Field()
-  livestockTag: string;
+  @Field({ nullable: true })
+  livestockTag?: string;
 
   @Field()
   breed: string;
