@@ -958,14 +958,16 @@ export class CropService {
   async listCropBatches({
     email,
     searchTerm,
+    filter,
     housingUnit,
     sort,
     role,
   }: {
     email: string;
     searchTerm: string;
+    filter?: CropBatchFilterInput;
     housingUnit: "FIELD" | "GREENHOUSE";
-    sort?: GreenhouseSortInput[];
+    sort?: CropBatchSortInput[];
     role: "ADMIN" | "WORKER";
   }) {
     const sortOrder = {};
@@ -983,6 +985,7 @@ export class CropService {
           },
         },
         name: ILike(`%${searchTerm}%`),
+        crop_type: filter?.crop_type,
       },
       relations: [`${housingUnit.toLowerCase()}`],
       order: sortOrder,
@@ -992,6 +995,7 @@ export class CropService {
   async listCropBatchesPaginated({
     email,
     searchTerm,
+    housingUnit,
     filter,
     pagination,
     sort,
@@ -999,14 +1003,24 @@ export class CropService {
   }: {
     email: string;
     searchTerm?: string;
+    housingUnit: "FIELD" | "GREENHOUSE";
     filter?: CropBatchFilterInput;
     pagination: PaginationInput;
     sort?: CropBatchSortInput[];
     role: "ADMIN" | "WORKER";
   }) {
-    // const fields = await this.listFields({ email, searchTerm, sort, role });
+    const cropBatches = await this.listCropBatches({
+      email,
+      searchTerm,
+      housingUnit,
+      filter,
+      sort,
+      role,
+    });
     // Apply pagination and return in the connection format
-    // return this.paginate<Field>(fields, pagination, (field) => field.id.toString());
+    return this.paginate<CropBatch>(cropBatches, pagination, (cropBatch) =>
+      cropBatch.id.toString(),
+    );
   }
 
   private paginate<T>(

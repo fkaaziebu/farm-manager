@@ -372,11 +372,17 @@ export class CropResolver {
     @Args("pagination", { nullable: true }) pagination?: PaginationInput,
     @Args("sort", { type: () => [CropBatchSortInput], nullable: true })
     sort?: CropBatchSortInput[],
+    @Args("housingUnit", {
+      type: () => HousingUnit!,
+      nullable: false,
+    })
+    housingUnit: HousingUnit,
   ) {
     const { email, role } = context.req.user;
     return this.cropService.listCropBatchesPaginated({
       email,
       searchTerm,
+      housingUnit,
       filter,
       pagination,
       sort,
