@@ -120,6 +120,9 @@ export class CropBatchType {
   yield_unit: string;
 
   @Field(() => GraphQLJSON, { nullable: true })
+  gps_coordinates?: any;
+
+  @Field(() => GraphQLJSON, { nullable: true })
   fertilizer_applications?: any;
 
   @Field(() => GraphQLJSON, { nullable: true })

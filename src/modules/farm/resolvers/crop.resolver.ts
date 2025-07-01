@@ -1,5 +1,12 @@
 import { UseGuards } from "@nestjs/common";
-import { Args, Context, Mutation, Resolver } from "@nestjs/graphql";
+import {
+  Args,
+  Context,
+  Mutation,
+  Query,
+  registerEnumType,
+  Resolver,
+} from "@nestjs/graphql";
 import { GqlJwtAuthGuard } from "../guards/gql-jwt-auth.guard";
 import { RolesGuard } from "../guards/roles.guard";
 import { Roles } from "../decorators/roles.decorator";
@@ -12,10 +19,14 @@ import {
   SalesRecordType,
 } from "src/database/types";
 import {
+  CropBatchFilterInput,
   CropBatchInput,
+  CropBatchSortInput,
   ExpenseRecordInput,
   FieldInput,
+  FieldSortInput,
   GreenhouseInput,
+  GreenhouseSortInput,
   SalesRecordInput,
   UpdateCropBatchInput,
   UpdateExpenseRecordInput,
@@ -26,6 +37,22 @@ import {
 import { CropService } from "../services/crop.service";
 import { WorkerRoles } from "../decorators/worker-roles.decorator";
 import { WorkerRole } from "src/database/types/worker.type";
+import {
+  CropBatchConnection,
+  FieldConnection,
+  GreenhouseConnection,
+} from "../types";
+import { PaginationInput } from "src/database/inputs";
+
+enum HousingUnit {
+  FIELD = "FIELD",
+  GREENHOUSE = "GREENHOUSE",
+}
+
+registerEnumType(HousingUnit, {
+  name: "HousingUnit",
+  description: "Whether it's a field of a greenhouse",
+});
 
 @Resolver()
 export class CropResolver {
@@ -242,6 +269,117 @@ export class CropResolver {
       email,
       salesRecordId,
       salesRecord,
+      role,
+    });
+  }
+
+  // Queries
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("admin", "worker")
+  @Query(() => FieldType)
+  getField(@Context() context, @Args("fieldUnitId") fieldUnitId: string) {
+    const { email, role } = context.req.user;
+    return this.cropService.getField({
+      email,
+      fieldUnitId,
+      role,
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("admin", "worker")
+  @Query(() => GreenhouseType)
+  getGreenhouse(
+    @Context() context,
+    @Args("greenhouseUnitId") greenhouseUnitId: string,
+  ) {
+    const { email, role } = context.req.user;
+    return this.cropService.getGreenhouse({
+      email,
+      greenhouseUnitId,
+      role,
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("admin", "worker")
+  @Query(() => CropBatchType)
+  getCropBatch(
+    @Context() context,
+    @Args("cropBatchTag") cropBatchTag: string,
+    @Args("housingUnit", {
+      type: () => HousingUnit!,
+      nullable: false,
+    })
+    housingUnit: HousingUnit,
+  ) {
+    const { email, role } = context.req.user;
+    return this.cropService.getCropBatch({
+      email,
+      cropBatchTag,
+      housingUnit,
+      role,
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("admin", "worker")
+  @Query(() => FieldConnection)
+  listFields(
+    @Context() context,
+    @Args("searchTerm") searchTerm: string,
+    @Args("pagination", { nullable: true }) pagination?: PaginationInput,
+    @Args("sort", { type: () => [FieldSortInput], nullable: true })
+    sort?: FieldSortInput[],
+  ) {
+    const { email, role } = context.req.user;
+    return this.cropService.listFieldsPaginated({
+      email,
+      searchTerm,
+      pagination,
+      sort,
+      role,
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("admin", "worker")
+  @Query(() => GreenhouseConnection)
+  listGreenhouses(
+    @Context() context,
+    @Args("searchTerm") searchTerm: string,
+    @Args("pagination", { nullable: true }) pagination?: PaginationInput,
+    @Args("sort", { type: () => [GreenhouseSortInput], nullable: true })
+    sort?: GreenhouseSortInput[],
+  ) {
+    const { email, role } = context.req.user;
+    return this.cropService.listGreenhousesPaginated({
+      email,
+      searchTerm,
+      pagination,
+      sort,
+      role,
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @Roles("admin", "worker")
+  @Query(() => CropBatchConnection)
+  listCropBatches(
+    @Context() context,
+    @Args("searchTerm") searchTerm: string,
+    @Args("filter", { nullable: true }) filter?: CropBatchFilterInput,
+    @Args("pagination", { nullable: true }) pagination?: PaginationInput,
+    @Args("sort", { type: () => [CropBatchSortInput], nullable: true })
+    sort?: CropBatchSortInput[],
+  ) {
+    const { email, role } = context.req.user;
+    return this.cropService.listCropBatchesPaginated({
+      email,
+      searchTerm,
+      filter,
+      pagination,
+      sort,
       role,
     });
   }

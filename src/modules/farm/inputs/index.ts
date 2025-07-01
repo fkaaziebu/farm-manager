@@ -39,6 +39,8 @@ export {
 };
 export { FarmSortInput } from "./farm-sort.input";
 export { BarnSortInput } from "./barn-sort.input";
+export { FieldSortInput } from "./field-sort.input";
+export { GreenhouseSortInput } from "./greenhouse-sort.input";
 export { PenSortInput } from "./pen-sort.input";
 export { LivestockSortInput } from "./livestock-sort.input";
 export { FarmFilterInput } from "./farm-filter.input";
@@ -60,3 +62,5 @@ export { CropBatchInput } from "./crop-batch.input";
 export { UpdateFieldInput } from "./update-field.input";
 export { UpdateGreenhouseInput } from "./update-greenhouse.input";
 export { UpdateCropBatchInput } from "./update-crop-batch.input";
+export { CropBatchFilterInput } from "./crop-batch-filter.input";
+export { CropBatchSortInput } from "./crop-batch-sort.input";

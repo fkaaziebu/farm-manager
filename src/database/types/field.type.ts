@@ -43,9 +43,6 @@ export class FieldType {
   @Field({ nullable: true })
   previous_crop?: string;
 
-  @Field(() => GraphQLJSON, { nullable: true })
-  gps_coordinates?: any;
-
   @Field(() => [CropBatchType], { nullable: true })
   crop_batches?: CropBatchType[];
 

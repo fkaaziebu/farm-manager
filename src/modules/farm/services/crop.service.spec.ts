@@ -923,6 +923,203 @@ describe("CropService", () => {
     });
   });
 
+  // Queries
+  describe("getField", () => {
+    it("should return field with provided unit id", async () => {
+      await setupForQueries();
+
+      let admin = await getAdmin(adminInfo.email);
+
+      await cropService.addFieldsToFarm({
+        email: adminInfo.email,
+        farmTag: admin.farms[0].farm_tag,
+        fields: [adminInfo.fields[0]],
+        role: "ADMIN",
+      });
+
+      const barn = await cropService.getField({
+        email: adminInfo.email,
+        fieldUnitId: adminInfo.fields[0].unitId,
+        role: "ADMIN",
+      });
+
+      expect(barn).toBeDefined();
+      expect(barn.name).toContain("Fred Field 1");
+    });
+  });
+
+  describe("getGreenhouse", () => {
+    it("should return greenhouse with provided unit id", async () => {
+      await setupForQueries();
+
+      let admin = await getAdmin(adminInfo.email);
+
+      await cropService.addGreenhousesToFarm({
+        email: adminInfo.email,
+        farmTag: admin.farms[0].farm_tag,
+        greenhouses: [adminInfo.greenhouses[0]],
+        role: "ADMIN",
+      });
+
+      const barn = await cropService.getGreenhouse({
+        email: adminInfo.email,
+        greenhouseUnitId: adminInfo.greenhouses[0].unitId,
+        role: "ADMIN",
+      });
+
+      expect(barn).toBeDefined();
+      expect(barn.name).toContain("Fred Greenhouse 1");
+    });
+  });
+
+  describe("getCropBatch", () => {
+    it("should return crop batch with provided unit id", async () => {
+      await setupForQueries();
+
+      let admin = await getAdmin(adminInfo.email);
+
+      const field = (
+        await cropService.addFieldsToFarm({
+          email: adminInfo.email,
+          farmTag: admin.farms[0].farm_tag,
+          fields: [adminInfo.fields[0]],
+          role: "ADMIN",
+        })
+      ).fields[0];
+
+      await cropService.addCropBatchesToField({
+        email: adminInfo.email,
+        fieldUnitId: field.unit_id,
+        cropBatches: [adminInfo.cropBatches[0]],
+        role: "ADMIN",
+      });
+
+      const cropBatch = await cropService.getCropBatch({
+        email: adminInfo.email,
+        cropBatchTag: adminInfo.cropBatches[0].cropBatchTag,
+        housingUnit: "FIELD",
+        role: "ADMIN",
+      });
+
+      expect(cropBatch).toBeDefined();
+      expect(cropBatch.crop_batch_tag).toContain(
+        adminInfo.cropBatches[0].cropBatchTag,
+      );
+    });
+  });
+
+  describe("listFields", () => {
+    it("should return a list of fields", async () => {
+      await setupForQueries();
+
+      let admin = await getAdmin(adminInfo.email);
+
+      await cropService.addFieldsToFarm({
+        email: adminInfo.email,
+        farmTag: admin.farms[0].farm_tag,
+        fields: [...adminInfo.fields],
+        role: "ADMIN",
+      });
+
+      let field = await cropService.listFields({
+        email: adminInfo.email,
+        searchTerm: "",
+        role: "ADMIN",
+      });
+
+      expect(field).toHaveLength(2);
+      expect(field.map((field) => field.unit_id)).toContain("FN1");
+
+      field = await cropService.listFields({
+        email: adminInfo.email,
+        searchTerm: "Fred Field 1",
+        role: "ADMIN",
+      });
+
+      expect(field).toHaveLength(1);
+      expect(field[0].name).toContain("Fred Field 1");
+    });
+  });
+
+  describe("listGreenhouses", () => {
+    it("should return a list of greenhouses", async () => {
+      await setupForQueries();
+
+      let admin = await getAdmin(adminInfo.email);
+
+      await cropService.addGreenhousesToFarm({
+        email: adminInfo.email,
+        farmTag: admin.farms[0].farm_tag,
+        greenhouses: [...adminInfo.greenhouses],
+        role: "ADMIN",
+      });
+
+      let field = await cropService.listGreenhouses({
+        email: adminInfo.email,
+        searchTerm: "",
+        role: "ADMIN",
+      });
+
+      expect(field).toHaveLength(2);
+      expect(field.map((field) => field.unit_id)).toContain("GN1");
+
+      field = await cropService.listGreenhouses({
+        email: adminInfo.email,
+        searchTerm: "Fred Greenhouse 1",
+        role: "ADMIN",
+      });
+
+      expect(field).toHaveLength(1);
+      expect(field[0].name).toContain("Fred Greenhouse 1");
+    });
+  });
+
+  describe("listCropBatches", () => {
+    it("should return a list of crop batches", async () => {
+      await setupForQueries();
+
+      let admin = await getAdmin(adminInfo.email);
+
+      const field = (
+        await cropService.addFieldsToFarm({
+          email: adminInfo.email,
+          farmTag: admin.farms[0].farm_tag,
+          fields: [adminInfo.fields[0]],
+          role: "ADMIN",
+        })
+      ).fields[0];
+
+      await cropService.addCropBatchesToField({
+        email: adminInfo.email,
+        fieldUnitId: field.unit_id,
+        cropBatches: [...adminInfo.cropBatches],
+        role: "ADMIN",
+      });
+
+      let cropBatches = await cropService.listCropBatches({
+        email: adminInfo.email,
+        searchTerm: "",
+        housingUnit: "FIELD",
+        role: "ADMIN",
+      });
+
+      expect(cropBatches).toHaveLength(2);
+      expect(
+        cropBatches.map((cropBatch) => cropBatch.crop_batch_tag),
+      ).toContain("CB1");
+
+      cropBatches = await cropService.listCropBatches({
+        email: adminInfo.email,
+        searchTerm: "Fred Crop Batch 1",
+        housingUnit: "FIELD",
+        role: "ADMIN",
+      });
+
+      expect(cropBatches).toHaveLength(1);
+      expect(cropBatches[0].name).toContain("Fred Crop Batch 1");
+    });
+  });
+
   const adminInfo = {
     name: "Frederick Aziebu",
     email: "frederickaziebu1998@gmail.com",
@@ -971,19 +1168,31 @@ describe("CropService", () => {
     cropBatches: [
       {
         cropBatchTag: "CB1",
-        name: "Fred Greenhouse 1",
+        name: "Fred Crop Batch 1",
         cropType: CropType.VEGETABLE,
         variety: "long",
         plantingDate: new Date(),
         plantsCount: 23,
+        gpsCoordinates: [
+          { lat: 1, lon: 2 },
+          { lat: 1, lon: 2 },
+          { lat: 1, lon: 2 },
+          { lat: 1, lon: 2 },
+        ],
       },
       {
         cropBatchTag: "CB2",
-        name: "Fred Greenhouse 2",
+        name: "Fred Crop Batch 2",
         cropType: CropType.VEGETABLE,
         variety: "long",
         plantingDate: new Date(),
         plantsCount: 23,
+        gpsCoordinates: [
+          { lat: 1, lon: 2 },
+          { lat: 1, lon: 2 },
+          { lat: 1, lon: 2 },
+          { lat: 1, lon: 2 },
+        ],
       },
     ],
   };

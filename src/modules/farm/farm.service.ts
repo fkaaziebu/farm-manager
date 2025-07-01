@@ -236,7 +236,15 @@ export class FarmService {
         name: ILike(`%${searchTerm}%`),
         id: filter?.id,
       },
-      relations: ["barns.pens.livestock", "workers", "livestock", "tasks"],
+      relations: [
+        "barns.pens.livestock",
+        "workers",
+        "livestock",
+        "tasks",
+        "crop_batches",
+        "fields.crop_batches",
+        "greenhouses.crop_batches",
+      ],
       order: sortOrder,
     });
   }

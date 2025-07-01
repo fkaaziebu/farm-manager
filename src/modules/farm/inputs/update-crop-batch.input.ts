@@ -65,4 +65,7 @@ export class UpdateCropBatchInput {
 
   @Field(() => CropStatus, { nullable: true })
   status?: CropStatus;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  gpsCoordinates?: any;
 }

@@ -7,3 +7,6 @@ export { AcceptRequestResponse } from "./accept-request-response.type";
 export { RequestToJoinResponse } from "./request-to-join-response.type";
 export { ReportConnection } from "./report-connection.type";
 export { QrCodeResponse } from "./qr-code-response.type";
+export { FieldConnection } from "./field-connection.type";
+export { GreenhouseConnection } from "./greenhouse-connection.type";
+export { CropBatchConnection } from "./crop-batch-connection.type";

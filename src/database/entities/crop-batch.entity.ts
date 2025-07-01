@@ -83,6 +83,9 @@ export class CropBatch {
   @Column({ nullable: true })
   harvest_date: Date;
 
+  @Column({ default: null, type: "json" })
+  gps_coordinates: object;
+
   @Column({
     type: "enum",
     enum: PlantingMethod,

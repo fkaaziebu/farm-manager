@@ -58,9 +58,6 @@ export class Field {
   @Column({ default: null })
   previous_crop: string;
 
-  @Column({ default: null, type: "json" })
-  gps_coordinates: object;
-
   @ManyToOne(() => Farm, (farm) => farm.fields)
   farm: Farm;
 

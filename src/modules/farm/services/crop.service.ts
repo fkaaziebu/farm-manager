@@ -14,10 +14,14 @@ import {
   Greenhouse,
 } from "../../../database/entities";
 import {
+  CropBatchFilterInput,
   CropBatchInput,
+  CropBatchSortInput,
   ExpenseRecordInput,
   FieldInput,
+  FieldSortInput,
   GreenhouseInput,
+  GreenhouseSortInput,
   SalesRecordInput,
   UpdateCropBatchInput,
   UpdateExpenseRecordInput,
@@ -25,10 +29,11 @@ import {
   UpdateGreenhouseInput,
   UpdateSalesRecordInput,
 } from "../inputs";
-import { Repository } from "typeorm";
+import { ILike, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { v4 as uuidv4 } from "uuid";
 import { ProductType } from "../../../database/types/sales-record.type";
+import { PaginationInput } from "src/database/inputs";
 
 @Injectable()
 export class CropService {
@@ -105,7 +110,6 @@ export class CropService {
             new_field.slope = field.slope || null;
             new_field.drainage = field.drainage || null;
             new_field.soil_test_results = field.soilTestResults || null;
-            new_field.gps_coordinates = field.gpsCoordinates || null;
 
             return new_field;
           }),
@@ -260,6 +264,7 @@ export class CropService {
               cropBatch.areaPlanted || new_crop_batch.area_planted;
             new_crop_batch.area_unit =
               cropBatch.areaUnit || new_crop_batch.area_unit;
+            new_crop_batch.gps_coordinates = cropBatch.gpsCoordinates || null;
             new_crop_batch.plants_count = cropBatch.plantsCount;
 
             return new_crop_batch;
@@ -507,8 +512,6 @@ export class CropService {
         fieldToUpdate.drainage = field.drainage || fieldToUpdate.drainage;
         fieldToUpdate.soil_test_results =
           field.soilTestResults || fieldToUpdate.soil_test_results;
-        fieldToUpdate.gps_coordinates =
-          field.gpsCoordinates || fieldToUpdate.gps_coordinates;
         fieldToUpdate.previous_crop =
           field.previousCrop || fieldToUpdate.previous_crop;
         fieldToUpdate.status = field.status || fieldToUpdate.status;
@@ -655,6 +658,8 @@ export class CropService {
           cropBatchToUpdate.pesticide_applications;
         cropBatchToUpdate.weather_conditions =
           cropBatch.weatherConditions || cropBatchToUpdate.weather_conditions;
+        cropBatchToUpdate.gps_coordinates =
+          cropBatch.gpsCoordinates || cropBatchToUpdate.gps_coordinates;
         cropBatchToUpdate.status = cropBatch.status || cropBatchToUpdate.status;
 
         const savedCropBatch = await transactionalEntityManager.save(
@@ -768,5 +773,325 @@ export class CropService {
         return savedSalesRecord;
       },
     );
+  }
+
+  async getField({
+    email,
+    fieldUnitId,
+    role,
+  }: {
+    email: string;
+    fieldUnitId: string;
+    role: "ADMIN" | "WORKER";
+  }) {
+    return this.fieldRepository.findOne({
+      where: {
+        farm: {
+          [role === "ADMIN" ? "admin" : "workers"]: {
+            email,
+          },
+        },
+        unit_id: fieldUnitId,
+      },
+      relations: ["crop_batches"],
+    });
+  }
+
+  async getGreenhouse({
+    email,
+    greenhouseUnitId,
+    role,
+  }: {
+    email: string;
+    greenhouseUnitId: string;
+    role: "ADMIN" | "WORKER";
+  }) {
+    return this.greenhouseRepository.findOne({
+      where: {
+        farm: {
+          [role === "ADMIN" ? "admin" : "workers"]: {
+            email,
+          },
+        },
+        unit_id: greenhouseUnitId,
+      },
+      relations: ["crop_batches"],
+    });
+  }
+
+  async getCropBatch({
+    email,
+    cropBatchTag,
+    role,
+    housingUnit,
+  }: {
+    email: string;
+    cropBatchTag: string;
+    housingUnit: "FIELD" | "GREENHOUSE";
+    role: "ADMIN" | "WORKER";
+  }) {
+    return this.cropBatchRepository.findOne({
+      where: {
+        crop_batch_tag: cropBatchTag,
+        [`${housingUnit.toLowerCase()}`]: {
+          farm: {
+            [role === "ADMIN" ? "admin" : "workers"]: {
+              email,
+            },
+          },
+        },
+      },
+      relations: [
+        `${housingUnit.toLowerCase()}`,
+        "expense_records",
+        "sales_records",
+        "farm.admin",
+      ],
+    });
+  }
+
+  async listFields({
+    email,
+    searchTerm,
+    sort,
+    role,
+  }: {
+    email: string;
+    searchTerm: string;
+    sort?: FieldSortInput[];
+    role: "ADMIN" | "WORKER";
+  }) {
+    const sortOrder = {};
+    sort?.map((item) => {
+      sortOrder[item.field] = item.direction;
+    });
+
+    return this.fieldRepository.find({
+      where: {
+        farm: {
+          [role === "ADMIN" ? "admin" : "workers"]: {
+            email,
+          },
+        },
+        name: ILike(`%${searchTerm}%`),
+      },
+      relations: ["crop_batches"],
+      order: sortOrder,
+    });
+  }
+
+  async listFieldsPaginated({
+    email,
+    searchTerm,
+    pagination,
+    sort,
+    role,
+  }: {
+    email: string;
+    searchTerm?: string;
+    pagination: PaginationInput;
+    sort?: FieldSortInput[];
+    role: "ADMIN" | "WORKER";
+  }) {
+    const fields = await this.listFields({ email, searchTerm, sort, role });
+    // Apply pagination and return in the connection format
+    return this.paginate<Field>(fields, pagination, (field) =>
+      field.id.toString(),
+    );
+  }
+
+  async listGreenhouses({
+    email,
+    searchTerm,
+    sort,
+    role,
+  }: {
+    email: string;
+    searchTerm: string;
+    sort?: GreenhouseSortInput[];
+    role: "ADMIN" | "WORKER";
+  }) {
+    const sortOrder = {};
+    sort?.map((item) => {
+      sortOrder[item.field] = item.direction;
+    });
+
+    return this.greenhouseRepository.find({
+      where: {
+        farm: {
+          [role === "ADMIN" ? "admin" : "workers"]: {
+            email,
+          },
+        },
+        name: ILike(`%${searchTerm}%`),
+      },
+      relations: ["crop_batches"],
+      order: sortOrder,
+    });
+  }
+
+  async listGreenhousesPaginated({
+    email,
+    searchTerm,
+    pagination,
+    sort,
+    role,
+  }: {
+    email: string;
+    searchTerm?: string;
+    pagination: PaginationInput;
+    sort?: GreenhouseSortInput[];
+    role: "ADMIN" | "WORKER";
+  }) {
+    const greenhouses = await this.listGreenhouses({
+      email,
+      searchTerm,
+      sort,
+      role,
+    });
+    // Apply pagination and return in the connection format
+    return this.paginate<Greenhouse>(greenhouses, pagination, (greenhouse) =>
+      greenhouse.id.toString(),
+    );
+  }
+
+  async listCropBatches({
+    email,
+    searchTerm,
+    housingUnit,
+    sort,
+    role,
+  }: {
+    email: string;
+    searchTerm: string;
+    housingUnit: "FIELD" | "GREENHOUSE";
+    sort?: GreenhouseSortInput[];
+    role: "ADMIN" | "WORKER";
+  }) {
+    const sortOrder = {};
+    sort?.map((item) => {
+      sortOrder[item.field] = item.direction;
+    });
+
+    return this.cropBatchRepository.find({
+      where: {
+        [`${housingUnit.toLowerCase()}`]: {
+          farm: {
+            [role === "ADMIN" ? "admin" : "workers"]: {
+              email,
+            },
+          },
+        },
+        name: ILike(`%${searchTerm}%`),
+      },
+      relations: [`${housingUnit.toLowerCase()}`],
+      order: sortOrder,
+    });
+  }
+
+  async listCropBatchesPaginated({
+    email,
+    searchTerm,
+    filter,
+    pagination,
+    sort,
+    role,
+  }: {
+    email: string;
+    searchTerm?: string;
+    filter?: CropBatchFilterInput;
+    pagination: PaginationInput;
+    sort?: CropBatchSortInput[];
+    role: "ADMIN" | "WORKER";
+  }) {
+    // const fields = await this.listFields({ email, searchTerm, sort, role });
+    // Apply pagination and return in the connection format
+    // return this.paginate<Field>(fields, pagination, (field) => field.id.toString());
+  }
+
+  private paginate<T>(
+    items: T[],
+    paginationInput: PaginationInput = {},
+    cursorExtractor: (item: T) => string | number,
+  ) {
+    const { first, after, last, before } = paginationInput;
+
+    // Default values
+    const defaultFirst = 10;
+    let limit = first || defaultFirst;
+    let afterIndex = -1;
+    let beforeIndex = items.length;
+
+    // Determine indices based on cursors
+    if (after) {
+      const decodedCursor = this.decodeCursor(after);
+      afterIndex = items.findIndex(
+        (item) => String(cursorExtractor(item)) === decodedCursor,
+      );
+      if (afterIndex === -1)
+        afterIndex = -1; // Not found
+      else afterIndex = afterIndex; // Include items after this index
+    }
+
+    if (before) {
+      const decodedCursor = this.decodeCursor(before);
+      beforeIndex = items.findIndex(
+        (item) => String(cursorExtractor(item)) === decodedCursor,
+      );
+      if (beforeIndex === -1)
+        beforeIndex = items.length; // Not found
+      else beforeIndex = beforeIndex; // Include items before this index
+    }
+
+    // Handle the 'last' parameter by adjusting the starting point
+    if (last) {
+      const potentialCount = beforeIndex - afterIndex - 1;
+      if (potentialCount > last) {
+        afterIndex = beforeIndex - last - 1;
+      }
+      limit = last;
+    }
+
+    // Get the paginated items
+    const slicedItems = items.slice(afterIndex + 1, beforeIndex);
+    const paginatedItems = slicedItems.slice(0, limit);
+
+    // Create edges with cursors
+    const edges = paginatedItems.map((item) => ({
+      cursor: this.encodeCursor(String(cursorExtractor(item))),
+      node: item,
+    }));
+
+    // Determine if there are more pages
+    const hasNextPage = beforeIndex > afterIndex + 1 + paginatedItems.length;
+    const hasPreviousPage = afterIndex >= 0;
+
+    // Create the pageInfo object
+    const pageInfo = {
+      hasNextPage,
+      hasPreviousPage,
+      startCursor: edges.length > 0 ? edges[0].cursor : null,
+      endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
+    };
+
+    return {
+      edges,
+      pageInfo,
+      count: items.length,
+    };
+  }
+
+  /**
+   * Encode a cursor to Base64
+   */
+  private encodeCursor(cursor: string): string {
+    return Buffer.from(cursor).toString("base64");
+  }
+
+  /**
+   * Decode a cursor from Base64
+   */
+  private decodeCursor(cursor: string): string {
+    return Buffer.from(cursor, "base64").toString("utf-8");
   }
 }

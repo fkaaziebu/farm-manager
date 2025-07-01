@@ -29,7 +29,4 @@ export class FieldInput {
 
   @Field(() => GraphQLJSON, { nullable: true })
   soilTestResults?: any;
-
-  @Field(() => GraphQLJSON, { nullable: true })
-  gpsCoordinates?: any;
 }
