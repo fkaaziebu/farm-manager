@@ -72,10 +72,7 @@ registerEnumType(IrrigationMethod, {
 @ObjectType("CropBatch")
 export class CropBatchType {
   @Field(() => ID)
-  id: number;
-
-  @Field()
-  batch_id: string;
+  id: string;
 
   @Field()
   name: string;

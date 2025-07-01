@@ -37,12 +37,6 @@ export class Greenhouse {
   })
   status: HousingStatus;
 
-  @ManyToOne(() => Farm, (farm) => farm.greenhouses)
-  farm: Farm;
-
-  @OneToMany(() => ExpenseRecord, (expense_record) => expense_record.greenhouse)
-  expense_records: ExpenseRecord[];
-
   @Column({ default: 0 })
   area_sqm: number;
 
@@ -66,6 +60,12 @@ export class Greenhouse {
 
   @Column({ default: null })
   ventilation_system: string;
+
+  @ManyToOne(() => Farm, (farm) => farm.greenhouses)
+  farm: Farm;
+
+  @OneToMany(() => ExpenseRecord, (expense_record) => expense_record.greenhouse)
+  expense_records: ExpenseRecord[];
 
   @OneToMany(() => CropBatch, (cropBatch) => cropBatch.greenhouse)
   crop_batches: CropBatch[];

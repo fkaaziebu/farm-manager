@@ -1860,7 +1860,7 @@ describe("FarmService", () => {
   });
 
   describe("updateLivestockExpenseRecord", () => {
-    it("returns the updated growth record when successful", async () => {
+    it("returns the updated expense record when successful", async () => {
       await registerAdmin(adminInfo);
 
       const farm = await farmService.createFarm({
@@ -2042,7 +2042,7 @@ describe("FarmService", () => {
   });
 
   describe("updateLivestockSalesRecord", () => {
-    it("returns the updated growth record when successful", async () => {
+    it("returns the updated sales record when successful", async () => {
       await registerAdmin(adminInfo);
 
       const farm = await farmService.createFarm({

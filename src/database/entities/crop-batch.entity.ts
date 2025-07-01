@@ -62,7 +62,7 @@ export class CropBatch {
   id: number;
 
   @Column({ unique: true })
-  batch_id: string;
+  crop_batch_tag: string;
 
   @Column()
   name: string;
@@ -100,7 +100,7 @@ export class CropBatch {
   @Column({ default: 0 })
   area_planted: number;
 
-  @Column()
+  @Column({ default: "hr" })
   area_unit: string;
 
   @Column({ default: 0 })
@@ -109,7 +109,7 @@ export class CropBatch {
   @Column({ default: 0 })
   seed_amount: number;
 
-  @Column()
+  @Column({ default: null })
   seed_unit: string;
 
   @Column({ default: 0 })
@@ -118,7 +118,7 @@ export class CropBatch {
   @Column({ default: 0 })
   actual_yield: number;
 
-  @Column()
+  @Column({ default: null })
   yield_unit: string;
 
   @Column({ default: null, type: "json" })

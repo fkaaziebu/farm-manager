@@ -38,6 +38,8 @@ import {
 import { GroupResolver } from "./resolvers/group.resolver";
 import { GroupService } from "./services/group.service";
 import { QueueModule } from "../queue/queue.module";
+import { CropService } from "./services/crop.service";
+import { CropResolver } from "./resolvers/crop.resolver";
 
 @Module({
   imports: [
@@ -79,6 +81,8 @@ import { QueueModule } from "../queue/queue.module";
     GroupService,
     FarmResolver,
     GroupResolver,
+    CropService,
+    CropResolver,
     JwtStrategy,
   ],
 })

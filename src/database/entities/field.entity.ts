@@ -37,12 +37,6 @@ export class Field {
   })
   status: HousingStatus;
 
-  @ManyToOne(() => Farm, (farm) => farm.fields)
-  farm: Farm;
-
-  @OneToMany(() => ExpenseRecord, (expense_record) => expense_record.field)
-  expense_records: ExpenseRecord[];
-
   @Column({ default: 0 })
   area_hectares: number;
 
@@ -66,6 +60,12 @@ export class Field {
 
   @Column({ default: null, type: "json" })
   gps_coordinates: object;
+
+  @ManyToOne(() => Farm, (farm) => farm.fields)
+  farm: Farm;
+
+  @OneToMany(() => ExpenseRecord, (expense_record) => expense_record.field)
+  expense_records: ExpenseRecord[];
 
   @OneToMany(() => CropBatch, (cropBatch) => cropBatch.field)
   crop_batches: CropBatch[];
