@@ -1,5 +1,5 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { HousingStatus } from "src/database/types/housing-status.enum";
+import { CropHousingStatus } from "src/database/types/housing-status.enum";
 
 @InputType()
 export class UpdateGreenhouseInput {
@@ -33,6 +33,6 @@ export class UpdateGreenhouseInput {
   @Field({ nullable: true })
   ventilationSystem?: string;
 
-  @Field(() => HousingStatus, { nullable: true })
-  status?: HousingStatus;
+  @Field(() => CropHousingStatus, { nullable: true })
+  status?: CropHousingStatus;
 }

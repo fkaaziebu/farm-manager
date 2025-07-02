@@ -107,7 +107,7 @@ export class CropBatchType {
   @Field()
   seed_amount: number;
 
-  @Field()
+  @Field({ nullable: true })
   seed_unit: string;
 
   @Field()
@@ -116,7 +116,7 @@ export class CropBatchType {
   @Field()
   actual_yield: number;
 
-  @Field()
+  @Field({ nullable: true })
   yield_unit: string;
 
   @Field(() => GraphQLJSON, { nullable: true })

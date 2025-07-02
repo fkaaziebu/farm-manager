@@ -2,7 +2,7 @@ import { Field, ID, ObjectType } from "@nestjs/graphql";
 import { CropBatchType } from "./crop-batch.type";
 import { FarmTypeClass } from "./farm.type";
 import { ExpenseRecordType } from "./expense-record.type";
-import { HousingStatus } from "./housing-status.enum";
+import { CropHousingStatus } from "./housing-status.enum";
 
 @ObjectType("Greenhouse")
 export class GreenhouseType {
@@ -18,8 +18,8 @@ export class GreenhouseType {
   @Field()
   capacity: number;
 
-  @Field(() => HousingStatus)
-  status: HousingStatus;
+  @Field(() => CropHousingStatus)
+  status: CropHousingStatus;
 
   @Field()
   area_sqm: number;

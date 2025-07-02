@@ -232,25 +232,8 @@ export class CropService {
 
         const new_crop_batches: CropBatch[] = await Promise.all(
           cropBatches.map(async (cropBatch) => {
-            const existingCropBatch = await transactionalEntityManager.findOne(
-              CropBatch,
-              {
-                where: {
-                  crop_batch_tag: cropBatch.cropBatchTag,
-                },
-              },
-            );
-
-            if (existingCropBatch) {
-              throw new BadRequestException(
-                `A crop batch with crop batch tag ${cropBatch.cropBatchTag} already exist`,
-              );
-            }
-
             const new_crop_batch = new CropBatch();
-            new_crop_batch.crop_batch_tag =
-              cropBatch.cropBatchTag ||
-              `${field.farm.default_start_tag}-${uuidv4().slice(0, 5)}`;
+            new_crop_batch.crop_batch_tag = uuidv4();
             new_crop_batch.name = cropBatch.name;
             new_crop_batch.crop_type = cropBatch.cropType;
             new_crop_batch.variety = cropBatch.variety;
@@ -317,25 +300,8 @@ export class CropService {
 
         const new_crop_batches: CropBatch[] = await Promise.all(
           cropBatches.map(async (cropBatch) => {
-            const existingCropBatch = await transactionalEntityManager.findOne(
-              CropBatch,
-              {
-                where: {
-                  crop_batch_tag: cropBatch.cropBatchTag,
-                },
-              },
-            );
-
-            if (existingCropBatch) {
-              throw new BadRequestException(
-                `A crop batch with crop batch tag ${cropBatch.cropBatchTag} already exist`,
-              );
-            }
-
             const new_crop_batch = new CropBatch();
-            new_crop_batch.crop_batch_tag =
-              cropBatch.cropBatchTag ||
-              `${greenhouse.farm.default_start_tag}-${uuidv4().slice(0, 5)}`;
+            new_crop_batch.crop_batch_tag = uuidv4();
             new_crop_batch.name = cropBatch.name;
             new_crop_batch.crop_type = cropBatch.cropType;
             new_crop_batch.variety = cropBatch.variety;

@@ -8,13 +8,7 @@ import {
 import { CropBatch } from "./crop-batch.entity";
 import { Farm } from "./farm.entity";
 import { ExpenseRecord } from "./expense-record.entity";
-
-enum HousingStatus {
-  OPERATIONAL = "OPERATIONAL",
-  MAINTENANCE = "MAINTENANCE",
-  EMPTY = "EMPTY",
-  FULL = "FULL",
-}
+import { CropHousingStatus } from "./field.entity";
 
 @Entity()
 export class Greenhouse {
@@ -32,10 +26,10 @@ export class Greenhouse {
 
   @Column({
     type: "enum",
-    enum: HousingStatus,
-    default: HousingStatus.OPERATIONAL,
+    enum: CropHousingStatus,
+    default: CropHousingStatus.ACTIVE,
   })
-  status: HousingStatus;
+  status: CropHousingStatus;
 
   @Column({ default: 0 })
   area_sqm: number;

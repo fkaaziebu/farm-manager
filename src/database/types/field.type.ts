@@ -3,7 +3,7 @@ import { CropBatchType } from "./crop-batch.type";
 import { GraphQLJSON } from "graphql-type-json";
 import { FarmTypeClass } from "./farm.type";
 import { ExpenseRecordType } from "./expense-record.type";
-import { HousingStatus } from "./housing-status.enum";
+import { CropHousingStatus } from "./housing-status.enum";
 
 @ObjectType("Field")
 export class FieldType {
@@ -19,8 +19,8 @@ export class FieldType {
   @Field()
   capacity: number;
 
-  @Field(() => HousingStatus)
-  status: HousingStatus;
+  @Field(() => CropHousingStatus)
+  status: CropHousingStatus;
 
   @Field()
   area_hectares: number;

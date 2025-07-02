@@ -1,6 +1,6 @@
 import { Field, InputType } from "@nestjs/graphql";
 import GraphQLJSON from "graphql-type-json";
-import { HousingStatus } from "src/database/types/housing-status.enum";
+import { CropHousingStatus } from "src/database/types/housing-status.enum";
 
 @InputType()
 export class UpdateFieldInput {
@@ -28,8 +28,8 @@ export class UpdateFieldInput {
   @Field({ nullable: true })
   previousCrop?: string;
 
-  @Field(() => HousingStatus, { nullable: true })
-  status?: HousingStatus;
+  @Field(() => CropHousingStatus, { nullable: true })
+  status?: CropHousingStatus;
 
   @Field(() => GraphQLJSON, { nullable: true })
   soilTestResults?: any;

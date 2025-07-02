@@ -61,7 +61,7 @@ export class CropBatch {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: "uuid" })
   crop_batch_tag: string;
 
   @Column()

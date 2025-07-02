@@ -8,9 +8,6 @@ import {
 
 @InputType()
 export class CropBatchInput {
-  @Field({ nullable: true })
-  cropBatchTag?: string;
-
   @Field()
   name: string;
 
