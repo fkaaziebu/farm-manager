@@ -235,15 +235,9 @@ export class LlmService {
         new URL(this.configService.get<string>("MCP_SERVER_URL")),
       );
 
-      console.log(
-        "MCP_SERVER_URL",
-        this.configService.get<string>("MCP_SERVER_URL"),
-      );
-      console.log("MCP_TRANSPORT", this.transport);
       await this.mcp.connect(this.transport);
 
       const toolsResult = await this.mcp.listTools();
-      console.log(toolsResult);
       // @ts-expect-error error
       this.tools = toolsResult.tools.map((tool) => {
         return {
