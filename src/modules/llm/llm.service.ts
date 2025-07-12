@@ -19,8 +19,8 @@ import {
   MessageParam,
   Tool,
 } from "@anthropic-ai/sdk/resources/messages/messages.mjs";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+
 import { Anthropic } from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 
@@ -29,7 +29,7 @@ export class LlmService {
   private openai: OpenAI;
   private anthropic: Anthropic;
   private mcp: Client;
-  private transport: StdioClientTransport | StdioServerTransport | null = null;
+  private transport: StreamableHTTPClientTransport | null = null;
   private tools: Tool[] = [];
 
   constructor(
@@ -50,7 +50,7 @@ export class LlmService {
     // Initialize MCP client
     this.mcp = new Client({ name: "mcp-client-cli", version: "1.0.0" });
 
-    // this.connectToServer(this.configService.get<string>("MCP_SERVER_PATH"));
+    this.connectToServer();
   }
 
   async processQuery(query: string) {
@@ -68,8 +68,6 @@ export class LlmService {
         messages,
         tools: this.tools,
       });
-
-      console.log(response);
 
       const finalText = [];
 
@@ -231,26 +229,15 @@ export class LlmService {
     `;
   }
 
-  private async connectToServer(serverScriptPath: string) {
+  private async connectToServer() {
     try {
-      const isJs = serverScriptPath.endsWith(".js");
-      const isPy = serverScriptPath.endsWith(".py");
-      if (!isJs && !isPy) {
-        throw new Error("Server script must be a .js or .py file");
-      }
-      const command = isPy
-        ? process.platform === "win32"
-          ? "python"
-          : "python3"
-        : process.execPath;
-
-      this.transport = new StdioClientTransport({
-        command,
-        args: [serverScriptPath],
-      });
+      this.transport = new StreamableHTTPClientTransport(
+        new URL(this.configService.get<string>("MCP_SERVER_URL")),
+      );
       await this.mcp.connect(this.transport);
 
       const toolsResult = await this.mcp.listTools();
+      console.log(toolsResult);
       // @ts-expect-error error
       this.tools = toolsResult.tools.map((tool) => {
         return {
@@ -259,11 +246,6 @@ export class LlmService {
           input_schema: tool.inputSchema,
         };
       });
-
-      console.log(
-        "Connected to server with tools:",
-        this.tools.map(({ name }) => name),
-      );
     } catch (e) {
       console.log("Failed to connect to MCP server: ", e);
       throw e;
