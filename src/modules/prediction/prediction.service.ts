@@ -1,7 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Feedback, Prediction } from "../../database/entities";
-import { DiseaseType } from "../../database/types/prediction.type";
+import { Farm, Feedback, Prediction } from "../../database/entities";
+import {
+  DiseaseType,
+  ModelType,
+  PredictionCropType,
+} from "../../database/types/prediction.type";
 import { Repository } from "typeorm";
 import { PredictionFilterInput, PredictionSortInput } from "./inputs";
 import { PaginationInput } from "src/database/inputs";
@@ -58,6 +62,59 @@ export class PredictionService {
         prediction.feedback = savedFeedback;
 
         return transactionalEntityManager.save(Prediction, prediction);
+      },
+    );
+  }
+
+  async createPrediction({
+    role,
+    email,
+    farmTag,
+    cropType,
+    modelUsed,
+    predictedDisease,
+    top3Predictions,
+    confidence,
+    imagePath,
+    processingTimeMs,
+  }: {
+    email: string;
+    role: "ADMIN" | "WORKER";
+    farmTag: string;
+    cropType: PredictionCropType;
+    modelUsed: ModelType;
+    predictedDisease: DiseaseType;
+    top3Predictions: DiseaseType[];
+    confidence: number;
+    imagePath: string;
+    processingTimeMs: number;
+  }) {
+    return this.predictionRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        const farm = await transactionalEntityManager.findOne(Farm, {
+          where: {
+            farm_tag: farmTag,
+            [role === "ADMIN" ? "admin" : "workers"]: {
+              email,
+            },
+          },
+        });
+
+        if (!farm) {
+          throw new NotFoundException("Farm not found");
+        }
+
+        const new_prediction = new Prediction();
+        new_prediction.crop_type = cropType;
+        new_prediction.model_used = modelUsed;
+        new_prediction.predicted_disease = predictedDisease;
+        new_prediction.confidence = confidence;
+        new_prediction.top3_predictions = top3Predictions;
+        new_prediction.image_path = imagePath;
+        new_prediction.processing_time_ms = processingTimeMs;
+        new_prediction.farm = farm;
+
+        return transactionalEntityManager.save(Prediction, new_prediction);
       },
     );
   }

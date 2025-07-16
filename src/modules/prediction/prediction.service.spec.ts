@@ -222,6 +222,31 @@ describe("GroupService", () => {
     });
   });
 
+  describe("createPrediction", () => {
+    it("returns created prediction after successful", async () => {
+      await createFarmSetup({
+        name: adminInfo.name,
+        adminEmail: adminInfo.email,
+      });
+
+      let admin = await getAdmin(adminInfo.email);
+      const prediction = await predictionService.createPrediction({
+        email: adminInfo.email,
+        farmTag: admin.farms[0].farm_tag,
+        role: "ADMIN",
+        cropType: PredictionCropType.CASSAVA,
+        modelUsed: ModelType.MODEL_1,
+        predictedDisease: DiseaseType.DISEASE_1,
+        confidence: 8,
+        top3Predictions: [DiseaseType.DISEASE_1],
+        imagePath: "/image.png",
+        processingTimeMs: 300,
+      });
+
+      expect(prediction.confidence).toEqual(8);
+    });
+  });
+
   describe("listPredictions", () => {
     it("should return a list of prediction", async () => {
       await createFarmSetup({
@@ -293,16 +318,6 @@ describe("GroupService", () => {
     admin.password = await HashHelper.encrypt(password);
 
     return await adminRepository.save(admin);
-  };
-
-  const registerWorker = async ({ name, email, password }) => {
-    const worker = new Worker();
-
-    worker.name = name;
-    worker.email = email;
-    worker.password = await HashHelper.encrypt(password);
-
-    return await workerRepository.save(worker);
   };
 
   const createFarmSetup = async ({ name, adminEmail }) => {
