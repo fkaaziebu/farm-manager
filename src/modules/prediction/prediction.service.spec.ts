@@ -1,0 +1,356 @@
+import { Test, TestingModule } from "@nestjs/testing";
+import { Connection, Repository } from "typeorm";
+
+import {
+  Admin,
+  Apiary,
+  AquacultureBatch,
+  AquacultureSystem,
+  Barn,
+  BreedingRecord,
+  Coop,
+  CropBatch,
+  ExpenseRecord,
+  Farm,
+  Field,
+  Greenhouse,
+  Group,
+  GrowthRecord,
+  HealthRecord,
+  Hive,
+  Livestock,
+  Pen,
+  Pond,
+  PoultryBatch,
+  PoultryHouse,
+  SalesRecord,
+  Task,
+  Worker,
+  Report,
+  Request,
+  Review,
+  Prediction,
+  Feedback,
+} from "../../database/entities";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { JwtModule } from "@nestjs/jwt";
+import { getRepositoryToken, TypeOrmModule } from "@nestjs/typeorm";
+import { HashHelper } from "../../helpers";
+import { WorkerRole } from "../../database/types/worker.type";
+import { PredictionService } from "./prediction.service";
+import {
+  DiseaseType,
+  ModelType,
+  PredictionCropType,
+} from "../../database/types/prediction.type";
+
+describe("GroupService", () => {
+  let module: TestingModule;
+  let connection: Connection;
+  let predictionService: PredictionService;
+  let adminRepository: Repository<Admin>;
+  let farmRepository: Repository<Farm>;
+  let workerRepository: Repository<Worker>;
+  let predictionRepository: Repository<Prediction>;
+
+  beforeAll(async () => {
+    module = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          envFilePath: ".env.test.local",
+        }),
+        JwtModule.registerAsync({
+          imports: [ConfigModule],
+          useFactory: async (configService: ConfigService) => ({
+            secret: configService.get<string>("JWT_SECRET"),
+            secretOrPrivateKey: configService.get("JWT_SECRET"),
+            signOptions: { expiresIn: "1h" },
+          }),
+          inject: [ConfigService],
+        }),
+        TypeOrmModule.forRootAsync({
+          imports: [ConfigModule],
+          useFactory: async (configService: ConfigService) => ({
+            type: "postgres",
+            host: configService.get("DB_HOST"),
+            port: configService.get("DB_PORT"),
+            username: configService.get("DB_USERNAME"),
+            password: configService.get("DB_PASSWORD"),
+            database: configService.get("DB_DATABASE_TEST"),
+            url: configService.get("DATABASE_URL"),
+            entities: [
+              Admin,
+              Apiary,
+              AquacultureBatch,
+              AquacultureSystem,
+              Barn,
+              BreedingRecord,
+              Coop,
+              CropBatch,
+              ExpenseRecord,
+              Farm,
+              Field,
+              Greenhouse,
+              Group,
+              GrowthRecord,
+              HealthRecord,
+              Hive,
+              Livestock,
+              Pen,
+              Pond,
+              PoultryBatch,
+              PoultryHouse,
+              Report,
+              Request,
+              Review,
+              SalesRecord,
+              Task,
+              Worker,
+              Prediction,
+              Feedback,
+            ],
+            synchronize: true,
+            // dropSchema: true,
+          }),
+          inject: [ConfigService],
+        }),
+        TypeOrmModule.forFeature([
+          Admin,
+          Apiary,
+          AquacultureBatch,
+          AquacultureSystem,
+          Barn,
+          BreedingRecord,
+          Coop,
+          CropBatch,
+          ExpenseRecord,
+          Farm,
+          Field,
+          Greenhouse,
+          Group,
+          GrowthRecord,
+          HealthRecord,
+          Hive,
+          Livestock,
+          Pen,
+          Pond,
+          PoultryBatch,
+          PoultryHouse,
+          Report,
+          Request,
+          Review,
+          SalesRecord,
+          Task,
+          Worker,
+          Prediction,
+          Feedback,
+        ]),
+      ],
+      controllers: [],
+      providers: [PredictionService],
+    }).compile();
+
+    connection = module.get<Connection>(Connection);
+    predictionService = module.get<PredictionService>(PredictionService);
+    farmRepository = module.get<Repository<Farm>>(getRepositoryToken(Farm));
+    adminRepository = module.get<Repository<Admin>>(getRepositoryToken(Admin));
+    workerRepository = module.get<Repository<Worker>>(
+      getRepositoryToken(Worker),
+    );
+    predictionRepository = module.get<Repository<Prediction>>(
+      getRepositoryToken(Prediction),
+    );
+  });
+
+  beforeEach(async () => {
+    // Clear the database before each test
+    const entities = connection.entityMetadatas;
+    for (const entity of entities) {
+      const repository = connection.getRepository(entity.name);
+      await repository.query(`TRUNCATE "${entity.tableName}" CASCADE;`);
+    }
+    jest.restoreAllMocks();
+  });
+
+  afterAll(async () => {
+    await connection.close();
+    await module.close();
+  });
+
+  describe("submitPredictionFeedback", () => {
+    it("returns prediction with feedback after successful", async () => {
+      await createFarmSetup({
+        name: adminInfo.name,
+        adminEmail: adminInfo.email,
+      });
+
+      let admin = await getAdmin(adminInfo.email);
+      let prediction = admin.farms[0].predictions[0];
+
+      // admins
+      await predictionService.submitPredictionFeedback({
+        email: adminInfo.email,
+        role: "ADMIN",
+        predictionId: prediction.id,
+        userFeedback: "Hey",
+        actualDisease: DiseaseType.DISEASE_1,
+      });
+
+      admin = await getAdmin(adminInfo.email);
+      prediction = admin.farms[0].predictions[0];
+
+      expect(prediction.feedback).not.toBeNull();
+      expect(prediction.feedback.user_feedback).toBe("Hey");
+      expect(prediction.feedback.actual_disease).toEqual(DiseaseType.DISEASE_1);
+
+      // workers
+      await predictionService.submitPredictionFeedback({
+        email: adminInfo.workers[0].email,
+        role: "WORKER",
+        predictionId: prediction.id,
+        userFeedback: "Heyaa",
+        actualDisease: DiseaseType.DISEASE_2,
+      });
+
+      admin = await getAdmin(adminInfo.email);
+      prediction = admin.farms[0].predictions[0];
+
+      expect(prediction.feedback).not.toBeNull();
+      expect(prediction.feedback.user_feedback).toBe("Heyaa");
+      expect(prediction.feedback.actual_disease).toEqual(DiseaseType.DISEASE_2);
+    });
+  });
+
+  describe("listPredictions", () => {
+    it("should return a list of prediction", async () => {
+      await createFarmSetup({
+        name: adminInfo.name,
+        adminEmail: adminInfo.email,
+      });
+
+      const predictions = await predictionService.listPredictions({
+        email: adminInfo.email,
+        role: "ADMIN",
+      });
+
+      expect(predictions.length).toEqual(1);
+    });
+  });
+
+  describe("getPrediction", () => {
+    it("should return a particular prediction with the specified id", async () => {
+      await createFarmSetup({
+        name: adminInfo.name,
+        adminEmail: adminInfo.email,
+      });
+
+      const admin = await getAdmin(adminInfo.email);
+      const predictions = admin.farms[0].predictions[0];
+
+      const prediction = await predictionService.getPrediction({
+        email: adminInfo.email,
+        role: "ADMIN",
+        predictionId: predictions.id,
+      });
+
+      expect(prediction.id).toEqual(predictions.id);
+    });
+  });
+
+  const adminInfo = {
+    name: "Frederick Aziebu",
+    email: "frederickaziebu1998@gmail.com",
+    password: "Microsoft@2021",
+    groupName: "Fred Groups",
+    workers: [
+      {
+        name: "John Doe",
+        email: "johndoe@gmail.com",
+      },
+
+      {
+        name: "Delali Dorwu",
+        email: "delalidorwu@gmail.com",
+      },
+    ],
+  };
+
+  const getAdmin = async (email: string) => {
+    const admin = await adminRepository.findOne({
+      where: { email },
+      relations: ["workers", "farms.predictions.feedback", "farms.workers"],
+    });
+
+    return admin;
+  };
+
+  const registerAdmin = async ({ name, email, password }) => {
+    const admin = new Admin();
+
+    admin.name = name;
+    admin.email = email;
+    admin.password = await HashHelper.encrypt(password);
+
+    return await adminRepository.save(admin);
+  };
+
+  const registerWorker = async ({ name, email, password }) => {
+    const worker = new Worker();
+
+    worker.name = name;
+    worker.email = email;
+    worker.password = await HashHelper.encrypt(password);
+
+    return await workerRepository.save(worker);
+  };
+
+  const createFarmSetup = async ({ name, adminEmail }) => {
+    const admin = await registerAdmin({
+      ...adminInfo,
+      email: adminEmail,
+    });
+
+    const farm = new Farm();
+
+    farm.name = name;
+    const savedFarm = await farmRepository.save(farm);
+
+    const workers: Worker[] = await Promise.all(
+      adminInfo.workers.map(async (worker) => {
+        const new_worker = new Worker();
+        new_worker.name = worker.name;
+        new_worker.email = worker.email;
+        new_worker.roles = [WorkerRole.ANIMAL_CARETAKER];
+        new_worker.password = await HashHelper.encrypt("123");
+        new_worker.farms = [savedFarm];
+        new_worker.admins = [admin];
+
+        return new_worker;
+      }),
+    );
+
+    await workerRepository.save(workers);
+
+    const prediction = new Prediction();
+    prediction.crop_type = PredictionCropType.CASSAVA;
+    prediction.model_used = ModelType.MODEL_1;
+    prediction.predicted_disease = DiseaseType.DISEASE_1;
+    prediction.confidence = 8;
+    prediction.top3_predictions = [DiseaseType.DISEASE_1];
+    prediction.image_path = "/image.png";
+    prediction.processing_time_ms = 300;
+    prediction.farm = savedFarm;
+
+    await predictionRepository.save(prediction);
+
+    if (!admin.farms) {
+      admin.farms = [];
+    }
+
+    admin.farms.push(savedFarm);
+    await adminRepository.save(admin);
+
+    return await farmRepository.save(farm);
+  };
+});

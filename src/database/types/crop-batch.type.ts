@@ -75,6 +75,9 @@ export class CropBatchType {
   id: string;
 
   @Field()
+  crop_batch_tag: string;
+
+  @Field()
   name: string;
 
   @Field(() => CropType)

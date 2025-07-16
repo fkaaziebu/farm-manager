@@ -35,6 +35,8 @@ import {
   Report,
   Request,
   Review,
+  Prediction,
+  Feedback,
 } from "../../../database/entities";
 import { FarmType } from "../../../database/types/farm.type";
 import { WorkerRole } from "../../../database/types/worker.type";
@@ -104,6 +106,8 @@ describe("CropService", () => {
               SalesRecord,
               Task,
               Worker,
+              Prediction,
+              Feedback,
             ],
             synchronize: true,
           }),
@@ -137,6 +141,8 @@ describe("CropService", () => {
           SalesRecord,
           Task,
           Worker,
+          Prediction,
+          Feedback,
         ]),
       ],
       controllers: [],

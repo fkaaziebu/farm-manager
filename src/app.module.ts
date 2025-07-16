@@ -9,6 +9,8 @@ import { GraphQLJSON } from "graphql-type-json";
 import { AuthModule } from "./modules/auth/auth.module";
 import { FarmModule } from "./modules/farm/farm.module";
 import { LlmModule } from "./modules/llm/llm.module";
+import { ImageModule } from "./modules/image/image.module";
+import { PredictionModule } from "./modules/prediction/prediction.module";
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { LlmModule } from "./modules/llm/llm.module";
     AuthModule,
     FarmModule,
     LlmModule,
+    ImageModule,
+    PredictionModule,
   ],
   controllers: [],
   providers: [],

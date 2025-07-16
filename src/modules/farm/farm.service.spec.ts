@@ -35,13 +35,14 @@ import {
   Report,
   Request,
   Review,
+  Prediction,
+  Feedback,
 } from "../../database/entities";
 import { FarmType } from "../../database/types/farm.type";
 import {
   BadRequestException,
   ConflictException,
   NotFoundException,
-  UnauthorizedException,
 } from "@nestjs/common";
 import { WorkerRole } from "../../database/types/worker.type";
 import { LivestockGender, TaskType } from "../../database/types";
@@ -116,6 +117,8 @@ describe("FarmService", () => {
               SalesRecord,
               Task,
               Worker,
+              Prediction,
+              Feedback,
             ],
             synchronize: true,
           }),
@@ -149,6 +152,8 @@ describe("FarmService", () => {
           SalesRecord,
           Task,
           Worker,
+          Prediction,
+          Feedback,
         ]),
       ],
       controllers: [],

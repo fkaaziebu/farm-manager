@@ -1,9 +1,8 @@
 import { Module } from "@nestjs/common";
-import { FarmService } from "./farm.service";
-import { FarmResolver } from "./farm.resolver";
+import { PredictionService } from "./prediction.service";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { JwtStrategy } from "./strategies/jwt.strategy";
+import { PredictionResolver } from "./prediction.resolver";
 
 // Entities
 import {
@@ -37,16 +36,10 @@ import {
   Prediction,
   Feedback,
 } from "src/database/entities";
-import { GroupResolver } from "./resolvers/group.resolver";
-import { GroupService } from "./services/group.service";
-import { QueueModule } from "../queue/queue.module";
-import { CropService } from "./services/crop.service";
-import { CropResolver } from "./resolvers/crop.resolver";
 
 @Module({
   imports: [
     ConfigModule,
-    QueueModule,
     TypeOrmModule.forFeature([
       Admin,
       Apiary,
@@ -79,15 +72,6 @@ import { CropResolver } from "./resolvers/crop.resolver";
       Feedback,
     ]),
   ],
-  controllers: [],
-  providers: [
-    FarmService,
-    GroupService,
-    FarmResolver,
-    GroupResolver,
-    CropService,
-    CropResolver,
-    JwtStrategy,
-  ],
+  providers: [PredictionService, PredictionResolver],
 })
-export class FarmModule {}
+export class PredictionModule {}

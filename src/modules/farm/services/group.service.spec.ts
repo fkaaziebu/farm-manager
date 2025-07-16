@@ -30,6 +30,8 @@ import {
   Report,
   Request,
   Review,
+  Prediction,
+  Feedback,
 } from "../../../database/entities";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
@@ -103,6 +105,8 @@ describe("GroupService", () => {
               SalesRecord,
               Task,
               Worker,
+              Prediction,
+              Feedback,
             ],
             synchronize: true,
           }),
@@ -136,6 +140,8 @@ describe("GroupService", () => {
           SalesRecord,
           Task,
           Worker,
+          Prediction,
+          Feedback,
         ]),
       ],
       controllers: [],

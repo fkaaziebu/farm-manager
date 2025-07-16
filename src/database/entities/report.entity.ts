@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  Generated,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Worker } from "./worker.entity";
 import { Farm } from "./farm.entity";
 

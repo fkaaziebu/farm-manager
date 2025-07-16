@@ -3,6 +3,7 @@ import { AppModule } from "./app.module";
 import { Client } from "pg";
 import { ConfigService } from "@nestjs/config";
 import { ValidationPipe } from "@nestjs/common";
+import * as express from "express";
 
 async function createDatabase(dbName: string) {
   const client = new Client({
@@ -48,8 +49,11 @@ async function bootstrap() {
     credentials: true,
   });
 
+  app.use(express.json({ limit: "10mb" })); // For JSON payloads
+  app.use(express.urlencoded({ limit: "10mb", extended: true })); // For form data
+
   await app.listen(port);
-  // console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 
 bootstrap();

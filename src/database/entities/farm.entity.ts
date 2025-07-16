@@ -27,6 +27,7 @@ import { Coop } from "./coop.entity";
 import { Pen } from "./pen.entity";
 import { Report } from "./report.entity";
 import { Group } from "./group.entity";
+import { Prediction } from "./prediction.entity";
 
 export enum FarmType {
   LIVESTOCK = "LIVESTOCK",
@@ -145,4 +146,7 @@ export class Farm {
 
   @ManyToMany(() => Group, (report) => report.farms)
   groups: Group[];
+
+  @OneToMany(() => Prediction, (prediction) => prediction.farm)
+  predictions: Prediction[];
 }

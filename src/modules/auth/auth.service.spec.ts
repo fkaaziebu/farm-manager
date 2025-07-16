@@ -38,6 +38,8 @@ import {
   SalesRecord,
   Task,
   Worker,
+  Prediction,
+  Feedback,
 } from "../../database/entities";
 
 describe("AuthService", () => {
@@ -102,6 +104,8 @@ describe("AuthService", () => {
               SalesRecord,
               Task,
               Worker,
+              Prediction,
+              Feedback,
             ],
             synchronize: true,
           }),
@@ -134,6 +138,8 @@ describe("AuthService", () => {
           SalesRecord,
           Task,
           Worker,
+          Prediction,
+          Feedback,
         ]),
       ],
       controllers: [],

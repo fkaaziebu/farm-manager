@@ -35,6 +35,8 @@ import {
   SalesRecord,
   Task,
   Worker,
+  Prediction,
+  Feedback,
 } from "src/database/entities";
 import { QueueModule } from "../queue/queue.module";
 
@@ -80,6 +82,8 @@ import { QueueModule } from "../queue/queue.module";
       SalesRecord,
       Task,
       Worker,
+      Prediction,
+      Feedback,
     ]),
   ],
   controllers: [],

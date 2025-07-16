@@ -34,6 +34,8 @@ import {
   SalesRecord,
   Task,
   Worker,
+  Prediction,
+  Feedback,
 } from "src/database/entities";
 import { CacheModule } from "@nestjs/cache-manager";
 
@@ -69,6 +71,8 @@ import { CacheModule } from "@nestjs/cache-manager";
       SalesRecord,
       Task,
       Worker,
+      Prediction,
+      Feedback,
     ]),
   ],
   controllers: [],
