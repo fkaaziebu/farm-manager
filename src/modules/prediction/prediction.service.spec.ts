@@ -241,6 +241,7 @@ describe("PredictionService", () => {
         modelUsed: ModelType.MODEL_1,
         leafDetections: [
           {
+            bbox: [0, 1, 2],
             detection_confidence: 9,
             confidence: 8,
             predicted_disease: DiseaseType.DISEASE_1,
@@ -356,6 +357,7 @@ describe("PredictionService", () => {
     await workerRepository.save(workers);
 
     const new_leaf_detection = new LeafDetection();
+    new_leaf_detection.bbox = [0, 1, 2];
     new_leaf_detection.detection_confidence = 9;
     new_leaf_detection.predicted_disease = DiseaseType.DISEASE_1;
     new_leaf_detection.confidence = 8;

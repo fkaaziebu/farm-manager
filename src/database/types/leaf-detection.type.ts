@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType, registerEnumType } from "@nestjs/graphql";
 import { PredictionType } from "./prediction.type";
+import GraphQLJSON from "graphql-type-json";
 
 export enum DiseaseType {
   DISEASE_1 = "DISEASE_1",
@@ -15,6 +16,9 @@ registerEnumType(DiseaseType, {
 export class LeafDetectionType {
   @Field(() => ID)
   id: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  bbox?: any;
 
   @Field()
   detection_confidence: number;

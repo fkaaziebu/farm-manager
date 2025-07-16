@@ -11,6 +11,9 @@ export class LeafDetection {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column({ default: null, type: "json" })
+  bbox: object;
+
   @Column()
   detection_confidence: number;
 

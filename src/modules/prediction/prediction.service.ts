@@ -112,6 +112,7 @@ export class PredictionService {
         const leaf_detections: LeafDetection[] = await Promise.all(
           leafDetections.map(async (leaf_detected) => {
             const new_leaf_detection = new LeafDetection();
+            new_leaf_detection.bbox = leaf_detected.bbox;
             new_leaf_detection.detection_confidence =
               leaf_detected.detection_confidence;
             new_leaf_detection.predicted_disease =
