@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from "@nestjs/graphql";
-import { DiseaseType, PredictionType } from "./prediction.type";
+import { PredictionType } from "./prediction.type";
+import { DiseaseType } from "./leaf-detection.type";
 
 @ObjectType("Feedback")
 export class FeedbackType {

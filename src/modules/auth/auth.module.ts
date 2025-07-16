@@ -37,6 +37,7 @@ import {
   Worker,
   Prediction,
   Feedback,
+  LeafDetection,
 } from "src/database/entities";
 import { QueueModule } from "../queue/queue.module";
 
@@ -84,6 +85,7 @@ import { QueueModule } from "../queue/queue.module";
       Worker,
       Prediction,
       Feedback,
+      LeafDetection,
     ]),
   ],
   controllers: [],

@@ -31,6 +31,7 @@ import {
   Review,
   Prediction,
   Feedback,
+  LeafDetection,
 } from "../../database/entities";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
@@ -39,12 +40,12 @@ import { HashHelper } from "../../helpers";
 import { WorkerRole } from "../../database/types/worker.type";
 import { PredictionService } from "./prediction.service";
 import {
-  DiseaseType,
   ModelType,
   PredictionCropType,
 } from "../../database/types/prediction.type";
+import { DiseaseType } from "../../database/types/leaf-detection.type";
 
-describe("GroupService", () => {
+describe("PredictionService", () => {
   let module: TestingModule;
   let connection: Connection;
   let predictionService: PredictionService;
@@ -109,6 +110,7 @@ describe("GroupService", () => {
               Worker,
               Prediction,
               Feedback,
+              LeafDetection,
             ],
             synchronize: true,
             // dropSchema: true,
@@ -145,6 +147,7 @@ describe("GroupService", () => {
           Worker,
           Prediction,
           Feedback,
+          LeafDetection,
         ]),
       ],
       controllers: [],
@@ -236,14 +239,19 @@ describe("GroupService", () => {
         role: "ADMIN",
         cropType: PredictionCropType.CASSAVA,
         modelUsed: ModelType.MODEL_1,
-        predictedDisease: DiseaseType.DISEASE_1,
-        confidence: 8,
-        top3Predictions: [DiseaseType.DISEASE_1],
+        leafDetections: [
+          {
+            detection_confidence: 9,
+            confidence: 8,
+            predicted_disease: DiseaseType.DISEASE_1,
+            top3_predictions: [DiseaseType.DISEASE_1],
+          },
+        ],
         imagePath: "/image.png",
         processingTimeMs: 300,
       });
 
-      expect(prediction.confidence).toEqual(8);
+      expect(prediction.leaf_detections.length).toEqual(1);
     });
   });
 
@@ -347,12 +355,16 @@ describe("GroupService", () => {
 
     await workerRepository.save(workers);
 
+    const new_leaf_detection = new LeafDetection();
+    new_leaf_detection.detection_confidence = 9;
+    new_leaf_detection.predicted_disease = DiseaseType.DISEASE_1;
+    new_leaf_detection.confidence = 8;
+    new_leaf_detection.top3_predictions = [DiseaseType.DISEASE_1];
+
     const prediction = new Prediction();
     prediction.crop_type = PredictionCropType.CASSAVA;
     prediction.model_used = ModelType.MODEL_1;
-    prediction.predicted_disease = DiseaseType.DISEASE_1;
-    prediction.confidence = 8;
-    prediction.top3_predictions = [DiseaseType.DISEASE_1];
+    prediction.leaf_detections = [new_leaf_detection];
     prediction.image_path = "/image.png";
     prediction.processing_time_ms = 300;
     prediction.farm = savedFarm;

@@ -36,6 +36,7 @@ import {
   Worker,
   Prediction,
   Feedback,
+  LeafDetection,
 } from "src/database/entities";
 import { GroupResolver } from "./resolvers/group.resolver";
 import { GroupService } from "./services/group.service";
@@ -77,6 +78,7 @@ import { CropResolver } from "./resolvers/crop.resolver";
       Worker,
       Prediction,
       Feedback,
+      LeafDetection,
     ]),
   ],
   controllers: [],

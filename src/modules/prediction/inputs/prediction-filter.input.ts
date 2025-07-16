@@ -1,6 +1,6 @@
 import { Field, InputType } from "@nestjs/graphql";
+import { DiseaseType } from "src/database/types/leaf-detection.type";
 import {
-  DiseaseType,
   ModelType,
   PredictionCropType,
 } from "src/database/types/prediction.type";

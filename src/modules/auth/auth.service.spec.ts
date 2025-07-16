@@ -40,6 +40,7 @@ import {
   Worker,
   Prediction,
   Feedback,
+  LeafDetection,
 } from "../../database/entities";
 
 describe("AuthService", () => {
@@ -106,6 +107,7 @@ describe("AuthService", () => {
               Worker,
               Prediction,
               Feedback,
+              LeafDetection,
             ],
             synchronize: true,
           }),
@@ -140,6 +142,7 @@ describe("AuthService", () => {
           Worker,
           Prediction,
           Feedback,
+          LeafDetection,
         ]),
       ],
       controllers: [],

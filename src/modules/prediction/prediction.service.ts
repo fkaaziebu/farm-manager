@@ -1,14 +1,23 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Farm, Feedback, Prediction } from "../../database/entities";
 import {
-  DiseaseType,
+  Farm,
+  Feedback,
+  LeafDetection,
+  Prediction,
+} from "../../database/entities";
+import {
   ModelType,
   PredictionCropType,
 } from "../../database/types/prediction.type";
 import { Repository } from "typeorm";
-import { PredictionFilterInput, PredictionSortInput } from "./inputs";
+import {
+  LeafDetectionInput,
+  PredictionFilterInput,
+  PredictionSortInput,
+} from "./inputs";
 import { PaginationInput } from "src/database/inputs";
+import { DiseaseType } from "src/database/types/leaf-detection.type";
 
 @Injectable()
 export class PredictionService {
@@ -72,22 +81,18 @@ export class PredictionService {
     farmTag,
     cropType,
     modelUsed,
-    predictedDisease,
-    top3Predictions,
-    confidence,
     imagePath,
     processingTimeMs,
+    leafDetections,
   }: {
     email: string;
     role: "ADMIN" | "WORKER";
     farmTag: string;
     cropType: PredictionCropType;
     modelUsed: ModelType;
-    predictedDisease: DiseaseType;
-    top3Predictions: DiseaseType[];
-    confidence: number;
     imagePath: string;
     processingTimeMs: number;
+    leafDetections: LeafDetectionInput[];
   }) {
     return this.predictionRepository.manager.transaction(
       async (transactionalEntityManager) => {
@@ -104,15 +109,30 @@ export class PredictionService {
           throw new NotFoundException("Farm not found");
         }
 
+        const leaf_detections: LeafDetection[] = await Promise.all(
+          leafDetections.map(async (leaf_detected) => {
+            const new_leaf_detection = new LeafDetection();
+            new_leaf_detection.detection_confidence =
+              leaf_detected.detection_confidence;
+            new_leaf_detection.predicted_disease =
+              leaf_detected.predicted_disease;
+            new_leaf_detection.confidence = leaf_detected.confidence;
+            new_leaf_detection.top3_predictions =
+              leaf_detected.top3_predictions;
+
+            return new_leaf_detection;
+          }),
+        );
+
+        await transactionalEntityManager.save(leaf_detections);
+
         const new_prediction = new Prediction();
         new_prediction.crop_type = cropType;
         new_prediction.model_used = modelUsed;
-        new_prediction.predicted_disease = predictedDisease;
-        new_prediction.confidence = confidence;
-        new_prediction.top3_predictions = top3Predictions;
         new_prediction.image_path = imagePath;
         new_prediction.processing_time_ms = processingTimeMs;
         new_prediction.farm = farm;
+        new_prediction.leaf_detections = leaf_detections;
 
         return transactionalEntityManager.save(Prediction, new_prediction);
       },
@@ -166,7 +186,9 @@ export class PredictionService {
         },
         crop_type: filter?.cropType,
         model_used: filter?.modelUsed,
-        predicted_disease: filter?.predictedDisease,
+        leaf_detections: {
+          predicted_disease: filter?.predictedDisease,
+        },
       },
       relations: ["feedback"],
       order: sortOrder,

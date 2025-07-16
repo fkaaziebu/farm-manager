@@ -32,6 +32,7 @@ import {
   Review,
   Prediction,
   Feedback,
+  LeafDetection,
 } from "../../../database/entities";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
@@ -107,6 +108,7 @@ describe("GroupService", () => {
               Worker,
               Prediction,
               Feedback,
+              LeafDetection,
             ],
             synchronize: true,
           }),
@@ -142,6 +144,7 @@ describe("GroupService", () => {
           Worker,
           Prediction,
           Feedback,
+          LeafDetection,
         ]),
       ],
       controllers: [],

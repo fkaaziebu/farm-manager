@@ -1,6 +1,7 @@
 import { Field, ID, ObjectType, registerEnumType } from "@nestjs/graphql";
 import { FarmTypeClass } from "./farm.type";
 import { FeedbackType } from "./feedback.type";
+import { LeafDetectionType } from "./leaf-detection.type";
 
 export enum PredictionCropType {
   MAIZE = "MAIZE",
@@ -12,19 +13,9 @@ export enum ModelType {
   MODEL_2 = "MODEL_2",
 }
 
-export enum DiseaseType {
-  DISEASE_1 = "DISEASE_1",
-  DISEASE_2 = "DISEASE_2",
-}
-
 registerEnumType(PredictionCropType, {
   name: "PredictionCropType",
   description: "Type of crop we are predicting for",
-});
-
-registerEnumType(DiseaseType, {
-  name: "DiseaseType",
-  description: "Type of disease affecting crop",
 });
 
 registerEnumType(ModelType, {
@@ -43,15 +34,6 @@ export class PredictionType {
   @Field(() => ModelType)
   model_used: ModelType;
 
-  @Field(() => DiseaseType)
-  predicted_disease: DiseaseType;
-
-  @Field()
-  confidence: number;
-
-  @Field(() => [DiseaseType])
-  top3_predictions: DiseaseType[];
-
   @Field()
   image_path: string;
 
@@ -66,6 +48,9 @@ export class PredictionType {
 
   @Field(() => FeedbackType, { nullable: true })
   feedback?: FeedbackType;
+
+  @Field(() => [LeafDetectionType], { nullable: true })
+  leaf_detections?: LeafDetectionType[];
 
   @Field(() => FarmTypeClass)
   farm: FarmTypeClass;

@@ -37,6 +37,7 @@ import {
   Review,
   Prediction,
   Feedback,
+  LeafDetection,
 } from "../../../database/entities";
 import { FarmType } from "../../../database/types/farm.type";
 import { WorkerRole } from "../../../database/types/worker.type";
@@ -108,6 +109,7 @@ describe("CropService", () => {
               Worker,
               Prediction,
               Feedback,
+              LeafDetection,
             ],
             synchronize: true,
           }),
@@ -143,6 +145,7 @@ describe("CropService", () => {
           Worker,
           Prediction,
           Feedback,
+          LeafDetection,
         ]),
       ],
       controllers: [],

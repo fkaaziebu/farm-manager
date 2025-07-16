@@ -34,3 +34,4 @@ export { RequestTypeClass, RequestType, RequestStatus } from "./request.type";
 export { ImageType } from "./image.type";
 export { PredictionType } from "./prediction.type";
 export { FeedbackType } from "./feedback.type";
+export { LeafDetectionType } from "./leaf-detection.type";

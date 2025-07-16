@@ -6,13 +6,17 @@ import { Roles } from "./decorators/roles.decorator";
 import { PredictionType } from "src/database/types";
 import { PredictionService } from "./prediction.service";
 import {
-  DiseaseType,
   ModelType,
   PredictionCropType,
 } from "src/database/types/prediction.type";
-import { PredictionFilterInput, PredictionSortInput } from "./inputs";
+import {
+  LeafDetectionInput,
+  PredictionFilterInput,
+  PredictionSortInput,
+} from "./inputs";
 import { PaginationInput } from "src/database/inputs";
 import { PredictionConnection } from "./types";
+import { DiseaseType } from "src/database/types/leaf-detection.type";
 
 @Resolver()
 export class PredictionResolver {
@@ -49,11 +53,11 @@ export class PredictionResolver {
     cropType: PredictionCropType,
     @Args("modelUsed", { type: () => ModelType })
     modelUsed: ModelType,
-    @Args("predictedDisease", { type: () => DiseaseType })
-    predictedDisease: DiseaseType,
-    @Args("confidence") confidence: number,
-    @Args("top3Predictions", { type: () => [DiseaseType] })
-    top3Predictions: DiseaseType[],
+    @Args("leafDetections", {
+      type: () => [LeafDetectionInput],
+      nullable: false,
+    })
+    leafDetections: LeafDetectionInput[],
     @Args("imagePath") imagePath: string,
     @Args("processingTimeMs") processingTimeMs: number,
   ) {
@@ -64,9 +68,7 @@ export class PredictionResolver {
       farmTag,
       cropType,
       modelUsed,
-      predictedDisease,
-      top3Predictions,
-      confidence,
+      leafDetections,
       imagePath,
       processingTimeMs,
     });
