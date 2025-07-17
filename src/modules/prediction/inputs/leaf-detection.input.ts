@@ -16,6 +16,6 @@ export class LeafDetectionInput {
   @Field()
   confidence: number;
 
-  @Field(() => [DiseaseType], { nullable: false })
-  top3_predictions: DiseaseType[];
+  @Field(() => GraphQLJSON, { nullable: false })
+  top3_predictions: any;
 }

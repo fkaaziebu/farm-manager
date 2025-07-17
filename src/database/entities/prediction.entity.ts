@@ -16,11 +16,13 @@ import { LeafDetection } from "./leaf-detection.entity";
 enum PredictionCropType {
   MAIZE = "MAIZE",
   CASSAVA = "CASSAVA",
+  CASHEW = "CASHEW",
+  TOMATO = "TOMATO",
 }
 
 enum ModelType {
-  MODEL_1 = "MODEL_1",
-  MODEL_2 = "MODEL_2",
+  ENHANCED_MOBILENETV2 = "ENHANCED_MOBILENETV2",
+  ENHANCED_RESNET50 = "ENHANCED_RESNET50",
 }
 
 @Entity()
@@ -37,7 +39,7 @@ export class Prediction {
   @Column()
   image_path: string;
 
-  @Column()
+  @Column({ type: "float" })
   processing_time_ms: number;
 
   @CreateDateColumn()

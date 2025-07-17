@@ -6,11 +6,13 @@ import { LeafDetectionType } from "./leaf-detection.type";
 export enum PredictionCropType {
   MAIZE = "MAIZE",
   CASSAVA = "CASSAVA",
+  CASHEW = "CASHEW",
+  TOMATO = "TOMATO",
 }
 
 export enum ModelType {
-  MODEL_1 = "MODEL_1",
-  MODEL_2 = "MODEL_2",
+  ENHANCED_MOBILENETV2 = "ENHANCED_MOBILENETV2",
+  ENHANCED_RESNET50 = "ENHANCED_RESNET50",
 }
 
 registerEnumType(PredictionCropType, {

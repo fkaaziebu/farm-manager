@@ -29,7 +29,9 @@ export class LlmService {
   private openai: OpenAI;
   private anthropic: Anthropic;
   private mcp: Client;
+  private mcp2: Client;
   private transport: StreamableHTTPClientTransport | null = null;
+  private transport2: StreamableHTTPClientTransport | null = null;
   private tools: Tool[] = [];
 
   constructor(
@@ -49,6 +51,7 @@ export class LlmService {
 
     // Initialize MCP client
     this.mcp = new Client({ name: "mcp-client-cli", version: "1.0.0" });
+    this.mcp2 = new Client({ name: "mcp-client-prediction", version: "1.0.0" });
 
     this.connectToServer();
   }
@@ -68,6 +71,7 @@ export class LlmService {
         messages,
         tools: this.tools,
       });
+      console.log(response);
 
       const finalText = [];
 
@@ -80,10 +84,25 @@ export class LlmService {
             | { [x: string]: unknown }
             | undefined;
 
-          const result = await this.mcp.callTool({
-            name: toolName,
-            arguments: toolArgs,
-          });
+          const hasTool = (await this.mcp.listTools()).tools.find(
+            (tool) => tool.name === toolName,
+          );
+
+          let result = null;
+
+          if (hasTool) {
+            result = await this.mcp.callTool({
+              name: toolName,
+              arguments: toolArgs,
+            });
+          } else {
+            result = await this.mcp2.callTool({
+              name: toolName,
+              arguments: toolArgs,
+            });
+          }
+
+          console.log(result);
 
           finalText.push(
             `[Calling tool ${toolName} with args ${JSON.stringify(toolArgs)}]`,
@@ -235,11 +254,18 @@ export class LlmService {
         new URL(this.configService.get<string>("MCP_SERVER_URL")),
       );
 
+      this.transport2 = new StreamableHTTPClientTransport(
+        new URL(this.configService.get<string>("MCP_SERVER_2_URL")),
+      );
+
       await this.mcp.connect(this.transport);
+      await this.mcp2.connect(this.transport2);
 
       const toolsResult = await this.mcp.listTools();
+      const toolsResult2 = await this.mcp2.listTools();
+      console.log("MCP TOOLS:", toolsResult2);
       // @ts-expect-error error
-      this.tools = toolsResult.tools.map((tool) => {
+      this.tools = [...toolsResult.tools, ...toolsResult2.tools].map((tool) => {
         return {
           name: tool.name,
           description: tool.description,

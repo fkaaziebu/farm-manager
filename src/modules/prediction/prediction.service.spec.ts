@@ -197,7 +197,7 @@ describe("PredictionService", () => {
         role: "ADMIN",
         predictionId: prediction.id,
         userFeedback: "Hey",
-        actualDisease: DiseaseType.DISEASE_1,
+        actualDisease: DiseaseType.ANTHRACNOSE,
       });
 
       admin = await getAdmin(adminInfo.email);
@@ -205,7 +205,9 @@ describe("PredictionService", () => {
 
       expect(prediction.feedback).not.toBeNull();
       expect(prediction.feedback.user_feedback).toBe("Hey");
-      expect(prediction.feedback.actual_disease).toEqual(DiseaseType.DISEASE_1);
+      expect(prediction.feedback.actual_disease).toEqual(
+        DiseaseType.ANTHRACNOSE,
+      );
 
       // workers
       await predictionService.submitPredictionFeedback({
@@ -213,7 +215,7 @@ describe("PredictionService", () => {
         role: "WORKER",
         predictionId: prediction.id,
         userFeedback: "Heyaa",
-        actualDisease: DiseaseType.DISEASE_2,
+        actualDisease: DiseaseType["BROWN SPOT"],
       });
 
       admin = await getAdmin(adminInfo.email);
@@ -221,7 +223,9 @@ describe("PredictionService", () => {
 
       expect(prediction.feedback).not.toBeNull();
       expect(prediction.feedback.user_feedback).toBe("Heyaa");
-      expect(prediction.feedback.actual_disease).toEqual(DiseaseType.DISEASE_2);
+      expect(prediction.feedback.actual_disease).toEqual(
+        DiseaseType["BROWN SPOT"],
+      );
     });
   });
 
@@ -238,14 +242,14 @@ describe("PredictionService", () => {
         farmTag: admin.farms[0].farm_tag,
         role: "ADMIN",
         cropType: PredictionCropType.CASSAVA,
-        modelUsed: ModelType.MODEL_1,
+        modelUsed: ModelType.RESNET50,
         leafDetections: [
           {
             bbox: [0, 1, 2],
             detection_confidence: 9,
             confidence: 8,
-            predicted_disease: DiseaseType.DISEASE_1,
-            top3_predictions: [DiseaseType.DISEASE_1],
+            predicted_disease: DiseaseType.ANTHRACNOSE,
+            top3_predictions: [DiseaseType.ANTHRACNOSE],
           },
         ],
         imagePath: "/image.png",
@@ -359,13 +363,13 @@ describe("PredictionService", () => {
     const new_leaf_detection = new LeafDetection();
     new_leaf_detection.bbox = [0, 1, 2];
     new_leaf_detection.detection_confidence = 9;
-    new_leaf_detection.predicted_disease = DiseaseType.DISEASE_1;
+    new_leaf_detection.predicted_disease = DiseaseType.ANTHRACNOSE;
     new_leaf_detection.confidence = 8;
-    new_leaf_detection.top3_predictions = [DiseaseType.DISEASE_1];
+    new_leaf_detection.top3_predictions = [DiseaseType.ANTHRACNOSE];
 
     const prediction = new Prediction();
     prediction.crop_type = PredictionCropType.CASSAVA;
-    prediction.model_used = ModelType.MODEL_1;
+    prediction.model_used = ModelType.RESNET50;
     prediction.leaf_detections = [new_leaf_detection];
     prediction.image_path = "/image.png";
     prediction.processing_time_ms = 300;

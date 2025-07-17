@@ -113,11 +113,12 @@ export class PredictionService {
           leafDetections.map(async (leaf_detected) => {
             const new_leaf_detection = new LeafDetection();
             new_leaf_detection.bbox = leaf_detected.bbox;
-            new_leaf_detection.detection_confidence =
-              leaf_detected.detection_confidence;
+            new_leaf_detection.detection_confidence = Number(
+              leaf_detected.detection_confidence,
+            );
             new_leaf_detection.predicted_disease =
               leaf_detected.predicted_disease;
-            new_leaf_detection.confidence = leaf_detected.confidence;
+            new_leaf_detection.confidence = Number(leaf_detected.confidence);
             new_leaf_detection.top3_predictions =
               leaf_detected.top3_predictions;
 

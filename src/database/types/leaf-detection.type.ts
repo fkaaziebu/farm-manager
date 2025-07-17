@@ -3,8 +3,24 @@ import { PredictionType } from "./prediction.type";
 import GraphQLJSON from "graphql-type-json";
 
 export enum DiseaseType {
-  DISEASE_1 = "DISEASE_1",
-  DISEASE_2 = "DISEASE_2",
+  ANTHRACNOSE = "ANTHRACNOSE",
+  GUMOSIS = "GUMOSIS",
+  HEALTHY = "HEALTHY",
+  LEAF_MINER = "LEAF_MINER",
+  RED_RUST = "RED_RUST",
+  BACTERIAL_BLIGHT = "BACTERIAL_BLIGHT",
+  BROWN_SPOT = "BROWN_SPOT",
+  GREEN_MITE = "GREEN_MITE",
+  MOSAIC = "MOSAIC",
+  FALL_ARMYWORM = "FALL_ARMYWORM",
+  GRASSHOPPER = "GRASSHOPPER",
+  LEAF_BEETLE = "LEAF_BEETLE",
+  LEAF_BLIGHT = "LEAF_BLIGHT",
+  LEAF_SPOT = "LEAF_SPOT",
+  STREAK_VIRUS = "STREAK_VIRUS",
+  LEAF_CURL = "LEAF_CURL",
+  SEPTORIA_LEAF_SPOT = "SEPTORIA_LEAF_SPOT",
+  VERTICILLIUM_WILT = "VERTICILLIUM_WILT",
 }
 
 registerEnumType(DiseaseType, {
@@ -17,8 +33,8 @@ export class LeafDetectionType {
   @Field(() => ID)
   id: string;
 
-  @Field(() => GraphQLJSON, { nullable: true })
-  bbox?: any;
+  @Field(() => GraphQLJSON, { nullable: false })
+  bbox: any;
 
   @Field()
   detection_confidence: number;
@@ -29,8 +45,8 @@ export class LeafDetectionType {
   @Field()
   confidence: number;
 
-  @Field(() => [DiseaseType])
-  top3_predictions: DiseaseType[];
+  @Field(() => GraphQLJSON, { nullable: false })
+  top3_predictions: any;
 
   @Field(() => [PredictionType])
   prediction: PredictionType;
