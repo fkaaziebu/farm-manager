@@ -24,7 +24,6 @@ export class ImageController {
     return this.imageService.uploadImage({ file });
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get("/images/:imageId")
   async fetchImage(@Param("imageId") imageId: string, @Res() res: Response) {
     const image = await this.imageService.fetchImage({ id: imageId });
