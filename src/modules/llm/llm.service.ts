@@ -51,7 +51,7 @@ export class LlmService {
 
     // Initialize MCP client
     this.mcp = new Client({ name: "mcp-client-cli", version: "1.0.0" });
-    this.mcp2 = new Client({ name: "mcp-client-prediction", version: "1.0.0" });
+    // this.mcp2 = new Client({ name: "mcp-client-prediction", version: "1.0.0" });
 
     this.connectToServer();
   }
@@ -71,7 +71,6 @@ export class LlmService {
         messages,
         tools: this.tools,
       });
-      console.log(response);
 
       const finalText = [];
 
@@ -96,10 +95,10 @@ export class LlmService {
               arguments: toolArgs,
             });
           } else {
-            result = await this.mcp2.callTool({
-              name: toolName,
-              arguments: toolArgs,
-            });
+            // result = await this.mcp2.callTool({
+            //   name: toolName,
+            //   arguments: toolArgs,
+            // });
           }
 
           console.log(result);
@@ -254,18 +253,18 @@ export class LlmService {
         new URL(this.configService.get<string>("MCP_SERVER_URL")),
       );
 
-      this.transport2 = new StreamableHTTPClientTransport(
-        new URL(this.configService.get<string>("MCP_SERVER_2_URL")),
-      );
+      // this.transport2 = new StreamableHTTPClientTransport(
+      //   new URL(this.configService.get<string>("MCP_SERVER_2_URL")),
+      // );
 
       await this.mcp.connect(this.transport);
-      await this.mcp2.connect(this.transport2);
+      // await this.mcp2.connect(this.transport2);
 
       const toolsResult = await this.mcp.listTools();
-      const toolsResult2 = await this.mcp2.listTools();
-      console.log("MCP TOOLS:", toolsResult2);
+      // const toolsResult2 = await this.mcp2.listTools();
+      // console.log("MCP TOOLS:", toolsResult2);
       // @ts-expect-error error
-      this.tools = [...toolsResult.tools, ...toolsResult2.tools].map((tool) => {
+      this.tools = [...toolsResult.tools].map((tool) => {
         return {
           name: tool.name,
           description: tool.description,
