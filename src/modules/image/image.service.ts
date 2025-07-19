@@ -15,7 +15,7 @@ export class ImageService {
     try {
       const image = new Image();
 
-      image.path = `${uuidv4()}-${file.originalname}`;
+      image.path = `${uuidv4()}.${file.originalname.split(".").pop()}`;
       image.original_name = file.originalname;
       image.buffer = file.buffer;
       image.mime_type = file.mimetype;
