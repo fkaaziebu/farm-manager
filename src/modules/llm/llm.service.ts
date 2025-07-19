@@ -101,6 +101,8 @@ export class LlmService {
             });
           }
 
+          finalText.push(result.content);
+
           messages.push({
             role: "user",
             content: result.content as string,
