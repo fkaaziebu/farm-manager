@@ -215,7 +215,7 @@ describe("PredictionService", () => {
         role: "WORKER",
         predictionId: prediction.id,
         userFeedback: "Heyaa",
-        actualDisease: DiseaseType["BROWN SPOT"],
+        actualDisease: DiseaseType.BROWN_SPOT,
       });
 
       admin = await getAdmin(adminInfo.email);
@@ -224,7 +224,7 @@ describe("PredictionService", () => {
       expect(prediction.feedback).not.toBeNull();
       expect(prediction.feedback.user_feedback).toBe("Heyaa");
       expect(prediction.feedback.actual_disease).toEqual(
-        DiseaseType["BROWN SPOT"],
+        DiseaseType.BROWN_SPOT,
       );
     });
   });
@@ -242,7 +242,7 @@ describe("PredictionService", () => {
         farmTag: admin.farms[0].farm_tag,
         role: "ADMIN",
         cropType: PredictionCropType.CASSAVA,
-        modelUsed: ModelType.RESNET50,
+        modelUsed: ModelType.ENHANCED_RESNET50,
         leafDetections: [
           {
             bbox: [0, 1, 2],
@@ -369,7 +369,7 @@ describe("PredictionService", () => {
 
     const prediction = new Prediction();
     prediction.crop_type = PredictionCropType.CASSAVA;
-    prediction.model_used = ModelType.RESNET50;
+    prediction.model_used = ModelType.ENHANCED_RESNET50;
     prediction.leaf_detections = [new_leaf_detection];
     prediction.image_path = "/image.png";
     prediction.processing_time_ms = 300;

@@ -25,7 +25,7 @@ enum ModelType {
   ENHANCED_RESNET50 = "ENHANCED_RESNET50",
 }
 
-@Entity()
+@Entity("predictions")
 export class Prediction {
   @PrimaryGeneratedColumn("uuid")
   id: string;

@@ -16,7 +16,7 @@ enum HousingStatus {
   FULL = "FULL",
 }
 
-@Entity()
+@Entity("poultry_houses")
 export class PoultryHouse {
   @PrimaryGeneratedColumn()
   id: number;

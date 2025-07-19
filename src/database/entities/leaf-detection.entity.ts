@@ -22,7 +22,7 @@ enum DiseaseType {
   VERTICILLIUM_WILT = "VERTICILLIUM_WILT",
 }
 
-@Entity()
+@Entity("leaf_detections")
 export class LeafDetection {
   @PrimaryGeneratedColumn("uuid")
   id: string;
@@ -31,14 +31,14 @@ export class LeafDetection {
   bbox: object;
 
   // Fix: Add explicit type for decimal values
-  @Column({ type: "float" })
+  @Column({ type: "float", default: 0 })
   detection_confidence: number;
 
-  @Column({ type: "enum", enum: DiseaseType })
+  @Column({ default: null, type: "enum", enum: DiseaseType })
   predicted_disease: DiseaseType;
 
   // Fix: Add explicit type for decimal values
-  @Column({ type: "float" })
+  @Column({ type: "float", default: 0 })
   confidence: number;
 
   @Column({ default: null, type: "json" })

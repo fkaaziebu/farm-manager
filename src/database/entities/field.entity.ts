@@ -16,7 +16,7 @@ export enum CropHousingStatus {
   MAINTENANCE = "MAINTENANCE",
 }
 
-@Entity()
+@Entity("fields")
 export class Field {
   @PrimaryGeneratedColumn()
   id: number;

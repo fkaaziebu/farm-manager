@@ -39,14 +39,14 @@ export class LeafDetectionType {
   @Field()
   detection_confidence: number;
 
-  @Field(() => DiseaseType)
-  predicted_disease: DiseaseType;
+  @Field(() => DiseaseType, { nullable: true })
+  predicted_disease?: DiseaseType;
 
   @Field()
   confidence: number;
 
-  @Field(() => GraphQLJSON, { nullable: false })
-  top3_predictions: any;
+  @Field(() => GraphQLJSON, { nullable: true })
+  top3_predictions?: any;
 
   @Field(() => [PredictionType])
   prediction: PredictionType;

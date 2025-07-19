@@ -22,7 +22,7 @@ enum DiseaseType {
   VERTICILLIUM_WILT = "VERTICILLIUM_WILT",
 }
 
-@Entity()
+@Entity("feedbacks")
 export class Feedback {
   @PrimaryGeneratedColumn("uuid")
   id: string;
@@ -30,6 +30,7 @@ export class Feedback {
   @Column({
     type: "enum",
     enum: DiseaseType,
+    default: null,
   })
   actual_disease: DiseaseType;
 

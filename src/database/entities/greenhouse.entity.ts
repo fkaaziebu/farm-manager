@@ -10,7 +10,7 @@ import { Farm } from "./farm.entity";
 import { ExpenseRecord } from "./expense-record.entity";
 import { CropHousingStatus } from "./field.entity";
 
-@Entity()
+@Entity("greenhouses")
 export class Greenhouse {
   @PrimaryGeneratedColumn()
   id: number;

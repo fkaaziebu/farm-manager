@@ -109,8 +109,6 @@ export class PredictionService {
           throw new NotFoundException("Farm not found");
         }
 
-        console.log("farm:", farm);
-
         const leaf_detections: LeafDetection[] = await Promise.all(
           leafDetections.map(async (leaf_detected) => {
             const new_leaf_detection = new LeafDetection();
@@ -119,18 +117,16 @@ export class PredictionService {
               leaf_detected.detection_confidence,
             );
             new_leaf_detection.predicted_disease =
-              leaf_detected.predicted_disease;
+              leaf_detected.predicted_disease || null;
             new_leaf_detection.confidence = Number(leaf_detected.confidence);
             new_leaf_detection.top3_predictions =
-              leaf_detected.top3_predictions;
+              leaf_detected.top3_predictions || null;
 
             return new_leaf_detection;
           }),
         );
 
         await transactionalEntityManager.save(leaf_detections);
-
-        console.log("leaf_detections:", leaf_detections);
 
         const new_prediction = new Prediction();
         new_prediction.crop_type = cropType;
