@@ -192,7 +192,7 @@ export class PredictionService {
           predicted_disease: filter?.predictedDisease,
         },
       },
-      relations: ["feedback"],
+      relations: ["feedback", "leaf_detections"],
       order: sortOrder,
     });
   }
