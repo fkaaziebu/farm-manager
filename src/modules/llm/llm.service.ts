@@ -101,10 +101,6 @@ export class LlmService {
             });
           }
 
-          finalText.push(
-            `[Calling tool ${toolName} with args ${JSON.stringify(toolArgs)}]`,
-          );
-
           messages.push({
             role: "user",
             content: result.content as string,
