@@ -109,6 +109,8 @@ export class PredictionService {
           throw new NotFoundException("Farm not found");
         }
 
+        console.log("farm:", farm);
+
         const leaf_detections: LeafDetection[] = await Promise.all(
           leafDetections.map(async (leaf_detected) => {
             const new_leaf_detection = new LeafDetection();
@@ -127,6 +129,8 @@ export class PredictionService {
         );
 
         await transactionalEntityManager.save(leaf_detections);
+
+        console.log("leaf_detections:", leaf_detections);
 
         const new_prediction = new Prediction();
         new_prediction.crop_type = cropType;

@@ -101,6 +101,8 @@ export class LlmService {
             });
           }
 
+          console.log(result.content);
+
           finalText.push(result.content);
 
           messages.push({
