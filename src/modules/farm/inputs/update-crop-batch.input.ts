@@ -1,5 +1,6 @@
 import { Field, InputType } from "@nestjs/graphql";
 import {
+  CropKind,
   CropStatus,
   CropType,
   IrrigationMethod,
@@ -14,6 +15,9 @@ export class UpdateCropBatchInput {
 
   @Field(() => CropType, { nullable: true })
   cropType?: CropType;
+
+  @Field(() => CropKind, { nullable: true })
+  cropKind?: CropKind;
 
   @Field({ nullable: true })
   variety?: string;

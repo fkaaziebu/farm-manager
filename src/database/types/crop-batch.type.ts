@@ -21,6 +21,13 @@ export enum CropType {
   OTHER = "OTHER",
 }
 
+export enum CropKind {
+  MAIZE = "MAIZE",
+  CASHEW = "CASHEW",
+  CASSAVA = "CASSAVA",
+  TOMATO = "TOMATO",
+}
+
 export enum CropStatus {
   SEEDLING = "SEEDLING",
   GROWING = "GROWING",
@@ -54,6 +61,11 @@ registerEnumType(CropType, {
   description: "Type of crop",
 });
 
+registerEnumType(CropKind, {
+  name: "CropKind",
+  description: "Kind of crop",
+});
+
 registerEnumType(CropStatus, {
   name: "CropStatus",
   description: "Growth status of a crop",
@@ -82,6 +94,9 @@ export class CropBatchType {
 
   @Field(() => CropType)
   crop_type: CropType;
+
+  @Field(() => CropKind, { nullable: true })
+  crop_kind?: CropKind;
 
   @Field()
   variety: string;

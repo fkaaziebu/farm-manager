@@ -41,8 +41,8 @@ import {
 } from "../../../database/entities";
 import { FarmType } from "../../../database/types/farm.type";
 import { WorkerRole } from "../../../database/types/worker.type";
-import { CropType } from "../../../database/types/crop-batch.type";
-import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { CropKind, CropType } from "../../../database/types/crop-batch.type";
+import { NotFoundException } from "@nestjs/common";
 import { ExpenseCategory } from "../../../database/types/expense-record.type";
 
 describe("CropService", () => {
@@ -263,48 +263,6 @@ describe("CropService", () => {
       expect(response.crop_batches.length).toEqual(2);
     });
 
-    it("throws an error if crop_batch already exist", async () => {
-      await setupForQueries();
-
-      let admin = await getAdmin(adminInfo.email);
-
-      const field = (
-        await cropService.addFieldsToFarm({
-          email: adminInfo.email,
-          farmTag: admin.farms[0].farm_tag,
-          fields: [adminInfo.fields[0]],
-          role: "ADMIN",
-        })
-      ).fields[0];
-
-      await cropService.addCropBatchesToField({
-        email: adminInfo.email,
-        fieldUnitId: field.unit_id,
-        cropBatches: [adminInfo.cropBatches[0]],
-        role: "ADMIN",
-      });
-
-      await expect(
-        cropService.addCropBatchesToField({
-          email: adminInfo.email,
-          fieldUnitId: field.unit_id,
-          cropBatches: [adminInfo.cropBatches[0]],
-          role: "ADMIN",
-        }),
-      ).rejects.toThrow(BadRequestException);
-
-      await expect(
-        cropService.addCropBatchesToField({
-          email: adminInfo.email,
-          fieldUnitId: field.unit_id,
-          cropBatches: [adminInfo.cropBatches[0]],
-          role: "ADMIN",
-        }),
-      ).rejects.toThrow(
-        `A crop batch with crop batch tag ${adminInfo.cropBatches[0].cropBatchTag} already exist`,
-      );
-    });
-
     it("throws an error if field does not exist", async () => {
       await setupForQueries();
 
@@ -362,48 +320,6 @@ describe("CropService", () => {
       expect(response.crop_batches.length).toEqual(2);
     });
 
-    it("throws an error if crop_batch already exist", async () => {
-      await setupForQueries();
-
-      let admin = await getAdmin(adminInfo.email);
-
-      const greenhouse = (
-        await cropService.addGreenhousesToFarm({
-          email: adminInfo.email,
-          farmTag: admin.farms[0].farm_tag,
-          greenhouses: [adminInfo.greenhouses[0]],
-          role: "ADMIN",
-        })
-      ).greenhouses[0];
-
-      await cropService.addCropBatchesToGreenhouse({
-        email: adminInfo.email,
-        greenhouseUnitId: greenhouse.unit_id,
-        cropBatches: [adminInfo.cropBatches[0]],
-        role: "ADMIN",
-      });
-
-      await expect(
-        cropService.addCropBatchesToGreenhouse({
-          email: adminInfo.email,
-          greenhouseUnitId: greenhouse.unit_id,
-          cropBatches: [adminInfo.cropBatches[0]],
-          role: "ADMIN",
-        }),
-      ).rejects.toThrow(BadRequestException);
-
-      await expect(
-        cropService.addCropBatchesToGreenhouse({
-          email: adminInfo.email,
-          greenhouseUnitId: greenhouse.unit_id,
-          cropBatches: [adminInfo.cropBatches[0]],
-          role: "ADMIN",
-        }),
-      ).rejects.toThrow(
-        `A crop batch with crop batch tag ${adminInfo.cropBatches[0].cropBatchTag} already exist`,
-      );
-    });
-
     it("throws an error if greenhouse does not exist", async () => {
       await setupForQueries();
 
@@ -442,16 +358,18 @@ describe("CropService", () => {
         })
       ).fields[0];
 
-      await cropService.addCropBatchesToField({
-        email: adminInfo.email,
-        fieldUnitId: field.unit_id,
-        cropBatches: [adminInfo.cropBatches[0]],
-        role: "ADMIN",
-      });
+      const cropBatch = (
+        await cropService.addCropBatchesToField({
+          email: adminInfo.email,
+          fieldUnitId: field.unit_id,
+          cropBatches: [adminInfo.cropBatches[0]],
+          role: "ADMIN",
+        })
+      ).crop_batches[0];
 
       const response = await cropService.addCropBatchExpenseRecord({
         email: adminInfo.email,
-        cropBatchTag: adminInfo.cropBatches[0].cropBatchTag,
+        cropBatchTag: cropBatch.crop_batch_tag,
         expenseRecord: {
           amount: 100,
           expenseDate: new Date(),
@@ -470,7 +388,7 @@ describe("CropService", () => {
       await expect(
         cropService.addCropBatchExpenseRecord({
           email: adminInfo.email,
-          cropBatchTag: adminInfo.cropBatches[0].cropBatchTag,
+          cropBatchTag: "6eb3ca36-f74e-45f0-ae70-e17ad0a4c57d",
           expenseRecord: {
             amount: 100,
             expenseDate: new Date(),
@@ -484,7 +402,7 @@ describe("CropService", () => {
       await expect(
         cropService.addCropBatchExpenseRecord({
           email: adminInfo.email,
-          cropBatchTag: adminInfo.cropBatches[0].cropBatchTag,
+          cropBatchTag: "6eb3ca36-f74e-45f0-ae70-e17ad0a4c57d",
           expenseRecord: {
             amount: 100,
             expenseDate: new Date(),
@@ -512,16 +430,18 @@ describe("CropService", () => {
         })
       ).fields[0];
 
-      await cropService.addCropBatchesToField({
-        email: adminInfo.email,
-        fieldUnitId: field.unit_id,
-        cropBatches: [adminInfo.cropBatches[0]],
-        role: "ADMIN",
-      });
+      const cropBatch = (
+        await cropService.addCropBatchesToField({
+          email: adminInfo.email,
+          fieldUnitId: field.unit_id,
+          cropBatches: [adminInfo.cropBatches[0]],
+          role: "ADMIN",
+        })
+      ).crop_batches[0];
 
       const response = await cropService.addCropBatchSalesRecord({
         email: adminInfo.email,
-        cropBatchTag: adminInfo.cropBatches[0].cropBatchTag,
+        cropBatchTag: cropBatch.crop_batch_tag,
         salesRecord: {
           buyerName: "John Doe",
           notes: "Initial sales record",
@@ -545,7 +465,7 @@ describe("CropService", () => {
       await expect(
         cropService.addCropBatchSalesRecord({
           email: adminInfo.email,
-          cropBatchTag: adminInfo.cropBatches[0].cropBatchTag,
+          cropBatchTag: "6eb3ca36-f74e-45f0-ae70-e17ad0a4c57d",
           salesRecord: {
             buyerName: "John Doe",
             notes: "Initial sales record",
@@ -562,7 +482,7 @@ describe("CropService", () => {
       await expect(
         cropService.addCropBatchSalesRecord({
           email: adminInfo.email,
-          cropBatchTag: adminInfo.cropBatches[0].cropBatchTag,
+          cropBatchTag: "6eb3ca36-f74e-45f0-ae70-e17ad0a4c57d",
           salesRecord: {
             buyerName: "John Doe",
             notes: "Initial sales record",
@@ -707,16 +627,18 @@ describe("CropService", () => {
         })
       ).fields[0];
 
-      await cropService.addCropBatchesToField({
-        email: adminInfo.email,
-        fieldUnitId: field.unit_id,
-        cropBatches: [adminInfo.cropBatches[0]],
-        role: "ADMIN",
-      });
+      const cropBatch = (
+        await cropService.addCropBatchesToField({
+          email: adminInfo.email,
+          fieldUnitId: field.unit_id,
+          cropBatches: [adminInfo.cropBatches[0]],
+          role: "ADMIN",
+        })
+      ).crop_batches[0];
 
       const response = await cropService.updateCropBatch({
         email: adminInfo.email,
-        cropBatchTag: adminInfo.cropBatches[0].cropBatchTag,
+        cropBatchTag: cropBatch.crop_batch_tag,
         cropBatch: {
           name: "Fred Greenhouse 1 updated",
         },
@@ -730,7 +652,7 @@ describe("CropService", () => {
       await expect(
         cropService.updateCropBatch({
           email: adminInfo.email,
-          cropBatchTag: adminInfo.cropBatches[0].cropBatchTag,
+          cropBatchTag: "6eb3ca36-f74e-45f0-ae70-e17ad0a4c57d",
           cropBatch: {
             name: "Fred Greenhouse 1 updated",
           },
@@ -741,7 +663,7 @@ describe("CropService", () => {
       await expect(
         cropService.updateCropBatch({
           email: adminInfo.email,
-          cropBatchTag: adminInfo.cropBatches[0].cropBatchTag,
+          cropBatchTag: "6eb3ca36-f74e-45f0-ae70-e17ad0a4c57d",
           cropBatch: {
             name: "Fred Greenhouse 1 updated",
           },
@@ -766,16 +688,18 @@ describe("CropService", () => {
         })
       ).fields[0];
 
-      await cropService.addCropBatchesToField({
-        email: adminInfo.email,
-        fieldUnitId: field.unit_id,
-        cropBatches: [adminInfo.cropBatches[0]],
-        role: "ADMIN",
-      });
+      const cropBatch = (
+        await cropService.addCropBatchesToField({
+          email: adminInfo.email,
+          fieldUnitId: field.unit_id,
+          cropBatches: [adminInfo.cropBatches[0]],
+          role: "ADMIN",
+        })
+      ).crop_batches[0];
 
       const record = await cropService.addCropBatchExpenseRecord({
         email: adminInfo.email,
-        cropBatchTag: adminInfo.cropBatches[0].cropBatchTag,
+        cropBatchTag: cropBatch.crop_batch_tag,
         expenseRecord: {
           amount: 100,
           expenseDate: new Date(),
@@ -849,16 +773,18 @@ describe("CropService", () => {
         })
       ).fields[0];
 
-      await cropService.addCropBatchesToField({
-        email: adminInfo.email,
-        fieldUnitId: field.unit_id,
-        cropBatches: [adminInfo.cropBatches[0]],
-        role: "ADMIN",
-      });
+      const cropBatch = (
+        await cropService.addCropBatchesToField({
+          email: adminInfo.email,
+          fieldUnitId: field.unit_id,
+          cropBatches: [adminInfo.cropBatches[0]],
+          role: "ADMIN",
+        })
+      ).crop_batches[0];
 
       const record = await cropService.addCropBatchSalesRecord({
         email: adminInfo.email,
-        cropBatchTag: adminInfo.cropBatches[0].cropBatchTag,
+        cropBatchTag: cropBatch.crop_batch_tag,
         salesRecord: {
           buyerName: "John Doe",
           notes: "Initial sales record",
@@ -996,23 +922,25 @@ describe("CropService", () => {
         })
       ).fields[0];
 
-      await cropService.addCropBatchesToField({
-        email: adminInfo.email,
-        fieldUnitId: field.unit_id,
-        cropBatches: [adminInfo.cropBatches[0]],
-        role: "ADMIN",
-      });
+      const createdCropBatch = (
+        await cropService.addCropBatchesToField({
+          email: adminInfo.email,
+          fieldUnitId: field.unit_id,
+          cropBatches: [adminInfo.cropBatches[0]],
+          role: "ADMIN",
+        })
+      ).crop_batches[0];
 
       const cropBatch = await cropService.getCropBatch({
         email: adminInfo.email,
-        cropBatchTag: adminInfo.cropBatches[0].cropBatchTag,
+        cropBatchTag: createdCropBatch.crop_batch_tag,
         housingUnit: "FIELD",
         role: "ADMIN",
       });
 
       expect(cropBatch).toBeDefined();
       expect(cropBatch.crop_batch_tag).toContain(
-        adminInfo.cropBatches[0].cropBatchTag,
+        createdCropBatch.crop_batch_tag,
       );
     });
   });
@@ -1098,12 +1026,14 @@ describe("CropService", () => {
         })
       ).fields[0];
 
-      await cropService.addCropBatchesToField({
-        email: adminInfo.email,
-        fieldUnitId: field.unit_id,
-        cropBatches: [...adminInfo.cropBatches],
-        role: "ADMIN",
-      });
+      const cropBatch = (
+        await cropService.addCropBatchesToField({
+          email: adminInfo.email,
+          fieldUnitId: field.unit_id,
+          cropBatches: [...adminInfo.cropBatches],
+          role: "ADMIN",
+        })
+      ).crop_batches[0];
 
       let cropBatches = await cropService.listCropBatches({
         email: adminInfo.email,
@@ -1115,7 +1045,7 @@ describe("CropService", () => {
       expect(cropBatches).toHaveLength(2);
       expect(
         cropBatches.map((cropBatch) => cropBatch.crop_batch_tag),
-      ).toContain("CB1");
+      ).toContain(cropBatch.crop_batch_tag);
 
       cropBatches = await cropService.listCropBatches({
         email: adminInfo.email,
@@ -1176,9 +1106,9 @@ describe("CropService", () => {
     ],
     cropBatches: [
       {
-        cropBatchTag: "CB1",
         name: "Fred Crop Batch 1",
         cropType: CropType.VEGETABLE,
+        cropKind: CropKind.TOMATO,
         variety: "long",
         plantingDate: new Date(),
         plantsCount: 23,
@@ -1190,9 +1120,9 @@ describe("CropService", () => {
         ],
       },
       {
-        cropBatchTag: "CB2",
         name: "Fred Crop Batch 2",
         cropType: CropType.VEGETABLE,
+        cropKind: CropKind.TOMATO,
         variety: "long",
         plantingDate: new Date(),
         plantsCount: 23,

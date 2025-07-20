@@ -1,6 +1,7 @@
 import { Field, InputType } from "@nestjs/graphql";
 import GraphQLJSON from "graphql-type-json";
 import {
+  CropKind,
   CropType,
   IrrigationMethod,
   PlantingMethod,
@@ -13,6 +14,9 @@ export class CropBatchInput {
 
   @Field(() => CropType)
   cropType: CropType;
+
+  @Field(() => CropKind)
+  cropKind: CropKind;
 
   @Field()
   variety: string;

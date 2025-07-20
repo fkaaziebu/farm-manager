@@ -28,6 +28,13 @@ export enum CropType {
   OTHER = "OTHER",
 }
 
+export enum CropKind {
+  MAIZE = "MAIZE",
+  CASHEW = "CASHEW",
+  CASSAVA = "CASSAVA",
+  TOMATO = "TOMATO",
+}
+
 export enum CropStatus {
   SEEDLING = "SEEDLING",
   GROWING = "GROWING",
@@ -73,6 +80,13 @@ export class CropBatch {
     default: CropType.VEGETABLE,
   })
   crop_type: CropType;
+
+  @Column({
+    type: "enum",
+    enum: CropKind,
+    default: null,
+  })
+  crop_kind: CropKind;
 
   @Column()
   variety: string;
