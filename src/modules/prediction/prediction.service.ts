@@ -185,6 +185,7 @@ export class PredictionService {
           [role === "ADMIN" ? "admin" : "workers"]: {
             email,
           },
+          farm_tag: filter?.farmTag,
         },
         crop_type: filter?.cropType,
         model_used: filter?.modelUsed,

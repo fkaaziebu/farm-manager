@@ -7,6 +7,9 @@ import {
 
 @InputType()
 export class PredictionFilterInput {
+  @Field(() => String, { nullable: true })
+  farmTag?: string;
+
   @Field(() => ModelType, { nullable: true })
   modelUsed?: ModelType;
 
