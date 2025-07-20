@@ -1,8 +1,8 @@
 import { Field, InputType, registerEnumType } from "@nestjs/graphql";
-import { SortDirection } from "src/database/inputs";
+import { SortDirection } from "../../../database/inputs";
 
-enum PredictionSortField {
-  INSERTED_AT = "insertedAt",
+export enum PredictionSortField {
+  INSERTED_AT = "inserted_at",
 }
 
 registerEnumType(PredictionSortField, {

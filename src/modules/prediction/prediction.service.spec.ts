@@ -44,6 +44,8 @@ import {
   PredictionCropType,
 } from "../../database/types/prediction.type";
 import { DiseaseType } from "../../database/types/leaf-detection.type";
+import { PredictionSortField } from "./inputs/prediction-sort.input";
+import { SortDirection } from "../../database/inputs";
 
 describe("PredictionService", () => {
   let module: TestingModule;
@@ -270,6 +272,12 @@ describe("PredictionService", () => {
       const predictions = await predictionService.listPredictions({
         email: adminInfo.email,
         role: "ADMIN",
+        sort: [
+          {
+            field: PredictionSortField.INSERTED_AT,
+            direction: SortDirection.DESC,
+          },
+        ],
       });
 
       expect(predictions.length).toEqual(1);
