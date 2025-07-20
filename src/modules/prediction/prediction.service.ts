@@ -159,7 +159,7 @@ export class PredictionService {
         },
         id: predictionId,
       },
-      relations: ["feedback"],
+      relations: ["feedback", "leaf_detections"],
     });
   }
 
