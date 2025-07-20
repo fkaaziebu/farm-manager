@@ -309,6 +309,9 @@ describe("CropService", () => {
       });
 
       expect(response.crop_batches.length).toEqual(1);
+      expect(response.crop_batches[0].crop_kind).toEqual(
+        adminInfo.cropBatches[0].cropKind,
+      );
 
       response = await cropService.addCropBatchesToGreenhouse({
         email: adminInfo.workers[0].email,

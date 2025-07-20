@@ -236,6 +236,7 @@ export class CropService {
             new_crop_batch.crop_batch_tag = uuidv4();
             new_crop_batch.name = cropBatch.name;
             new_crop_batch.crop_type = cropBatch.cropType;
+            new_crop_batch.crop_kind = cropBatch.cropKind;
             new_crop_batch.variety = cropBatch.variety;
             new_crop_batch.planting_date = cropBatch.plantingDate;
             new_crop_batch.harvest_date = cropBatch.harvestDate || null;
@@ -304,6 +305,7 @@ export class CropService {
             new_crop_batch.crop_batch_tag = uuidv4();
             new_crop_batch.name = cropBatch.name;
             new_crop_batch.crop_type = cropBatch.cropType;
+            new_crop_batch.crop_kind = cropBatch.cropKind;
             new_crop_batch.variety = cropBatch.variety;
             new_crop_batch.planting_date = cropBatch.plantingDate;
             new_crop_batch.harvest_date = cropBatch.harvestDate || null;
