@@ -249,6 +249,34 @@ export class FarmService {
     });
   }
 
+  async getFarm({
+    email,
+    farmTag,
+    role,
+  }: {
+    email: string;
+    farmTag: string;
+    role: "ADMIN" | "WORKER";
+  }) {
+    return this.farmRepository.findOne({
+      where: {
+        [role === "ADMIN" ? "admin" : "workers"]: {
+          email,
+        },
+        farm_tag: farmTag,
+      },
+      relations: [
+        "barns.pens.livestock",
+        "workers",
+        "livestock",
+        "tasks",
+        "crop_batches",
+        "fields.crop_batches",
+        "greenhouses.crop_batches",
+      ],
+    });
+  }
+
   async listTask({
     email,
     filter,
