@@ -47,7 +47,7 @@ export class AuthController {
 
     const access_token = this.jwtService.sign(payload);
     res.redirect(
-      `${this.configService.get<string>("FRONTEND_URL")}/auth/admin/oauth/${access_token}`,
+      `${this.configService.get<string>("FRONTEND_URL")}/admin/oauth/redirect?token=${access_token}&role=${payload.role}&id=${payload.id}`,
     );
   }
 
@@ -56,7 +56,7 @@ export class AuthController {
     // Render or redirect to frontend consent page with data
 
     return res.redirect(
-      `${this.configService.get<string>("FRONTEND_URL")}/auth/admin/consent?email=${consentQueryDto.email}&firstName=${consentQueryDto.firstName}&lastName=${consentQueryDto.lastName}`,
+      `${this.configService.get<string>("FRONTEND_URL")}/auth/admin/oauth/consent?email=${consentQueryDto.email}&firstName=${consentQueryDto.firstName}&lastName=${consentQueryDto.lastName}`,
     );
   }
 
@@ -72,7 +72,7 @@ export class AuthController {
       const access_token = this.jwtService.sign(payload);
 
       return {
-        redirectUrl: `${this.configService.get<string>("FRONTEND_URL")}/oauth/${access_token}`,
+        redirectUrl: `${this.configService.get<string>("FRONTEND_URL")}/admin/oauth/redirect?token=${access_token}&role=${payload.role}&id=${payload.id}`,
       };
     }
 
