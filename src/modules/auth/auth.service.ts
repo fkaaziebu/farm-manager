@@ -241,4 +241,50 @@ export class AuthService {
       },
     );
   }
+
+  async validateGoogleUser(googleUser: LoginBodyDto) {
+    const user = await this.adminRepository.findOne({
+      where: { email: googleUser.email },
+    });
+
+    return user;
+  }
+
+  async createGoogleUser({ firstName, lastName, email }) {
+    return await this.adminRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        const name = firstName + " " + lastName;
+
+        // find if student already exist
+        const existingUser = await transactionalEntityManager.findOne(Admin, {
+          where: { email },
+        });
+
+        if (existingUser) {
+          throw new BadRequestException("Email already exist");
+        }
+
+        const user = new Admin();
+        user.name = name;
+        user.email = email;
+        user.password = await HashHelper.encrypt("password");
+
+        const savedUser = await transactionalEntityManager.save(Admin, user);
+
+        const payload: {
+          id: number;
+          name: string;
+          email: string;
+          role: "ADMIN" | "WORKER";
+        } = {
+          id: savedUser.id,
+          name: savedUser.name,
+          email: savedUser.email,
+          role: "ADMIN",
+        };
+
+        return payload;
+      },
+    );
+  }
 }

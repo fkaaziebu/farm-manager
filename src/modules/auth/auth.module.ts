@@ -5,6 +5,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { JwtModule } from "@nestjs/jwt";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { AuthResolver } from "./auth.resolver";
+import { GoogleStrategy } from "./strategies/google.strategy";
 
 // Entities
 import {
@@ -40,6 +41,7 @@ import {
   LeafDetection,
 } from "src/database/entities";
 import { QueueModule } from "../queue/queue.module";
+import { AuthController } from "./auth.controller";
 
 @Module({
   imports: [
@@ -88,7 +90,7 @@ import { QueueModule } from "../queue/queue.module";
       LeafDetection,
     ]),
   ],
-  controllers: [],
-  providers: [AuthService, JwtStrategy, AuthResolver],
+  controllers: [AuthController],
+  providers: [AuthService, JwtStrategy, AuthResolver, GoogleStrategy],
 })
 export class AuthModule {}

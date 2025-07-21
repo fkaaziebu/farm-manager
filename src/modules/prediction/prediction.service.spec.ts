@@ -269,9 +269,14 @@ describe("PredictionService", () => {
         adminEmail: adminInfo.email,
       });
 
+      let admin = await getAdmin(adminInfo.email);
+
       const predictions = await predictionService.listPredictions({
         email: adminInfo.email,
         role: "ADMIN",
+        filter: {
+          farmTag: admin.farms[0].farm_tag,
+        },
         sort: [
           {
             field: PredictionSortField.INSERTED_AT,
