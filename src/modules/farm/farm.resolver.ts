@@ -93,7 +93,7 @@ export class FarmResolver {
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @Roles("admin", "worker")
-  @Query(() => WorkerType)
+  @Query(() => FarmTypeClass)
   getFarm(@Context() context, @Args("farmTag") farmTag: string) {
     const { email, role } = context.req.user;
     return this.farmService.getFarm({
