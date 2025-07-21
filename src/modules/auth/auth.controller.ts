@@ -47,7 +47,7 @@ export class AuthController {
 
     const access_token = this.jwtService.sign(payload);
     res.redirect(
-      `${this.configService.get<string>("FRONTEND_URL")}/auth/admin/oauth/redirect?token=${access_token}&role=${payload.role}&id=${payload.id}`,
+      `${this.configService.get<string>("FRONTEND_URL")}/auth/admin/oauth/redirect?token=${access_token}&role=${payload.role.toLowerCase()}&id=${payload.id}`,
     );
   }
 
@@ -72,7 +72,7 @@ export class AuthController {
       const access_token = this.jwtService.sign(payload);
 
       return {
-        redirectUrl: `${this.configService.get<string>("FRONTEND_URL")}/auth/admin/oauth/redirect?token=${access_token}&role=${payload.role}&id=${payload.id}`,
+        redirectUrl: `${this.configService.get<string>("FRONTEND_URL")}/auth/admin/oauth/redirect?token=${access_token}&role=${payload.role.toLowerCase()}&id=${payload.id}`,
       };
     }
 
