@@ -7,6 +7,8 @@ import {
   OneToMany,
   JoinTable,
   Generated,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { Admin } from "./admin.entity";
 import { Worker } from "./worker.entity";
@@ -149,4 +151,10 @@ export class Farm {
 
   @OneToMany(() => Prediction, (prediction) => prediction.farm)
   predictions: Prediction[];
+
+  @CreateDateColumn()
+  inserted_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

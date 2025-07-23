@@ -3,7 +3,7 @@ import { PenType } from "./pen.type";
 import { FarmTypeClass } from "./farm.type";
 import { ExpenseRecordType } from "./expense-record.type";
 import { HousingStatus } from "./housing-status.enum";
-import { TaskType } from "./task.type";
+import { TaskTypeClass } from "./task.type";
 
 @ObjectType("Barn")
 export class BarnType {
@@ -47,6 +47,6 @@ export class BarnType {
   @Field(() => [ExpenseRecordType], { nullable: true })
   expense_records?: ExpenseRecordType[];
 
-  @Field(() => [TaskType], { nullable: true })
-  tasks?: TaskType[];
+  @Field(() => [TaskTypeClass], { nullable: true })
+  tasks?: TaskTypeClass[];
 }
