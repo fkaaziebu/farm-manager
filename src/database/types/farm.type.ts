@@ -119,4 +119,10 @@ export class FarmTypeClass {
 
   @Field(() => [PredictionType], { nullable: true })
   predictions?: PredictionType[];
+
+  @Field()
+  inserted_at: Date;
+
+  @Field()
+  updated_at: Date;
 }
