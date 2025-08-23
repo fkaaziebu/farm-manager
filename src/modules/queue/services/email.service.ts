@@ -1,10 +1,10 @@
-import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import * as nodemailer from "nodemailer";
-import * as handlebars from "handlebars";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import axios from "axios";
+import * as handlebars from "handlebars";
+import * as nodemailer from "nodemailer";
 import { RequestType } from "src/database/types";
 
 @Injectable()
@@ -13,7 +13,7 @@ export class EmailService {
 
   constructor(private configService: ConfigService) {
     // this.createTestAccount();
-    if (this.configService.get<string>("STAGE") === "prod") {
+    if (this.configService.get<string>("STAGE") === "development") {
       this.transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -55,10 +55,14 @@ export class EmailService {
   private compileTemplate(templateName: string, context: any): string {
     const templatePath = path.join(
       __dirname,
-      "../../../..",
-      "/src/modules/queue/services/templates",
+      "/templates/",
       `${templateName}.hbs`,
     );
+
+    console.log("sendOTPCodeByEmailTemplatePath:", {
+      templatePath,
+      dirName: __dirname,
+    });
 
     const templateSource = fs.readFileSync(templatePath, "utf-8");
     const template = handlebars.compile(templateSource);
@@ -110,6 +114,31 @@ export class EmailService {
     const mailOptions = {
       from: this.configService.get<string>("EMAIL_FROM"),
       subject: "Reset Your Password",
+      to,
+      html,
+    };
+
+    try {
+      await this.sendMail(
+        mailOptions.to,
+        mailOptions.subject,
+        "",
+        mailOptions.html,
+      );
+    } catch (error) {
+      console.error("Failed to send password reset email:", error);
+      throw new Error("Failed to send password reset email");
+    }
+  }
+
+  async sendOTPCodeByEmail(to: string, otpCode: string): Promise<void> {
+    const html = this.compileTemplate("otp-code", {
+      otpCode,
+    });
+
+    const mailOptions = {
+      from: this.configService.get<string>("EMAIL_FROM"),
+      subject: "Your OTP Code",
       to,
       html,
     };

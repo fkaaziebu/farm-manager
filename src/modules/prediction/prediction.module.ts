@@ -36,6 +36,7 @@ import {
   Prediction,
   Feedback,
   LeafDetection,
+  Iam,
 } from "src/database/entities";
 
 @Module({
@@ -72,6 +73,7 @@ import {
       Prediction,
       Feedback,
       LeafDetection,
+      Iam,
     ]),
   ],
   providers: [PredictionService, PredictionResolver],

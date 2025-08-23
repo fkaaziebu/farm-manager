@@ -32,6 +32,7 @@ import {
   Prediction,
   Feedback,
   LeafDetection,
+  Iam,
 } from "../../database/entities";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
@@ -113,6 +114,7 @@ describe("PredictionService", () => {
               Prediction,
               Feedback,
               LeafDetection,
+              Iam,
             ],
             synchronize: true,
             // dropSchema: true,
@@ -150,6 +152,7 @@ describe("PredictionService", () => {
           Prediction,
           Feedback,
           LeafDetection,
+          Iam,
         ]),
       ],
       controllers: [],

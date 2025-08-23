@@ -4,7 +4,7 @@ import { EmailService } from "../services/email.service";
 
 @Processor("farm-queue")
 export class EmailConsumer extends WorkerHost {
-  constructor(private emailService: EmailService) {
+  constructor(private readonly emailService: EmailService) {
     super();
   }
 
@@ -33,6 +33,19 @@ export class EmailConsumer extends WorkerHost {
           type,
         );
 
+        break;
+      }
+
+      case "send-otp-code-by-email": {
+        const { email, otpCode } = job.data;
+
+        await this.emailService.sendOTPCodeByEmail(email, otpCode);
+        break;
+      }
+
+      case "send-otp-code-by-sms": {
+        const { phone_number, otp_code } = job.data;
+        console.log(phone_number, otp_code);
         break;
       }
     }

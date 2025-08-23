@@ -1,10 +1,6 @@
 import { Module } from "@nestjs/common";
-import { FarmService } from "./farm.service";
-import { FarmResolver } from "./farm.resolver";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { JwtStrategy } from "./strategies/jwt.strategy";
-
 // Entities
 import {
   Admin,
@@ -17,32 +13,35 @@ import {
   CropBatch,
   ExpenseRecord,
   Farm,
+  Feedback,
   Field,
   Greenhouse,
   Group,
   GrowthRecord,
   HealthRecord,
   Hive,
+  LeafDetection,
   Livestock,
   Pen,
   Pond,
   PoultryBatch,
   PoultryHouse,
+  Prediction,
   Report,
   Request,
   Review,
   SalesRecord,
   Task,
   Worker,
-  Prediction,
-  Feedback,
-  LeafDetection,
 } from "src/database/entities";
-import { GroupResolver } from "./resolvers/group.resolver";
-import { GroupService } from "./services/group.service";
 import { QueueModule } from "../queue/queue.module";
-import { CropService } from "./services/crop.service";
+import { FarmResolver } from "./farm.resolver";
+import { FarmService } from "./farm.service";
 import { CropResolver } from "./resolvers/crop.resolver";
+import { GroupResolver } from "./resolvers/group.resolver";
+import { CropService } from "./services/crop.service";
+import { GroupService } from "./services/group.service";
+import { JwtStrategy } from "./strategies/jwt.strategy";
 
 @Module({
   imports: [

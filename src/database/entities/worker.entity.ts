@@ -1,18 +1,18 @@
+import { Exclude } from "class-transformer";
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
+  Entity,
+  Generated,
   ManyToMany,
   OneToMany,
-  Generated,
+  PrimaryGeneratedColumn,
 } from "typeorm";
-import { Exclude } from "class-transformer";
-import { Farm } from "./farm.entity";
 import { Admin } from "./admin.entity";
-import { Task } from "./task.entity";
+import { Farm } from "./farm.entity";
+import { Group } from "./group.entity";
 import { Report } from "./report.entity";
 import { Review } from "./review.entity";
-import { Group } from "./group.entity";
+import { Task } from "./task.entity";
 
 export enum WorkerRole {
   FARM_MANAGER = "FARM_MANAGER",
@@ -36,6 +36,9 @@ export class Worker {
 
   @Column()
   name: string;
+
+  @Column({ unique: true, default: null })
+  contact: string;
 
   @Column({
     type: "enum",
@@ -79,6 +82,13 @@ export class Worker {
 
   @Column({ default: null })
   password_reset_date: Date;
+
+  @Column({ default: null })
+  @Exclude({ toPlainOnly: true })
+  otp_code: string;
+
+  @Column({ default: null })
+  otp_request_date: Date;
 
   @ManyToMany(() => Farm, (farm) => farm.workers)
   farms: Farm[];

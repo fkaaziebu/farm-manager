@@ -38,6 +38,7 @@ import {
   Prediction,
   Feedback,
   LeafDetection,
+  Iam,
 } from "../../database/entities";
 import { FarmType } from "../../database/types/farm.type";
 import {
@@ -121,6 +122,7 @@ describe("FarmService", () => {
               Prediction,
               Feedback,
               LeafDetection,
+              Iam,
             ],
             synchronize: true,
           }),
@@ -157,6 +159,7 @@ describe("FarmService", () => {
           Prediction,
           Feedback,
           LeafDetection,
+          Iam,
         ]),
       ],
       controllers: [],

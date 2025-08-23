@@ -24,4 +24,12 @@ export class EmailProducer {
   }) {
     await this.farmQueue.add("send-group-join-request", data);
   }
+
+  async sendOTPCodeByEmail(data: { email: string; otpCode: string }) {
+    await this.farmQueue.add("send-otp-code-by-email", data);
+  }
+
+  async sendOTPCodeBySMS(data: { phoneNumber: string; otpCode: string }) {
+    await this.farmQueue.add("send-otp-code-by-sms", data);
+  }
 }

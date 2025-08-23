@@ -29,3 +29,4 @@ export { Image } from "./image.entity";
 export { Prediction } from "./prediction.entity";
 export { Feedback } from "./feedback.entity";
 export { LeafDetection } from "./leaf-detection.entity";
+export { Iam } from "./iam.entity";

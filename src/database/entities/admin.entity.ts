@@ -12,6 +12,7 @@ import { Worker } from "./worker.entity";
 import { Task } from "./task.entity";
 import { Review } from "./review.entity";
 import { Group } from "./group.entity";
+import { Iam } from "./iam.entity";
 
 @Entity("admins")
 export class Admin {
@@ -23,6 +24,9 @@ export class Admin {
 
   @Column({ unique: true })
   email: string;
+
+  @Column({ unique: true, default: null })
+  contact: string;
 
   @Column()
   @Exclude({ toPlainOnly: true })
@@ -37,6 +41,13 @@ export class Admin {
 
   @Column({ default: null })
   password_reset_date: Date;
+
+  @Column({ default: null })
+  @Exclude({ toPlainOnly: true })
+  otp_code: string;
+
+  @Column({ default: null })
+  otp_request_date: Date;
 
   @OneToMany(() => Farm, (farm) => farm.admin)
   farms: Farm[];
@@ -53,4 +64,7 @@ export class Admin {
 
   @OneToMany(() => Group, (group) => group.admin)
   groups: Group[];
+
+  @OneToMany(() => Iam, (aim_user) => aim_user.admin)
+  iam_users: Iam[];
 }

@@ -1,12 +1,7 @@
 import { Module } from "@nestjs/common";
-import { AuthService } from "./auth.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { TypeOrmModule } from "@nestjs/typeorm";
 import { JwtModule } from "@nestjs/jwt";
-import { JwtStrategy } from "./strategies/jwt.strategy";
-import { AuthResolver } from "./auth.resolver";
-import { GoogleStrategy } from "./strategies/google.strategy";
-
+import { TypeOrmModule } from "@nestjs/typeorm";
 // Entities
 import {
   Admin,
@@ -19,29 +14,38 @@ import {
   CropBatch,
   ExpenseRecord,
   Farm,
+  Feedback,
   Field,
   Greenhouse,
   Group,
   GrowthRecord,
   HealthRecord,
   Hive,
+  Iam,
+  LeafDetection,
   Livestock,
   Pen,
   Pond,
   PoultryBatch,
   PoultryHouse,
+  Prediction,
   Report,
   Request,
   Review,
   SalesRecord,
   Task,
   Worker,
-  Prediction,
-  Feedback,
-  LeafDetection,
 } from "src/database/entities";
 import { QueueModule } from "../queue/queue.module";
 import { AuthController } from "./auth.controller";
+import { AuthResolver } from "./auth.resolver";
+import { AuthService } from "./auth.service";
+import { AdminResolver } from "./resolvers/admin.resolver";
+import { WorkerResolver } from "./resolvers/worker.resolver";
+import { AdminService } from "./services/admin.service";
+import { WorkerService } from "./services/worker.service";
+import { GoogleStrategy } from "./strategies/google.strategy";
+import { JwtStrategy } from "./strategies/jwt.strategy";
 
 @Module({
   imports: [
@@ -88,9 +92,19 @@ import { AuthController } from "./auth.controller";
       Prediction,
       Feedback,
       LeafDetection,
+      Iam,
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, AuthResolver, GoogleStrategy],
+  providers: [
+    WorkerService,
+    WorkerResolver,
+    AdminService,
+    AdminResolver,
+    AuthService,
+    JwtStrategy,
+    AuthResolver,
+    GoogleStrategy,
+  ],
 })
 export class AuthModule {}
