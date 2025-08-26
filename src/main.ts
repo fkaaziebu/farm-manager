@@ -29,6 +29,8 @@ async function createDatabase(dbName: string) {
 }
 
 async function bootstrap() {
+  console.log("All envs");
+  console.log(process.env);
   // Create main database
   await createDatabase(process.env.DB_NAME);
 
