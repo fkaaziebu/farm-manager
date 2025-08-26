@@ -50,10 +50,13 @@ jobs:
             # Write .env
             echo "${{ secrets.ENV_FILE }}" > .env
 
-            # Copy docker-compose.yml from repo
-            cat > docker-compose.yml << 'EOF'
-            $(cat docker-compose.yml)
-            EOF
+            # Download docker-compose.yml from GitHub
+            curl -L -o docker-compose.yml \
+              https://raw.githubusercontent.com/fkaaziebu/farm-manager/main/docker-compose.yml
+
+            # Verify the file
+            echo "Downloaded docker-compose.yml:"
+            cat docker-compose.yml
 
             # Start app
             docker compose up -d --remove-orphans
