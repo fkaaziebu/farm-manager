@@ -13,7 +13,7 @@ export class EmailService {
 
   constructor(private configService: ConfigService) {
     // this.createTestAccount();
-    if (this.configService.get<string>("STAGE") === "development") {
+    if (this.configService.get<string>("STAGE") === "prod") {
       this.transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {

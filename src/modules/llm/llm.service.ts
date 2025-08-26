@@ -1,3 +1,10 @@
+import { Anthropic } from "@anthropic-ai/sdk";
+import {
+  MessageParam,
+  Tool,
+} from "@anthropic-ai/sdk/resources/messages/messages.mjs";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import {
   BadRequestException,
   Injectable,
@@ -5,8 +12,7 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { Livestock } from "../../database/entities";
+import OpenAI from "openai";
 import {
   HealthStatus,
   LivestockAvailabilityStatus,
@@ -14,15 +20,8 @@ import {
   LivestockType,
   LivestockUnavailabilityReason,
 } from "src/database/types/livestock.type";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import {
-  MessageParam,
-  Tool,
-} from "@anthropic-ai/sdk/resources/messages/messages.mjs";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-
-import { Anthropic } from "@anthropic-ai/sdk";
-import OpenAI from "openai";
+import { Repository } from "typeorm";
+import { Livestock } from "../../database/entities";
 
 @Injectable()
 export class LlmService {
@@ -251,20 +250,23 @@ export class LlmService {
         new URL(this.configService.get<string>("MCP_SERVER_URL")),
       );
 
-      this.transport2 = new StreamableHTTPClientTransport(
-        new URL(this.configService.get<string>("MCP_SERVER_2_URL")),
-      );
+      // this.transport2 = new StreamableHTTPClientTransport(
+      //   new URL(this.configService.get<string>("MCP_SERVER_2_URL")),
+      // );
 
       await this.mcp.connect(this.transport);
-      await this.mcp2.connect(this.transport2);
+      // await this.mcp2.connect(this.transport2);
 
       const toolsResult = await this.mcp.listTools();
       console.log("MCP TOOLS1:", toolsResult);
-      const toolsResult2 = await this.mcp2.listTools();
-      console.log("MCP TOOLS1:", toolsResult2);
+      // const toolsResult2 = await this.mcp2.listTools();
+      // console.log("MCP TOOLS1:", toolsResult2);
 
       // @ts-expect-error error
-      this.tools = [...toolsResult.tools, ...toolsResult2.tools].map((tool) => {
+      this.tools = [
+        ...toolsResult.tools,
+        // , ...toolsResult2.tools
+      ].map((tool) => {
         return {
           name: tool.name,
           description: tool.description,
