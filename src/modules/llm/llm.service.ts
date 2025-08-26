@@ -246,33 +246,33 @@ export class LlmService {
 
   private async connectToServer() {
     try {
-      this.transport = new StreamableHTTPClientTransport(
-        new URL(this.configService.get<string>("MCP_SERVER_URL")),
-      );
+      // this.transport = new StreamableHTTPClientTransport(
+      //   new URL(this.configService.get<string>("MCP_SERVER_URL")),
+      // );
 
       // this.transport2 = new StreamableHTTPClientTransport(
       //   new URL(this.configService.get<string>("MCP_SERVER_2_URL")),
       // );
 
-      await this.mcp.connect(this.transport);
+      // await this.mcp.connect(this.transport);
       // await this.mcp2.connect(this.transport2);
 
-      const toolsResult = await this.mcp.listTools();
-      console.log("MCP TOOLS1:", toolsResult);
+      // const toolsResult = await this.mcp.listTools();
+      // console.log("MCP TOOLS1:", toolsResult);
       // const toolsResult2 = await this.mcp2.listTools();
       // console.log("MCP TOOLS1:", toolsResult2);
 
-      // @ts-expect-error error
-      this.tools = [
-        ...toolsResult.tools,
-        // , ...toolsResult2.tools
-      ].map((tool) => {
-        return {
-          name: tool.name,
-          description: tool.description,
-          input_schema: tool.inputSchema,
-        };
-      });
+      this.tools = [];
+      // this.tools = [
+      //   ...toolsResult.tools,
+      //   // , ...toolsResult2.tools
+      // ].map((tool) => {
+      //   return {
+      //     name: tool.name,
+      //     description: tool.description,
+      //     input_schema: tool.inputSchema,
+      //   };
+      // });
     } catch (e) {
       console.log("Failed to connect to MCP server: ", e);
       throw e;
