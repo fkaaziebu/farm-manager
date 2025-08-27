@@ -44,6 +44,9 @@ jobs:
             cd ~/farm-manager || mkdir ~/farm-manager && cd ~/farm-manager
 
             # Cleanup old containers/images
+            docker stop $(docker ps -a -q)
+            docker rm $(docker ps -a -q)
+            docker rmi $(docker images -a -q)
             docker system prune -af
             docker volume prune -f
 
