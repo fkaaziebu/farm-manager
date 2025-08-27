@@ -18,9 +18,6 @@ RUN npm ci
 # Bundle app source
 COPY --chown=node:node . .
 
-# build while nest-cli is present
-RUN npm run build
-
 # Use the node user from the image (instead of the root user)
 USER node
 
@@ -39,8 +36,8 @@ COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modul
 
 COPY --chown=node:node . .
 
-# # Run the build command which creates the production bundle
-# RUN npm run build
+# Run the build command which creates the production bundle
+RUN npm run build
 
 # Set NODE_ENV environment variable
 ENV NODE_ENV=production
@@ -58,7 +55,8 @@ FROM node:22 AS production
 
 # Copy the bundled code from the build stage to the production image
 COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=development /usr/src/app/dist ./dist
+COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+COPY --chown=node:node src/**/*.hbs ./dist
 
 # Start the server using the production build
 ENV STAGE=prod
