@@ -47,8 +47,8 @@ jobs:
             docker stop $(docker ps -a -q)
             docker rm $(docker ps -a -q)
             docker rmi $(docker images -a -q)
-            docker system prune -af
-            docker volume prune -f
+            # docker system prune -af
+            # docker volume prune -f
 
             # Write .env
             echo "${{ secrets.ENV_FILE }}" > .env
